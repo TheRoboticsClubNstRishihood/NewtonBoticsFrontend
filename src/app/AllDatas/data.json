@@ -1,0 +1,161 @@
+{
+  "clubFoundation": {
+    "foundedBy": ["Rishihood University", "Newton School of Technology"],
+    "foundedYear": 2024
+  },
+  "leadership": [
+    {
+      "name": "Sachin Sir",
+      "role": "Club Mentor",
+      "expertise": "Robotics and Embedded Systems",
+      "email": "sachin@gmail.com"
+    },
+    {
+      "name": "Aman Kumar",
+      "role": "Club President",
+      "responsibilities": [
+        "Overall club management",
+        "Strategic planning",
+        "External communications"
+      ],
+      "email":"aman@gmail.com"
+    },
+    {
+      "name": "Manish Kumar",
+      "role": "Vice President",
+      "responsibilities": [
+        "Support club president",
+        "Internal coordination",
+        "Event planning"
+      ],
+      "email": "manish@gmail.com"
+    },
+    {
+      "name": "Monu Kumar",
+      "role": "Project Manager",
+      "responsibilities": [
+        "Oversee project development",
+        "Track project progress",
+        "Resource allocation",
+        "Event planning"
+      ],
+      "email": "Monu@gmail.com"
+    },
+    {
+      "name": "Sourabh Kumar",
+      "role": "Inventory Manager",
+      "responsibilities": [
+        "Manage club equipment",
+        "Track inventory",
+        "Procurement planning",
+        "Event planning"
+      ],
+      "email": "sourabh@gmail.com"
+    }
+  ],
+  "labDetails": {
+    "location": {
+      "building": "Academic Block",
+      "floor": "Third Floor"
+    },
+    "equipment": [
+      "3D Printers",
+      "Soldering Stations",
+      "Microcontroller Kits (Arduino, Raspberry Pi)",
+      "Robotic Arm Prototypes",
+      "Drone Components",
+      "Sensor Kits",
+      "Computer Workstations",
+      "Oscilloscopes",
+      "Multimeters"
+    ]
+  },
+  "workshops": [
+    {
+      "name": "Drone Workshop",
+      "description": "Comprehensive drone design and operation training",
+      "topics": [
+        "Drone Assembly",
+        "Flight Mechanics",
+        "Aerial Photography",
+        "Autonomous Navigation"
+      ]
+    },
+    {
+      "name": "Line Follower Workshop",
+      "description": "Robotics fundamentals and autonomous navigation",
+      "topics": [
+        "Sensor Integration",
+        "Path Following Algorithms",
+        "Motor Control"
+      ]
+    },
+    {
+      "name": "Robo Soccer Competition",
+      "description": "Robotics challenge focusing on autonomous robot design",
+      "objectives": [
+        "Team Collaboration",
+        "Problem Solving",
+        "Real-world Robotics Application"
+      ]
+    }
+  ],
+  "coreMemberCount": 25,
+  "coreMembersPlaceholders": [
+    "Rohit Sharma",
+    "Vivek Gupta",
+    "Priya Patel",
+    "Arun Singh",
+    "Neha Verma",
+    "Rajesh Kumar",
+    "Ananya Mishra",
+    "Vikram Reddy",
+    "Shreya Joshi",
+    "Rahul Malhotra",
+    "Deepak Choudhary",
+    "Anjali Kumari",
+    "Sanjay Yadav",
+    "Meera Naidu",
+    "Vishal Patil",
+    "Kavita Sharma",
+    "Nitin Tiwari",
+    "Riya Kapoor",
+    "Akash Verma",
+    "Pooja Banerjee",
+    "Siddharth Mahajan",
+    "Lakshmi Narayan",
+    "Gaurav Singh",
+    "Divya Menon",
+    "Karthik Subramanian"
+  ],
+  "achievements": [
+    "National Robotics Championship Winner (2023)",
+    "AI Innovation Hackathon 2nd Place",
+    "Best Robotics Club Award (2022)"
+  ],
+  "contactInfo": {
+    "email": "roboticsclub@rishihood.edu.in",
+    "socialMedia": {
+      "instagram": "@rishihood_robotics",
+      "linkedin": "Rishihood Robotics Club"
+    }
+  },
+
+"guestLectures": [
+  {
+    "title": "Advances in Robotics and AI",
+  "speaker": "Dr. Ramesh Kumar",
+"date": "2023-08-15",
+"description": "Explored cutting-edge trends in robotics and AI integration."
+},
+{
+  "title": "Introduction to Drones",
+"speaker": "Ms. Sneha Patel",
+"date": "2024-03-10",
+"description": "Comprehensive session on drone technology and applications."
+}
+]
+
+
+}
+

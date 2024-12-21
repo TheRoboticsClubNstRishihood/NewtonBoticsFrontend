@@ -10,12 +10,13 @@ const Navbar = () => {
   const toggleMenu = () => {
     setIsOpen(!isOpen);
   };
-
+ 
+ 
   return (
-    <nav className="bg-gray-900 text-white shadow-lg">
+    <nav className="sticky top-0 z-[100] flex justify-between items-center h-14 w-full bg-purple-700/35 border-gray-200 bg-white/75 backdrop-blur-lg transition-all">
       <div className="container mx-auto px-4 py-3 flex items-center justify-between">
         {/* Logo */}
-        <div className="flex items-center">
+        <div className="flex items-center ">
           <a
             href="/DashBoard"
             className="text-2xl font-bold hover:text-blue-500 transition"

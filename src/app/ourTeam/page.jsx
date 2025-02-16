@@ -5,7 +5,6 @@ import { motion } from "framer-motion";
 import { Users, Award, Star, Filter, Search } from "lucide-react";
 import Navbar from "../components/navbar";
 import clubData from "../AllDatas/data.json";
-import image1 from "../assets/image01.png";
 
 // Placeholder function for team member images
 const getPlaceholderImage = (index) => {
@@ -20,7 +19,7 @@ const TeamPage = () => {
   // Combine leadership and core members
   const allMembers = [
     ...clubData.leadership,
-    ...clubData.coreMembersPlaceholders.map((name) => ({
+    ...clubData.coreMembers.map((name) => ({
       name,
       role: "Core Member",
     })),
@@ -35,16 +34,38 @@ const TeamPage = () => {
   );
 
   return (
-    <div className="text-black min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-blue-900 text-white font-body">
       {/* <Navbar /> */}
 
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-blue-600 to-teal-400 text-white py-16">
-        <div className="container mx-auto text-center">
+      <motion.section
+        className="relative h-screen flex items-center justify-center overflow-hidden"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1 }}
+      >
+        {/* Animated Background Grid */}
+        <div className="absolute inset-0 grid grid-cols-8 grid-rows-8 opacity-20">
+          {[...Array(64)].map((_, i) => (
+            <motion.div
+              key={i}
+              className="border border-white/10"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: [0.1, 0.3, 0.1] }}
+              transition={{
+                duration: 4,
+                delay: i * 0.1,
+                repeat: Infinity,
+              }}
+            />
+          ))}
+        </div>
+
+        <div className="container mx-auto px-6 text-center">
           <motion.h1
             initial={{ opacity: 0, y: -50 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-4xl md:text-5xl font-bold mb-4"
+            className="text-5xl md:text-7xl font-bold mb-6 font-display bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-400"
           >
             Our Robotics Team
           </motion.h1>
@@ -52,15 +73,15 @@ const TeamPage = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3 }}
-            className="text-xl max-w-2xl mx-auto"
+            className="text-xl md:text-2xl text-blue-100 mb-8 font-light"
           >
             Innovators, Creators, Problem Solvers
           </motion.p>
         </div>
-      </section>
+      </motion.section>
 
       {/* Search and Filter Section */}
-      <section className="py-8 bg-white">
+      <section className="py-16 bg-white/5 backdrop-blur-lg">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             {/* Search Input */}
@@ -70,9 +91,9 @@ const TeamPage = () => {
                 placeholder="Search team members..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full p-3 pl-10 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full p-3 pl-10 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white/10 text-white placeholder:text-blue-100"
               />
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-100" />
             </div>
 
             {/* Role Filter */}
@@ -80,30 +101,32 @@ const TeamPage = () => {
               <select
                 value={filterRole}
                 onChange={(e) => setFilterRole(e.target.value)}
-                className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white/10 text-white"
               >
                 <option value="All">All Roles</option>
-                <option value="President">President</option>
+                <option value="Club Mentor">Club Mentor</option>
+                <option value="Club President">Club President</option>
                 <option value="Vice President">Vice President</option>
-                <option value="Core Member">Core Member</option>
                 <option value="Project Manager">Project Manager</option>
+                <option value="Inventory Manager">Inventory Manager</option>
+                <option value="Core Member">Core Member</option>
               </select>
-              <Filter className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <Filter className="absolute right-3 top-1/2 -translate-y-1/2 text-blue-100" />
             </div>
           </div>
         </div>
       </section>
 
       {/* Leadership Section */}
-      <section className="py-16 bg-gray-100">
+      <section className="py-24 relative">
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             whileInView={{ opacity: 1, x: 0 }}
             className="flex items-center mb-8"
           >
-            <Users className="w-12 h-12 text-blue-600 mr-4" />
-            <h2 className="text-3xl font-bold text-gray-800">
+            <Users className="w-12 h-12 text-blue-400 mr-4" />
+            <h2 className="text-3xl font-bold text-white font-display">
               Leadership Team
             </h2>
           </motion.div>
@@ -115,7 +138,7 @@ const TeamPage = () => {
                 initial={{ opacity: 0, scale: 0.9 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 transition={{ delay: index * 0.2 }}
-                className="bg-white p-6 rounded-lg shadow-md text-center"
+                className="bg-white/5 backdrop-blur-lg rounded-xl p-6 text-center border border-blue-500/20"
               >
                 <div className="w-32 h-32 mx-auto mb-4 rounded-full overflow-hidden">
                   <Image
@@ -126,12 +149,12 @@ const TeamPage = () => {
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <h3 className="text-xl font-semibold text-gray-800">
+                <h3 className="text-xl font-semibold text-white font-display">
                   {leader.name}
                 </h3>
-                <p className="text-gray-600">{leader.role}</p>
+                <p className="text-blue-100">{leader.role}</p>
                 {leader.expertise && (
-                  <p className="text-sm text-gray-500 mt-2">
+                  <p className="text-sm text-blue-200 mt-2">
                     {leader.expertise}
                   </p>
                 )}
@@ -142,17 +165,17 @@ const TeamPage = () => {
       </section>
 
       {/* Core Members Section */}
-      <section className="py-16 bg-white">
+      <section className="py-24 bg-white/5 backdrop-blur-lg">
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             whileInView={{ opacity: 1, x: 0 }}
             className="flex items-center mb-8"
           >
-            <Star className="w-12 h-12 text-green-600 mr-4" />
-            <h2 className="text-3xl font-bold text-gray-800">
+            <Star className="w-12 h-12 text-cyan-400 mr-4" />
+            <h2 className="text-3xl font-bold text-white font-display">
               Core Members
-              <span className="text-lg text-gray-600 ml-4">
+              <span className="text-lg text-blue-100 ml-4">
                 ({filteredMembers.length} Total)
               </span>
             </h2>
@@ -165,7 +188,7 @@ const TeamPage = () => {
                 initial={{ opacity: 0, scale: 0.9 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 transition={{ delay: index * 0.1 }}
-                className="bg-gray-100 p-4 rounded-lg text-center"
+                className="bg-white/5 backdrop-blur-lg rounded-xl p-4 text-center border border-blue-500/20"
               >
                 <div className="w-24 h-24 mx-auto mb-4 rounded-full overflow-hidden">
                   <Image
@@ -176,8 +199,10 @@ const TeamPage = () => {
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <h3 className="font-semibold text-gray-800">{member.name}</h3>
-                <p className="text-sm text-gray-600">
+                <h3 className="font-semibold text-white font-display">
+                  {member.name}
+                </h3>
+                <p className="text-sm text-blue-100">
                   {member.role || "Core Member"}
                 </p>
               </motion.div>
@@ -187,51 +212,57 @@ const TeamPage = () => {
       </section>
 
       {/* Team Statistics */}
-      <section className="py-16 bg-gray-100">
+      <section className="py-24 relative">
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             whileInView={{ opacity: 1, x: 0 }}
             className="flex items-center mb-8"
           >
-            <Award className="w-12 h-12 text-yellow-500 mr-4" />
-            <h2 className="text-3xl font-bold text-gray-800">
+            <Award className="w-12 h-12 text-yellow-400 mr-4" />
+            <h2 className="text-3xl font-bold text-white font-display">
               Team Statistics
             </h2>
           </motion.div>
 
           <div className="grid md:grid-cols-3 gap-6">
-            <div className="bg-white p-6 rounded-lg text-center">
-              <h3 className="text-4xl font-bold text-blue-600">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              className="bg-white/5 backdrop-blur-lg rounded-xl p-6 text-center border border-blue-500/20"
+            >
+              <h3 className="text-4xl font-bold text-blue-400 font-display">
                 {clubData.leadership.length}
               </h3>
-              <p className="text-gray-600">Leadership Positions</p>
-            </div>
-            <div className="bg-white p-6 rounded-lg text-center">
-              <h3 className="text-4xl font-bold text-green-600">
-                {clubData.coreMemberCount}
+              <p className="text-blue-100">Leadership Positions</p>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="bg-white/5 backdrop-blur-lg rounded-xl p-6 text-center border border-blue-500/20"
+            >
+              <h3 className="text-4xl font-bold text-cyan-400 font-display">
+                {clubData.coreMembers.length}
               </h3>
-              <p className="text-gray-600">Core Members</p>
-            </div>
-            <div className="bg-white p-6 rounded-lg text-center">
-              <h3 className="text-4xl font-bold text-purple-600">
+              <p className="text-blue-100">Core Members</p>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="bg-white/5 backdrop-blur-lg rounded-xl p-6 text-center border border-blue-500/20"
+            >
+              <h3 className="text-4xl font-bold text-purple-400 font-display">
                 {clubData.workshops.length}
               </h3>
-              <p className="text-gray-600">Workshops Conducted</p>
-            </div>
+              <p className="text-blue-100">Workshops Conducted</p>
+            </motion.div>
           </div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="py-6 bg-gray-800 text-white">
-        <div className="container mx-auto text-center">
-          <p>© 2024 Robotics Club. All rights reserved.</p>
-          <div className="mt-4">
-            <p>Join Our Team: {clubData.contactInfo.email}</p>
-          </div>
-        </div>
-      </footer>
+    
     </div>
   );
 };

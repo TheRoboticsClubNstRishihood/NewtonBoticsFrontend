@@ -2,22 +2,36 @@
 import React from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { Users, Building, Trophy, Wrench, Star } from "lucide-react";
+import {
+  Users,
+  Building,
+  Trophy,
+  Wrench,
+  Star,
+  Calendar,
+  BookOpen,
+} from "lucide-react";
 import Navbar from "../components/navbar";
 import clubData from "../AllDatas/data.json";
 
 const AboutUs = () => {
   return (
-    <div className="text-black min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-blue-900 text-white font-body">
       {/* <Navbar /> */}
 
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-blue-600 to-teal-400 text-white py-16">
-        <div className="container mx-auto text-center">
+      <motion.section
+        className="relative h-[60vh] flex items-center justify-center overflow-hidden"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1 }}
+      >
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/50 to-teal-400/50 backdrop-blur-sm" />
+        <div className="container mx-auto text-center z-10">
           <motion.h1
             initial={{ opacity: 0, y: -50 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-4xl md:text-5xl font-bold mb-4"
+            className="text-4xl md:text-6xl font-bold mb-4 font-display bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-400"
           >
             About Robotics Club
           </motion.h1>
@@ -25,23 +39,23 @@ const AboutUs = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3 }}
-            className="text-xl max-w-2xl mx-auto"
+            className="text-xl md:text-2xl max-w-2xl mx-auto text-blue-100"
           >
             Innovating the future through cutting-edge robotics and technology
           </motion.p>
         </div>
-      </section>
+      </motion.section>
 
       {/* Lab Details Section */}
-      <section className="py-16 bg-white">
+      <section className="py-16 bg-gradient-to-b from-blue-900/50 to-slate-900/50 backdrop-blur-xl">
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             whileInView={{ opacity: 1, x: 0 }}
             className="flex items-center mb-8"
           >
-            <Building className="w-12 h-12 text-blue-600 mr-4" />
-            <h2 className="text-3xl font-bold text-gray-800">
+            <Building className="w-12 h-12 text-cyan-400 mr-4" />
+            <h2 className="text-3xl font-bold font-display">
               Our Robotics Lab
             </h2>
           </motion.div>
@@ -50,10 +64,12 @@ const AboutUs = () => {
             <motion.div
               initial={{ opacity: 0, y: 50 }}
               whileInView={{ opacity: 1, y: 0 }}
-              className="bg-gray-100 p-6 rounded-lg"
+              className="bg-white/5 backdrop-blur-lg p-6 rounded-lg border border-blue-500/20"
             >
-              <h3 className="text-2xl font-semibold mb-4">Location</h3>
-              <p className="text-gray-700">
+              <h3 className="text-2xl font-semibold mb-4 font-display">
+                Location
+              </h3>
+              <p className="text-blue-100">
                 Located on the Third Floor of the Academic Block at Rishihood
                 University
               </p>
@@ -63,12 +79,16 @@ const AboutUs = () => {
               initial={{ opacity: 0, y: 50 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="bg-gray-100 p-6 rounded-lg"
+              className="bg-white/5 backdrop-blur-lg p-6 rounded-lg border border-blue-500/20"
             >
-              <h3 className="text-2xl font-semibold mb-4">Key Equipment</h3>
-              <ul className="list-disc list-inside text-gray-700">
+              <h3 className="text-2xl font-semibold mb-4 font-display">
+                Key Equipment
+              </h3>
+              <ul className="list-disc list-inside text-blue-100">
                 {clubData.labDetails.equipment.map((item, index) => (
-                  <li key={index}>{item}</li>
+                  <li key={index}>
+                    {typeof item === "string" ? item : item.name}
+                  </li>
                 ))}
               </ul>
             </motion.div>
@@ -77,17 +97,15 @@ const AboutUs = () => {
       </section>
 
       {/* Leadership Section */}
-      <section className="py-16 bg-gray-100">
+      <section className="py-16 bg-gradient-to-b from-blue-900/50 to-slate-900/50 backdrop-blur-xl">
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             whileInView={{ opacity: 1, x: 0 }}
             className="flex items-center mb-8"
           >
-            <Users className="w-12 h-12 text-green-600 mr-4" />
-            <h2 className="text-3xl font-bold text-gray-800">
-              Club Leadership
-            </h2>
+            <Users className="w-12 h-12 text-cyan-400 mr-4" />
+            <h2 className="text-3xl font-bold font-display">Club Leadership</h2>
           </motion.div>
 
           <div className="grid md:grid-cols-3 gap-6">
@@ -97,12 +115,12 @@ const AboutUs = () => {
                 initial={{ opacity: 0, scale: 0.9 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 transition={{ delay: index * 0.2 }}
-                className="bg-white p-6 rounded-lg shadow-md text-center"
+                className="bg-white/5 backdrop-blur-lg p-6 rounded-lg border border-blue-500/20 text-center"
               >
-                <h3 className="text-xl font-semibold text-gray-800">
+                <h3 className="text-xl font-semibold font-display">
                   {leader.name}
                 </h3>
-                <p className="text-gray-600">{leader.role}</p>
+                <p className="text-blue-100">{leader.role}</p>
               </motion.div>
             ))}
           </div>
@@ -110,7 +128,7 @@ const AboutUs = () => {
       </section>
 
       {/* Workshops and Achievements */}
-      <section className="py-16 bg-white">
+      <section className="py-16 bg-gradient-to-b from-blue-900/50 to-slate-900/50 backdrop-blur-xl">
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-2 gap-8">
             {/* Workshops */}
@@ -119,17 +137,25 @@ const AboutUs = () => {
               whileInView={{ opacity: 1, x: 0 }}
             >
               <div className="flex items-center mb-8">
-                <Wrench className="w-12 h-12 text-purple-600 mr-4" />
-                <h2 className="text-3xl font-bold text-gray-800">
+                <Wrench className="w-12 h-12 text-cyan-400 mr-4" />
+                <h2 className="text-3xl font-bold font-display">
                   Our Workshops
                 </h2>
               </div>
               <div className="space-y-4">
-                {clubData.workshops.map((workshop, index) => (
-                  <div key={index} className="bg-gray-100 p-4 rounded-lg">
-                    <h3 className="text-xl font-semibold">{workshop.name}</h3>
-                    <p className="text-gray-600">{workshop.description}</p>
-                  </div>
+                {clubData.workshopss.map((workshop, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.2 }}
+                    className="bg-white/5 backdrop-blur-lg p-4 rounded-lg border border-blue-500/20"
+                  >
+                    <h3 className="text-xl font-semibold font-display">
+                      {workshop.name}
+                    </h3>
+                    <p className="text-blue-100">{workshop.description}</p>
+                  </motion.div>
                 ))}
               </div>
             </motion.div>
@@ -140,20 +166,23 @@ const AboutUs = () => {
               whileInView={{ opacity: 1, x: 0 }}
             >
               <div className="flex items-center mb-8">
-                <Trophy className="w-12 h-12 text-yellow-500 mr-4" />
-                <h2 className="text-3xl font-bold text-gray-800">
+                <Trophy className="w-12 h-12 text-cyan-400 mr-4" />
+                <h2 className="text-3xl font-bold font-display">
                   Achievements
                 </h2>
               </div>
               <div className="space-y-4">
                 {clubData.achievements.map((achievement, index) => (
-                  <div
+                  <motion.div
                     key={index}
-                    className="bg-gray-100 p-4 rounded-lg flex items-center"
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.2 }}
+                    className="bg-white/5 backdrop-blur-lg p-4 rounded-lg border border-blue-500/20 flex items-center"
                   >
-                    <Star className="w-6 h-6 text-blue-600 mr-4" />
-                    <p className="text-gray-800">{achievement}</p>
-                  </div>
+                    <Star className="w-6 h-6 text-cyan-400 mr-4" />
+                    <p className="text-blue-100">{achievement}</p>
+                  </motion.div>
                 ))}
               </div>
             </motion.div>
@@ -161,7 +190,36 @@ const AboutUs = () => {
         </div>
       </section>
 
-      
+      {/* New Section: Guest Lectures */}
+      <section className="py-16 bg-gradient-to-b from-blue-900/50 to-slate-900/50 backdrop-blur-xl">
+        <div className="container mx-auto px-4">
+          <motion.div
+            initial={{ opacity: 0, x: -50 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            className="flex items-center mb-8"
+          >
+            <Calendar className="w-12 h-12 text-cyan-400 mr-4" />
+            <h2 className="text-3xl font-bold font-display">Guest Lectures</h2>
+          </motion.div>
+
+          <div className="grid md:grid-cols-3 gap-6">
+            {clubData.guestLectures.map((lecture, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                transition={{ delay: index * 0.2 }}
+                className="bg-white/5 backdrop-blur-lg p-6 rounded-lg border border-blue-500/20"
+              >
+                <h3 className="text-xl font-semibold font-display">
+                  {lecture.title}
+                </h3>
+                <p className="text-blue-100">{lecture.description}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
     </div>
   );
 };

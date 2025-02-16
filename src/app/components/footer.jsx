@@ -1,8 +1,7 @@
 "use client";
-import React from "react";
-import { Instagram, Linkedin, Mail, MapPin, Phone, Robot } from "lucide-react";
-import clubData from "../AllDatas/data.json";
+import { Instagram, Linkedin, Mail, MapPin } from "lucide-react";
 import Link from "next/link";
+import clubData from "../AllDatas/data.json";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -13,7 +12,6 @@ const Footer = () => {
         {/* Club Overview */}
         <div>
           <div className="flex items-center mb-4">
-            {/* <Robot className="h-8 w-8 mr-3 text-indigo-400" /> */}
             <h3 className="text-xl font-bold">Robotics Club</h3>
           </div>
           <p className="text-gray-300 text-sm">
@@ -22,7 +20,7 @@ const Footer = () => {
           </p>
           <div className="flex space-x-4 mt-4">
             <a
-              href={`https://instagram.com/${clubData.contactInfo.socialMedia.instagram.replace(
+              href={`https://instagram.com/${clubData?.contactInfo?.socialMedia?.instagram.replace(
                 "@",
                 ""
               )}`}
@@ -33,8 +31,8 @@ const Footer = () => {
               <Instagram />
             </a>
             <a
-              href={`https://linkedin.com/company/${clubData.contactInfo.socialMedia.linkedin
-                .replace(/\s+/g, "-")
+              href={`https://linkedin.com/company/${clubData?.contactInfo?.socialMedia?.linkedin
+                ?.replace(/\s+/g, "-")
                 .toLowerCase()}`}
               target="_blank"
               rel="noopener noreferrer"
@@ -90,7 +88,7 @@ const Footer = () => {
             Recent Achievements
           </h4>
           <ul className="space-y-2">
-            {clubData.achievements.map((achievement, index) => (
+            {clubData?.achievements?.map((achievement, index) => (
               <li
                 key={index}
                 className="text-gray-300 text-sm flex items-center"
@@ -98,7 +96,7 @@ const Footer = () => {
                 <span className="mr-2 text-green-400">●</span>
                 {achievement}
               </li>
-            ))}
+            )) || <li className="text-gray-400">No achievements available</li>}
           </ul>
         </div>
 
@@ -109,14 +107,14 @@ const Footer = () => {
             <div className="flex items-center">
               <MapPin className="h-5 w-5 mr-3 text-indigo-400" />
               <span className="text-gray-300">
-                {clubData.labDetails.location.building},{" "}
-                {clubData.labDetails.location.floor}
+                {clubData?.labDetails?.location?.building || "Unknown Building"}
+                , {clubData?.labDetails?.location?.floor || "Unknown Floor"}
               </span>
             </div>
             <div className="flex items-center">
               <Mail className="h-5 w-5 mr-3 text-indigo-400" />
               <span className="text-gray-300">
-                {clubData.contactInfo.email}
+                {clubData?.contactInfo?.email || "No Email Available"}
               </span>
             </div>
           </div>
@@ -128,10 +126,10 @@ const Footer = () => {
         <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center">
           <p className="text-gray-400 text-sm">
             © {currentYear} Robotics Club. Founded by{" "}
-            {clubData.clubFoundation.foundedBy.join(" & ")}
+            {clubData?.clubFoundation?.foundedBy?.join(" & ") || "Unknown"}
           </p>
           <p className="text-gray-400 text-sm">
-            Established in {clubData.clubFoundation.foundedYear}
+            Established in {clubData?.clubFoundation?.foundedYear || "N/A"}
           </p>
         </div>
       </div>

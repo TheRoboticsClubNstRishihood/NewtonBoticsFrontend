@@ -1,7 +1,12 @@
 {
-  "clubFoundation": {
-    "foundedBy": ["Rishihood University", "Newton School of Technology"],
-    "foundedYear": 2024
+  "clubInfo": {
+    "name": "Robotics Club",
+    "description": "Innovating the future through cutting-edge robotics and technology.",
+    "mission": "To foster creativity, innovation, and technical skills in robotics.",
+    "vision": "To be a leading hub for robotics research and development.",
+    "logo": "/images/logo.png",
+    "founded": 2015,
+    "foundedBy": ["Rishihood University", "Newton School of Technology"]
   },
   "leadership": [
     {
@@ -18,7 +23,7 @@
         "Strategic planning",
         "External communications"
       ],
-      "email":"aman@gmail.com"
+      "email": "aman@gmail.com"
     },
     {
       "name": "Manish Kumar",
@@ -56,21 +61,103 @@
   "labDetails": {
     "location": {
       "building": "Academic Block",
-      "floor": "Third Floor"
+      "floor": "Third Floor",
+      "address": "Rishihood University"
     },
     "equipment": [
-      "3D Printers",
+      {
+        "name": "3D Printer",
+        "description": "Used for prototyping robotic parts."
+      },
+      {
+        "name": "Arduino Kits",
+        "description": "For building and testing electronic circuits."
+      },
+      {
+        "name": "Raspberry Pi",
+        "description": "Single-board computers for AI and IoT projects."
+      },
       "Soldering Stations",
-      "Microcontroller Kits (Arduino, Raspberry Pi)",
       "Robotic Arm Prototypes",
       "Drone Components",
       "Sensor Kits",
       "Computer Workstations",
       "Oscilloscopes",
       "Multimeters"
+    ],
+    "facilities": [
+      "High-speed internet",
+      "Workshop tools",
+      "Collaboration spaces"
+    ],
+    "inventory": [
+      {
+        "id": 1,
+        "name": "Arduino Uno",
+        "category": "Microcontrollers",
+        "quantity": 15,
+        "image": "/api/placeholder/400/400?text=Arduino+Uno",
+        "description": "A popular microcontroller board for prototyping."
+      },
+      {
+        "id": 2,
+        "name": "Raspberry Pi 4",
+        "category": "Single-Board Computers",
+        "quantity": 8,
+        "image": "/api/placeholder/400/400?text=Raspberry+Pi+4",
+        "description": "A powerful single-board computer for IoT projects."
+      },
+      {
+        "id": 3,
+        "name": "DC Motors",
+        "category": "Motors",
+        "quantity": 50,
+        "image": "/api/placeholder/400/400?text=DC+Motors",
+        "description": "High-torque DC motors for robotics applications."
+      },
+      {
+        "id": 4,
+        "name": "LiPo Battery",
+        "category": "Power Supplies",
+        "quantity": 20,
+        "image": "/api/placeholder/400/400?text=LiPo+Battery",
+        "description": "Rechargeable lithium polymer batteries."
+      },
+      {
+        "id": 5,
+        "name": "Servo Motors",
+        "category": "Motors",
+        "quantity": 3,
+        "image": "/api/placeholder/400/400?text=Servo+Motors",
+        "description": "Precision servo motors for accurate control."
+      },
+      {
+        "id": 6,
+        "name": "Jumper Wires",
+        "category": "Accessories",
+        "quantity": 200,
+        "image": "/api/placeholder/400/400?text=Jumper+Wires",
+        "description": "Assorted jumper wires for circuit connections."
+      },
+      {
+        "id": 7,
+        "name": "Breadboard",
+        "category": "Accessories",
+        "quantity": 25,
+        "image": "/api/placeholder/400/400?text=Breadboard",
+        "description": "Solderless breadboard for prototyping circuits."
+      },
+      {
+        "id": 8,
+        "name": "ESP32",
+        "category": "Microcontrollers",
+        "quantity": 0,
+        "image": "/api/placeholder/400/400?text=ESP32",
+        "description": "Wi-Fi and Bluetooth-enabled microcontroller."
+      }
     ]
   },
-  "workshops": [
+  "workshopss": [
     {
       "name": "Drone Workshop",
       "description": "Comprehensive drone design and operation training",
@@ -100,8 +187,22 @@
       ]
     }
   ],
+  "guestLectures": [
+    {
+      "title": "Advances in Robotics and AI",
+      "speaker": "Dr. Ramesh Kumar",
+      "date": "2023-08-15",
+      "description": "Explored cutting-edge trends in robotics and AI integration."
+    },
+    {
+      "title": "Introduction to Drones",
+      "speaker": "Ms. Sneha Patel",
+      "date": "2024-03-10",
+      "description": "Comprehensive session on drone technology and applications."
+    }
+  ],
   "coreMemberCount": 25,
-  "coreMembersPlaceholders": [
+  "coreMembers": [
     "Rohit Sharma",
     "Vivek Gupta",
     "Priya Patel",
@@ -131,7 +232,8 @@
   "achievements": [
     "National Robotics Championship Winner (2023)",
     "AI Innovation Hackathon 2nd Place",
-    "Best Robotics Club Award (2022)"
+    "Best Robotics Club Award (2022)",
+    "Published research in IEEE Robotics Journal"
   ],
   "contactInfo": {
     "email": "roboticsclub@rishihood.edu.in",
@@ -140,22 +242,171 @@
       "linkedin": "Rishihood Robotics Club"
     }
   },
-
-"guestLectures": [
-  {
-    "title": "Advances in Robotics and AI",
-  "speaker": "Dr. Ramesh Kumar",
-"date": "2023-08-15",
-"description": "Explored cutting-edge trends in robotics and AI integration."
-},
-{
-  "title": "Introduction to Drones",
-"speaker": "Ms. Sneha Patel",
-"date": "2024-03-10",
-"description": "Comprehensive session on drone technology and applications."
+  "projects": {
+    "completed": [
+      {
+        "id": 1,
+        "name": "Autonomous Drone System",
+        "description": "Developed a fully autonomous drone capable of obstacle avoidance and GPS navigation.",
+        "image": "/api/placeholder/600/400?text=Autonomous+Drone",
+        "team": ["Aman Kumar", "Manish Kumar", "Priya Patel"],
+        "date": "2023-05-15",
+        "status": "Completed"
+      },
+      {
+        "id": 2,
+        "name": "Robotic Arm for Industrial Automation",
+        "description": "Designed a robotic arm for assembly line automation with precision control.",
+        "image": "/api/placeholder/600/400?text=Robotic+Arm",
+        "team": ["Sourabh Kumar", "Neha Verma", "Rajesh Kumar"],
+        "date": "2023-08-20",
+        "status": "Completed"
+      }
+    ],
+    "ongoing": [
+      {
+        "id": 3,
+        "name": "AI-Powered Surveillance Robot",
+        "description": "Building a robot with AI-based object detection and real-time surveillance capabilities.",
+        "image": "/api/placeholder/600/400?text=AI+Surveillance+Robot",
+        "team": ["Monu Kumar", "Vivek Gupta", "Ananya Mishra"],
+        "startDate": "2024-01-10",
+        "status": "Ongoing"
+      }
+    ],
+    "upcoming": [
+      {
+        "id": 4,
+        "name": "Swarm Robotics for Disaster Management",
+        "description": "Developing a swarm of robots for search and rescue operations in disaster zones.",
+        "image": "/api/placeholder/600/400?text=Swarm+Robotics",
+        "team": ["Rohit Sharma", "Shreya Joshi", "Gaurav Singh"],
+        "startDate": "2024-06-01",
+        "status": "Upcoming"
+      },
+      {
+        "id": 5,
+        "name": "Swarm Robotics for Disaster Management",
+        "description": "Developing a swarm of robots for search and rescue operations in disaster zones.",
+        "image": "/api/placeholder/600/400?text=Swarm+Robotics",
+        "team": ["Rohit Sharma", "Shreya Joshi", "Gaurav Singh"],
+        "startDate": "2024-06-01",
+        "status": "Upcoming"
+      }
+    ],
+    "highlighted": [
+      {
+        "id": 5,
+        "name": "Humanoid Robot for Healthcare",
+        "description": "A humanoid robot designed to assist in patient care and medical procedures.",
+        "image": "/api/placeholder/600/400?text=Humanoid+Robot",
+        "team": ["Aman Kumar", "Manish Kumar", "Priya Patel"],
+        "date": "2023-12-10",
+        "status": "Highlighted"
+      }
+    ]
+  },
+  "workshops": {
+    "past": [
+      {
+        "id": 1,
+        "name": "Drone Workshop",
+        "description": "Comprehensive drone design and operation training.",
+        "image": "/api/placeholder/600/400?text=Drone+Workshop",
+        "video": "https://www.youtube.com/embed/dQw4w9WgXcQ",
+        "impact": "Trained 50+ students in drone technology.",
+        "studentsJoined": 50,
+        "specialThanks": ["Sachin Sir", "Monu Kumar"],
+        "date": "2023-03-15"
+      },
+      {
+        "id": 2,
+        "name": "Line Follower Workshop",
+        "description": "Robotics fundamentals and autonomous navigation.",
+        "image": "/api/placeholder/600/400?text=Line+Follower+Workshop",
+        "video": "https://www.youtube.com/embed/dQw4w9WgXcQ",
+        "impact": "Enabled 30+ students to build their first robot.",
+        "studentsJoined": 30,
+        "specialThanks": ["Manish Kumar", "Priya Patel"],
+        "date": "2023-06-20"
+      }
+    ],
+    "upcoming": [
+      {
+        "id": 3,
+        "name": "AI and Robotics Workshop",
+        "description": "Learn AI integration in robotics with hands-on projects.",
+        "image": "/api/placeholder/600/400?text=AI+Robotics+Workshop",
+        "date": "2024-07-10",
+        "registrationLink": "https://example.com/register"
+      },
+      {
+        "id": 4,
+        "name": "IoT for Beginners",
+        "description": "Introduction to IoT with practical applications.",
+        "image": "/api/placeholder/600/400?text=IoT+Workshop",
+        "date": "2024-08-15",
+        "registrationLink": "https://example.com/register"
+      }
+    ]
+  },
+  "projectRequests": [
+    {
+      "id": 1,
+      "title": "Autonomous Drone System",
+      "description": "Develop a drone with obstacle avoidance and GPS navigation.",
+      "teamMembers": ["Aman Kumar", "Manish Kumar", "Priya Patel"],
+      "budget": 5000,
+      "itemsNeeded": [
+        { "name": "Drone Kit", "quantity": 1 },
+        { "name": "LiPo Battery", "quantity": 2 }
+      ],
+      "startDate": "2024-06-01",
+      "endDate": "2024-08-31",
+      "status": "Pending",
+      "comments": [{ "by": "Monu Kumar", "comment": "Under review." }]
+    },
+    {
+      "id": 2,
+      "title": "Robotic Arm for Industrial Automation",
+      "description": "Design a robotic arm for assembly line automation.",
+      "teamMembers": ["Sourabh Kumar", "Neha Verma", "Rajesh Kumar"],
+      "budget": 7000,
+      "itemsNeeded": [
+        { "name": "Servo Motors", "quantity": 4 },
+        { "name": "Arduino Uno", "quantity": 1 }
+      ],
+      "startDate": "2024-05-15",
+      "endDate": "2024-07-15",
+      "status": "Approved",
+      "comments": [
+        {
+          "by": "Monu Kumar",
+          "comment": "Looks promising. Approved for next review."
+        },
+        { "by": "Sachin Sir", "comment": "Approved. Good initiative." },
+        {
+          "by": "Pryog Mali Sir",
+          "comment": "Final approval granted. Congratulations!"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "AI-Powered Surveillance Robot",
+      "description": "Build a robot with AI-based object detection.",
+      "teamMembers": ["Monu Kumar", "Vivek Gupta", "Ananya Mishra"],
+      "budget": 10000,
+      "itemsNeeded": [
+        { "name": "Raspberry Pi 4", "quantity": 1 },
+        { "name": "Camera Module", "quantity": 1 }
+      ],
+      "startDate": "2024-07-01",
+      "endDate": "2024-09-30",
+      "status": "Rejected",
+      "comments": [
+        { "by": "Monu Kumar", "comment": "Budget too high. Please revise." }
+      ]
+    }
+  ]
 }
-]
-
-
-}
-

@@ -248,7 +248,7 @@
         "id": 1,
         "name": "Autonomous Drone System",
         "description": "Developed a fully autonomous drone capable of obstacle avoidance and GPS navigation.",
-        "image": "/api/placeholder/600/400?text=Autonomous+Drone",
+        "image":"/servilancerobot.jpeg",
         "team": ["Aman Kumar", "Manish Kumar", "Priya Patel"],
         "date": "2023-05-15",
         "status": "Completed"

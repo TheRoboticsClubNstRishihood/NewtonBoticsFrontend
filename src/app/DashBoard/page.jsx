@@ -1,9 +1,11 @@
 "use client";
-import React, { useState } from "react";
-import Image from "next/image";
 import { motion } from "framer-motion";
-import { Brain, Box, Layout, Calendar } from "lucide-react";
+import { Box, Brain, Layout } from "lucide-react";
+import Image from "next/image";
 import bgImage from "../assets/image01.png";
+import autonomousDrone from "../assets/automousdronesystem.jpg";
+import industrialAutomation from "../assets/industrialAutonomous.jpg";
+import medicalAssistantRobot from "../assets/medicalautonomousSystem.jpg";
 
 const HomePage = () => {
   const floatingAnimation = {
@@ -258,6 +260,7 @@ const HomePage = () => {
       </section>
 
       {/* Latest Projects Showcase */}
+      {/* Latest Projects Showcase */}
       <section className="py-24 bg-gradient-to-b from-blue-900/50 to-slate-900/50 backdrop-blur-xl">
         <div className="container mx-auto px-6">
           <motion.h2
@@ -271,21 +274,21 @@ const HomePage = () => {
           <div className="grid md:grid-cols-3 gap-8">
             {[
               {
-                image: "/api/placeholder/600/400",
+                image: autonomousDrone, // Pass the imported image directly
                 title: "Autonomous Drone System",
                 category: "Aerial Robotics",
                 description:
                   "Advanced drone system with computer vision and autonomous navigation capabilities",
               },
               {
-                image: "/api/placeholder/600/400",
+                image: medicalAssistantRobot, // Pass the imported image directly
                 title: "Medical Assistant Robot",
                 category: "Healthcare Robotics",
                 description:
                   "Robotic system designed to assist in medical procedures and patient care",
               },
               {
-                image: "/api/placeholder/600/400",
+                image: industrialAutomation, // Pass the imported image directly
                 title: "Industrial Automation",
                 category: "Manufacturing",
                 description:
@@ -300,7 +303,7 @@ const HomePage = () => {
                 className="group relative overflow-hidden rounded-xl bg-white/5 backdrop-blur-lg border border-blue-500/20"
               >
                 <Image
-                  src={project.image}
+                  src={project.image} // Use the image directly
                   alt={project.title}
                   width={600}
                   height={400}

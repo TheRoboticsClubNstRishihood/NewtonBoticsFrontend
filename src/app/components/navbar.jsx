@@ -1,18 +1,36 @@
 // components/Navbar.js
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FiMenu, FiX } from "react-icons/fi";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
   };
 
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 10) {
+        setIsScrolled(true);
+      } else {
+        setIsScrolled(false);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   return (
-    <nav className="sticky top-0 z-[100] flex justify-between items-center h-14 w-full bg-black/90 border-red-800 backdrop-blur-lg transition-all">
-      <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+    <nav
+      className={`sticky top-0 z-[100] w-full transition-all duration-300 ${
+        isScrolled ? "bg-black/90 backdrop-blur-lg" : "bg-black/70"
+      }`}
+    >
+      <div className="container mx-auto px-4 py-3 flex items-center justify-between relative">
         {/* Logo */}
         <div className="flex items-center">
           <a
@@ -86,65 +104,86 @@ const Navbar = () => {
         <button
           className="md:hidden text-2xl text-white focus:outline-none"
           onClick={toggleMenu}
+          aria-label={isOpen ? "Close menu" : "Open menu"}
         >
           {isOpen ? <FiX /> : <FiMenu />}
         </button>
       </div>
 
       {/* Mobile Menu */}
-      {isOpen && (
-        <div className="md:hidden bg-black">
+      <div
+        className={`md:hidden absolute w-full transition-all duration-300 ease-in-out bg-black/95 backdrop-blur-lg overflow-hidden ${
+          isOpen ? "max-h-96" : "max-h-0"
+        }`}
+        style={{ zIndex: 90 }}
+      >
+        <div className="py-2">
           <a
             href="/DashBoard"
             className="block py-2 px-4 text-white hover:bg-red-900 transition"
+            onClick={() => setIsOpen(false)}
           >
             Home
           </a>
           <a
             href="/aboutus"
             className="block py-2 px-4 text-white hover:bg-red-900 transition"
+            onClick={() => setIsOpen(false)}
           >
             About Us
           </a>
           <a
-            href="#projects"
+            href="/Projects"
             className="block py-2 px-4 text-white hover:bg-red-900 transition"
+            onClick={() => setIsOpen(false)}
           >
             Projects
           </a>
           <a
-            href="#projects"
+            href="/Workshops"
             className="block py-2 px-4 text-white hover:bg-red-900 transition"
+            onClick={() => setIsOpen(false)}
           >
             Workshops
           </a>
           <a
-            href="#inventory"
+            href="/Inventory"
             className="block py-2 px-4 text-white hover:bg-red-900 transition"
+            onClick={() => setIsOpen(false)}
           >
             Inventory
           </a>
           <a
             href="/ourTeam"
             className="block py-2 px-4 text-white hover:bg-red-900 transition"
+            onClick={() => setIsOpen(false)}
           >
             Team
           </a>
           <a
+            href="/ProjectRequests"
+            className="block py-2 px-4 text-white hover:bg-red-900 transition"
+            onClick={() => setIsOpen(false)}
+          >
+            Project Requests
+          </a>
+          <a
             href="/contact"
             className="block py-2 px-4 text-white hover:bg-red-900 transition"
+            onClick={() => setIsOpen(false)}
           >
             Contact Us
           </a>
           {/* Register Button */}
           <a
             href="/login"
-            className="block py-2 px-4 bg-red-600 text-white text-center hover:bg-red-700 transition"
+            className="block mx-4 my-3 py-2 bg-red-600 text-white text-center rounded-lg hover:bg-red-700 transition"
+            onClick={() => setIsOpen(false)}
           >
             Register
           </a>
         </div>
-      )}
+      </div>
     </nav>
   );
 };

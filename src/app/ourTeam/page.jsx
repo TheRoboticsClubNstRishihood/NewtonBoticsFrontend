@@ -34,7 +34,7 @@ const TeamPage = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-blue-900 text-white font-body">
+    <div className="min-h-screen bg-black text-white font-sans">
       {/* <Navbar /> */}
 
       {/* Hero Section */}
@@ -65,7 +65,7 @@ const TeamPage = () => {
           <motion.h1
             initial={{ opacity: 0, y: -50 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-5xl md:text-7xl font-bold mb-6 font-display bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-400"
+            className="text-5xl md:text-7xl font-bold mb-6 font-display bg-clip-text text-transparent bg-gradient-to-r from-red-500 to-red-600"
           >
             Our Robotics Team
           </motion.h1>
@@ -73,7 +73,7 @@ const TeamPage = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3 }}
-            className="text-xl md:text-2xl text-blue-100 mb-8 font-light"
+            className="text-xl md:text-2xl text-white/80 mb-8 font-light"
           >
             Innovators, Creators, Problem Solvers
           </motion.p>
@@ -91,9 +91,9 @@ const TeamPage = () => {
                 placeholder="Search team members..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full p-3 pl-10 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white/10 text-white placeholder:text-blue-100"
+                className="w-full p-3 pl-10 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 bg-white/10 text-white placeholder:text-white/80"
               />
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-100" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/80" />
             </div>
 
             {/* Role Filter */}
@@ -101,7 +101,7 @@ const TeamPage = () => {
               <select
                 value={filterRole}
                 onChange={(e) => setFilterRole(e.target.value)}
-                className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white/10 text-white"
+                className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 bg-white/10 text-white"
               >
                 <option value="All">All Roles</option>
                 <option value="Club Mentor">Club Mentor</option>
@@ -111,7 +111,7 @@ const TeamPage = () => {
                 <option value="Inventory Manager">Inventory Manager</option>
                 <option value="Core Member">Core Member</option>
               </select>
-              <Filter className="absolute right-3 top-1/2 -translate-y-1/2 text-blue-100" />
+              <Filter className="absolute right-3 top-1/2 -translate-y-1/2 text-white/80" />
             </div>
           </div>
         </div>
@@ -125,7 +125,7 @@ const TeamPage = () => {
             whileInView={{ opacity: 1, x: 0 }}
             className="flex items-center mb-8"
           >
-            <Users className="w-12 h-12 text-blue-400 mr-4" />
+            <Users className="w-12 h-12 text-red-500 mr-4" />
             <h2 className="text-3xl font-bold text-white font-display">
               Leadership Team
             </h2>
@@ -138,7 +138,7 @@ const TeamPage = () => {
                 initial={{ opacity: 0, scale: 0.9 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 transition={{ delay: index * 0.2 }}
-                className="bg-white/5 backdrop-blur-lg rounded-xl p-6 text-center border border-blue-500/20"
+                className="bg-white/5 backdrop-blur-lg rounded-xl p-6 text-center border border-white/10"
               >
                 <div className="w-32 h-32 mx-auto mb-4 rounded-full overflow-hidden">
                   <Image
@@ -152,9 +152,9 @@ const TeamPage = () => {
                 <h3 className="text-xl font-semibold text-white font-display">
                   {leader.name}
                 </h3>
-                <p className="text-blue-100">{leader.role}</p>
+                <p className="text-white/80">{leader.role}</p>
                 {leader.expertise && (
-                  <p className="text-sm text-blue-200 mt-2">
+                  <p className="text-sm text-red-400 mt-2">
                     {leader.expertise}
                   </p>
                 )}
@@ -172,10 +172,10 @@ const TeamPage = () => {
             whileInView={{ opacity: 1, x: 0 }}
             className="flex items-center mb-8"
           >
-            <Star className="w-12 h-12 text-cyan-400 mr-4" />
+            <Star className="w-12 h-12 text-red-500 mr-4" />
             <h2 className="text-3xl font-bold text-white font-display">
               Core Members
-              <span className="text-lg text-blue-100 ml-4">
+              <span className="text-lg text-white/80 ml-4">
                 ({filteredMembers.length} Total)
               </span>
             </h2>
@@ -188,7 +188,7 @@ const TeamPage = () => {
                 initial={{ opacity: 0, scale: 0.9 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 transition={{ delay: index * 0.1 }}
-                className="bg-white/5 backdrop-blur-lg rounded-xl p-4 text-center border border-blue-500/20"
+                className="bg-white/5 backdrop-blur-lg rounded-xl p-4 text-center border border-white/10"
               >
                 <div className="w-24 h-24 mx-auto mb-4 rounded-full overflow-hidden">
                   <Image
@@ -202,7 +202,7 @@ const TeamPage = () => {
                 <h3 className="font-semibold text-white font-display">
                   {member.name}
                 </h3>
-                <p className="text-sm text-blue-100">
+                <p className="text-sm text-white/80">
                   {member.role || "Core Member"}
                 </p>
               </motion.div>
@@ -219,7 +219,7 @@ const TeamPage = () => {
             whileInView={{ opacity: 1, x: 0 }}
             className="flex items-center mb-8"
           >
-            <Award className="w-12 h-12 text-yellow-400 mr-4" />
+            <Award className="w-12 h-12 text-red-500 mr-4" />
             <h2 className="text-3xl font-bold text-white font-display">
               Team Statistics
             </h2>
@@ -229,40 +229,38 @@ const TeamPage = () => {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              className="bg-white/5 backdrop-blur-lg rounded-xl p-6 text-center border border-blue-500/20"
+              className="bg-white/5 backdrop-blur-lg rounded-xl p-6 text-center border border-white/10"
             >
-              <h3 className="text-4xl font-bold text-blue-400 font-display">
+              <h3 className="text-4xl font-bold text-red-500 font-display">
                 {clubData.leadership.length}
               </h3>
-              <p className="text-blue-100">Leadership Positions</p>
+              <p className="text-white/80">Leadership Positions</p>
             </motion.div>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="bg-white/5 backdrop-blur-lg rounded-xl p-6 text-center border border-blue-500/20"
+              className="bg-white/5 backdrop-blur-lg rounded-xl p-6 text-center border border-white/10"
             >
-              <h3 className="text-4xl font-bold text-cyan-400 font-display">
+              <h3 className="text-4xl font-bold text-red-500 font-display">
                 {clubData.coreMembers.length}
               </h3>
-              <p className="text-blue-100">Core Members</p>
+              <p className="text-white/80">Core Members</p>
             </motion.div>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
-              className="bg-white/5 backdrop-blur-lg rounded-xl p-6 text-center border border-blue-500/20"
+              className="bg-white/5 backdrop-blur-lg rounded-xl p-6 text-center border border-white/10"
             >
-              <h3 className="text-4xl font-bold text-purple-400 font-display">
+              <h3 className="text-4xl font-bold text-red-500 font-display">
                 {clubData.workshops.length}
               </h3>
-              <p className="text-blue-100">Workshops Conducted</p>
+              <p className="text-white/80">Workshops Conducted</p>
             </motion.div>
           </div>
         </div>
       </section>
-
-    
     </div>
   );
 };

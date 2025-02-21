@@ -36,10 +36,10 @@ const ContactPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-blue-900 text-white font-body py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-black text-white font-sans py-12 px-4 sm:px-6 lg:px-8">
       {/* Robotics Header Section */}
       <motion.div
-        className="max-w-7xl mx-auto mb-12 bg-white/10 backdrop-blur-lg rounded-lg overflow-hidden border border-blue-500/20"
+        className="max-w-7xl mx-auto mb-12 bg-white/10 backdrop-blur-lg rounded-lg overflow-hidden border border-white/10"
         initial={{ opacity: 0, y: -50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1 }}
@@ -52,7 +52,7 @@ const ContactPage = () => {
             className="object-cover w-full h-full"
             priority
           />
-          <div className="absolute inset-0 bg-indigo-600 opacity-70"></div>
+          <div className="absolute inset-0 bg-gray-600/70"></div>
           <div className="absolute inset-0 flex items-center justify-center">
             <h1 className="text-4xl font-bold text-white flex items-center font-display">
               Robotics Club Contact
@@ -64,7 +64,7 @@ const ContactPage = () => {
       <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-8">
         {/* Contact Form */}
         <motion.div
-          className="bg-white/5 backdrop-blur-lg rounded-xl p-8 border border-blue-500/20"
+          className="bg-white/5 backdrop-blur-lg rounded-xl p-8 border border-white/10"
           initial={{ opacity: 0, x: -50 }}
           whileInView={{ opacity: 1, x: 0 }}
           transition={{ duration: 1 }}
@@ -76,7 +76,7 @@ const ContactPage = () => {
             <div>
               <label
                 htmlFor="name"
-                className="block text-sm font-medium text-blue-100"
+                className="block text-sm font-medium text-white/80"
               >
                 Name
               </label>
@@ -87,13 +87,13 @@ const ContactPage = () => {
                 required
                 value={formData.name}
                 onChange={handleInputChange}
-                className="mt-1 block w-full rounded-md border border-blue-500/20 bg-white/10 text-white shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                className="mt-1 block w-full rounded-md border border-white/10 bg-white/5 text-white shadow-sm focus:border-red-500 focus:ring focus:ring-red-500 focus:ring-opacity-50"
               />
             </div>
             <div>
               <label
                 htmlFor="email"
-                className="block text-sm font-medium text-blue-100"
+                className="block text-sm font-medium text-white/80"
               >
                 Email
               </label>
@@ -104,13 +104,13 @@ const ContactPage = () => {
                 required
                 value={formData.email}
                 onChange={handleInputChange}
-                className="mt-1 block w-full rounded-md border border-blue-500/20 bg-white/10 text-white shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                className="mt-1 block w-full rounded-md border border-white/10 bg-white/5 text-white shadow-sm focus:border-red-500 focus:ring focus:ring-red-500 focus:ring-opacity-50"
               />
             </div>
             <div>
               <label
                 htmlFor="message"
-                className="block text-sm font-medium text-blue-100"
+                className="block text-sm font-medium text-white/80"
               >
                 Message
               </label>
@@ -121,14 +121,14 @@ const ContactPage = () => {
                 required
                 value={formData.message}
                 onChange={handleInputChange}
-                className="mt-1 block w-full rounded-md border border-blue-500/20 bg-white/10 text-white shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                className="mt-1 block w-full rounded-md border border-white/10 bg-white/5 text-white shadow-sm focus:border-red-500 focus:ring focus:ring-red-500 focus:ring-opacity-50"
               />
             </div>
             <motion.button
               type="submit"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white py-3 rounded-md hover:bg-indigo-700 transition duration-300 ease-in-out"
+              className="w-full bg-gradient-to-r from-red-500 to-red-600 text-white py-3 rounded-md hover:from-red-600 hover:to-red-500 transition duration-300 ease-in-out"
             >
               Send Message
             </motion.button>
@@ -145,13 +145,13 @@ const ContactPage = () => {
 
         {/* Core Members Section */}
         <motion.div
-          className="bg-white/5 backdrop-blur-lg rounded-xl p-8 border border-blue-500/20"
+          className="bg-white/5 backdrop-blur-lg rounded-xl p-8 border border-white/10"
           initial={{ opacity: 0, x: 50 }}
           whileInView={{ opacity: 1, x: 0 }}
           transition={{ duration: 1 }}
         >
           <h3 className="text-2xl font-bold text-white mb-6 flex items-center font-display">
-            <Users className="mr-3 text-cyan-400" /> Core Members
+            <Users className="mr-3 text-red-500" /> Core Members
           </h3>
           <div className="space-y-4">
             {coreMembersData.map((member, index) => (
@@ -160,15 +160,15 @@ const ContactPage = () => {
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.2 }}
-                className="flex items-center justify-between p-4 bg-white/5 backdrop-blur-lg rounded-lg hover:bg-white/10 transition border border-blue-500/20"
+                className="flex items-center justify-between p-4 bg-white/5 backdrop-blur-lg rounded-lg hover:bg-white/10 transition border border-white/10"
               >
                 <div>
                   <p className="font-semibold text-white">{member.name}</p>
-                  <p className="text-sm text-blue-100">{member.role}</p>
+                  <p className="text-sm text-white/80">{member.role}</p>
                 </div>
                 <a
                   href={`mailto:${member.email}`}
-                  className="text-cyan-400 hover:text-cyan-600"
+                  className="text-red-500 hover:text-red-600"
                 >
                   <Mail className="h-5 w-5" />
                 </a>
@@ -176,16 +176,16 @@ const ContactPage = () => {
             ))}
           </div>
 
-          <div className="mt-8 space-y-4 text-blue-100">
+          <div className="mt-8 space-y-4 text-white/80">
             <div className="flex items-center">
-              <MapPin className="mr-3 text-cyan-400" />
+              <MapPin className="mr-3 text-red-500" />
               <span>
                 {clubData.labDetails.location.building},{" "}
                 {clubData.labDetails.location.floor}
               </span>
             </div>
             <div className="flex items-center">
-              <Mail className="mr-3 text-cyan-400" />
+              <Mail className="mr-3 text-red-500" />
               <span>{clubData.contactInfo.email}</span>
             </div>
             <div className="mt-4">
@@ -200,7 +200,7 @@ const ContactPage = () => {
                   )}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-pink-400 hover:text-pink-600"
+                  className="text-red-500 hover:text-red-600"
                 >
                   Instagram
                 </a>
@@ -210,7 +210,7 @@ const ContactPage = () => {
                     .toLowerCase()}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-blue-400 hover:text-blue-600"
+                  className="text-red-500 hover:text-red-600"
                 >
                   LinkedIn
                 </a>

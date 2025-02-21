@@ -63,7 +63,7 @@ const ProjectApprovalPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-blue-900 text-white font-body py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-black text-white font-sans py-12 px-4 sm:px-6 lg:px-8">
       {/* Header Section */}
       <motion.div
         className="max-w-7xl mx-auto mb-12 text-center"
@@ -71,10 +71,10 @@ const ProjectApprovalPage = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1 }}
       >
-        <h1 className="text-4xl md:text-5xl font-bold mb-4 font-display bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-400">
+        <h1 className="text-4xl md:text-5xl font-bold mb-4 font-display bg-clip-text text-transparent bg-gradient-to-r from-red-500 to-red-600">
           Project Approval System
         </h1>
-        <p className="text-lg text-blue-100">
+        <p className="text-lg text-white/80">
           Submit your project ideas and track their approval status.
         </p>
       </motion.div>
@@ -88,7 +88,7 @@ const ProjectApprovalPage = () => {
       >
         <button
           onClick={() => setShowForm(!showForm)}
-          className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-6 py-3 rounded-full flex items-center gap-2 hover:from-cyan-500 hover:to-blue-500 transition-all"
+          className="bg-gradient-to-r from-red-500 to-red-600 text-white px-6 py-3 rounded-full flex items-center gap-2 hover:from-red-600 hover:to-red-500 transition-all"
         >
           <Plus className="w-5 h-5" />
           {showForm ? "Close Form" : "Create New Project"}
@@ -104,14 +104,14 @@ const ProjectApprovalPage = () => {
           transition={{ duration: 0.5 }}
         >
           <h2 className="text-3xl font-bold mb-6 flex items-center font-display">
-            <h3 className="mr-3 text-cyan-400" /> New Project Request
+            <h3 className="mr-3 text-red-500" /> New Project Request
           </h2>
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Project Title */}
             <div>
               <label
                 htmlFor="title"
-                className="block text-sm font-medium text-blue-100"
+                className="block text-sm font-medium text-white/80"
               >
                 Project Title
               </label>
@@ -122,7 +122,7 @@ const ProjectApprovalPage = () => {
                 required
                 value={formData.title}
                 onChange={handleInputChange}
-                className="mt-1 block w-full rounded-md border border-blue-500/20 bg-white/10 text-white shadow-sm focus:border-cyan-300 focus:ring focus:ring-cyan-200 focus:ring-opacity-50"
+                className="mt-1 block w-full rounded-md border border-white/10 bg-white/5 text-white shadow-sm focus:border-red-500 focus:ring focus:ring-red-500 focus:ring-opacity-50"
               />
             </div>
 
@@ -130,7 +130,7 @@ const ProjectApprovalPage = () => {
             <div>
               <label
                 htmlFor="description"
-                className="block text-sm font-medium text-blue-100"
+                className="block text-sm font-medium text-white/80"
               >
                 Description
               </label>
@@ -141,7 +141,7 @@ const ProjectApprovalPage = () => {
                 required
                 value={formData.description}
                 onChange={handleInputChange}
-                className="mt-1 block w-full rounded-md border border-blue-500/20 bg-white/10 text-white shadow-sm focus:border-cyan-300 focus:ring focus:ring-cyan-200 focus:ring-opacity-50"
+                className="mt-1 block w-full rounded-md border border-white/10 bg-white/5 text-white shadow-sm focus:border-red-500 focus:ring focus:ring-red-500 focus:ring-opacity-50"
               />
             </div>
 
@@ -149,7 +149,7 @@ const ProjectApprovalPage = () => {
             <div>
               <label
                 htmlFor="teamMembers"
-                className="block text-sm font-medium text-blue-100"
+                className="block text-sm font-medium text-white/80"
               >
                 Team Members
               </label>
@@ -168,7 +168,7 @@ const ProjectApprovalPage = () => {
                     ),
                   }))
                 }
-                className="mt-1 block w-full rounded-md border border-blue-500/20 bg-white/10 text-white shadow-sm focus:border-cyan-300 focus:ring focus:ring-cyan-200 focus:ring-opacity-50"
+                className="mt-1 block w-full rounded-md border border-white/10 bg-white/5 text-white shadow-sm focus:border-red-500 focus:ring focus:ring-red-500 focus:ring-opacity-50"
               >
                 {clubData.coreMembers.map((member, index) => (
                   <option key={index} value={member}>
@@ -182,7 +182,7 @@ const ProjectApprovalPage = () => {
             <div>
               <label
                 htmlFor="budget"
-                className="block text-sm font-medium text-blue-100"
+                className="block text-sm font-medium text-white/80"
               >
                 Budget Estimate (₹)
               </label>
@@ -193,7 +193,7 @@ const ProjectApprovalPage = () => {
                 required
                 value={formData.budget}
                 onChange={handleInputChange}
-                className="mt-1 block w-full rounded-md border border-blue-500/20 bg-white/10 text-white shadow-sm focus:border-cyan-300 focus:ring focus:ring-cyan-200 focus:ring-opacity-50"
+                className="mt-1 block w-full rounded-md border border-white/10 bg-white/5 text-white shadow-sm focus:border-red-500 focus:ring focus:ring-red-500 focus:ring-opacity-50"
               />
             </div>
 
@@ -201,7 +201,7 @@ const ProjectApprovalPage = () => {
             <div>
               <label
                 htmlFor="itemsNeeded"
-                className="block text-sm font-medium text-blue-100"
+                className="block text-sm font-medium text-white/80"
               >
                 Items Needed
               </label>
@@ -213,7 +213,7 @@ const ProjectApprovalPage = () => {
                     placeholder="Item Name"
                     value={item.name}
                     onChange={(e) => handleItemChange(index, e)}
-                    className="flex-1 rounded-md border border-blue-500/20 bg-white/10 text-white shadow-sm focus:border-cyan-300 focus:ring focus:ring-cyan-200 focus:ring-opacity-50"
+                    className="flex-1 rounded-md border border-white/10 bg-white/5 text-white shadow-sm focus:border-red-500 focus:ring focus:ring-red-500 focus:ring-opacity-50"
                   />
                   <input
                     type="number"
@@ -221,14 +221,14 @@ const ProjectApprovalPage = () => {
                     placeholder="Quantity"
                     value={item.quantity}
                     onChange={(e) => handleItemChange(index, e)}
-                    className="w-1/4 rounded-md border border-blue-500/20 bg-white/10 text-white shadow-sm focus:border-cyan-300 focus:ring focus:ring-cyan-200 focus:ring-opacity-50"
+                    className="w-1/4 rounded-md border border-white/10 bg-white/5 text-white shadow-sm focus:border-red-500 focus:ring focus:ring-red-500 focus:ring-opacity-50"
                   />
                 </div>
               ))}
               <button
                 type="button"
                 onClick={handleAddItem}
-                className="text-sm text-cyan-400 hover:text-cyan-600"
+                className="text-sm text-red-500 hover:text-red-600"
               >
                 + Add Another Item
               </button>
@@ -239,7 +239,7 @@ const ProjectApprovalPage = () => {
               <div>
                 <label
                   htmlFor="startDate"
-                  className="block text-sm font-medium text-blue-100"
+                  className="block text-sm font-medium text-white/80"
                 >
                   Expected Start Date
                 </label>
@@ -250,13 +250,13 @@ const ProjectApprovalPage = () => {
                   required
                   value={formData.startDate}
                   onChange={handleInputChange}
-                  className="mt-1 block w-full rounded-md border border-blue-500/20 bg-white/10 text-white shadow-sm focus:border-cyan-300 focus:ring focus:ring-cyan-200 focus:ring-opacity-50"
+                  className="mt-1 block w-full rounded-md border border-white/10 bg-white/5 text-white shadow-sm focus:border-red-500 focus:ring focus:ring-red-500 focus:ring-opacity-50"
                 />
               </div>
               <div>
                 <label
                   htmlFor="endDate"
-                  className="block text-sm font-medium text-blue-100"
+                  className="block text-sm font-medium text-white/80"
                 >
                   Expected End Date
                 </label>
@@ -267,7 +267,7 @@ const ProjectApprovalPage = () => {
                   required
                   value={formData.endDate}
                   onChange={handleInputChange}
-                  className="mt-1 block w-full rounded-md border border-blue-500/20 bg-white/10 text-white shadow-sm focus:border-cyan-300 focus:ring focus:ring-cyan-200 focus:ring-opacity-50"
+                  className="mt-1 block w-full rounded-md border border-white/10 bg-white/5 text-white shadow-sm focus:border-red-500 focus:ring focus:ring-red-500 focus:ring-opacity-50"
                 />
               </div>
             </div>
@@ -275,7 +275,7 @@ const ProjectApprovalPage = () => {
             {/* Submit Button */}
             <button
               type="submit"
-              className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white py-3 rounded-md hover:from-cyan-500 hover:to-blue-500 transition-all"
+              className="w-full bg-gradient-to-r from-red-500 to-red-600 text-white py-3 rounded-md hover:from-red-600 hover:to-red-500 transition-all"
             >
               Submit Request
             </button>
@@ -294,9 +294,9 @@ const ProjectApprovalPage = () => {
           <CheckCircle className="mr-3 text-green-400" /> All Projects
         </h2>
         <div className="overflow-x-auto">
-          <table className="w-full bg-white/5 backdrop-blur-lg rounded-lg border border-blue-500/20">
+          <table className="w-full bg-white/5 backdrop-blur-lg rounded-lg border border-white/10">
             <thead>
-              <tr className="text-left border-b border-blue-500/20">
+              <tr className="text-left border-b border-white/10">
                 <th className="p-4">Title</th>
                 <th className="p-4">Team Members</th>
                 <th className="p-4">Budget</th>
@@ -306,7 +306,7 @@ const ProjectApprovalPage = () => {
             </thead>
             <tbody>
               {clubData.projectRequests.map((project) => (
-                <tr key={project.id} className="border-b border-blue-500/20">
+                <tr key={project.id} className="border-b border-white/10">
                   <td className="p-4">{project.title}</td>
                   <td className="p-4">{project.teamMembers.join(", ")}</td>
                   <td className="p-4">₹{project.budget}</td>
@@ -326,7 +326,7 @@ const ProjectApprovalPage = () => {
                   <td className="p-4">
                     <button
                       onClick={() => handleViewDetails(project)}
-                      className="text-cyan-400 hover:text-cyan-600"
+                      className="text-red-500 hover:text-red-600"
                     >
                       View Details
                     </button>
@@ -342,7 +342,7 @@ const ProjectApprovalPage = () => {
       {selectedProject && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
           <motion.div
-            className="bg-gradient-to-br from-slate-900 to-blue-900 rounded-xl p-8 w-full max-w-2xl border border-blue-500/20"
+            className="bg-black rounded-xl p-8 w-full max-w-2xl border border-white/10"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
@@ -350,26 +350,26 @@ const ProjectApprovalPage = () => {
             <h2 className="text-2xl font-bold mb-6 font-display">
               {selectedProject.title}
             </h2>
-            <p className="text-blue-100 mb-4">{selectedProject.description}</p>
+            <p className="text-white/80 mb-4">{selectedProject.description}</p>
             <div className="space-y-4">
-              <div className="flex items-center text-sm text-blue-100">
+              <div className="flex items-center text-sm text-white/80">
                 <Users className="w-4 h-4 mr-2" />
                 <span>
                   Team Members: {selectedProject.teamMembers.join(", ")}
                 </span>
               </div>
-              <div className="flex items-center text-sm text-blue-100">
+              <div className="flex items-center text-sm text-white/80">
                 <DollarSign className="w-4 h-4 mr-2" />
                 <span>Budget: ₹{selectedProject.budget}</span>
               </div>
-              <div className="flex items-center text-sm text-blue-100">
+              <div className="flex items-center text-sm text-white/80">
                 <Calendar className="w-4 h-4 mr-2" />
                 <span>
                   Timeline: {selectedProject.startDate} -{" "}
                   {selectedProject.endDate}
                 </span>
               </div>
-              <div className="text-sm text-blue-100">
+              <div className="text-sm text-white/80">
                 <span className="font-semibold">Items Needed:</span>
                 <ul className="list-disc list-inside">
                   {selectedProject.itemsNeeded.map((item, index) => (
@@ -379,7 +379,7 @@ const ProjectApprovalPage = () => {
                   ))}
                 </ul>
               </div>
-              <div className="text-sm text-blue-100">
+              <div className="text-sm text-white/80">
                 <span className="font-semibold">Status:</span>{" "}
                 <span
                   className={`px-2 py-1 rounded-full ${
@@ -393,11 +393,11 @@ const ProjectApprovalPage = () => {
                   {selectedProject.status}
                 </span>
               </div>
-              <div className="text-sm text-blue-100">
+              <div className="text-sm text-white/80">
                 <span className="font-semibold">Comments:</span>
                 {selectedProject.comments.map((comment, index) => (
                   <div key={index} className="mt-2">
-                    <span className="text-cyan-400">{comment.by}:</span>{" "}
+                    <span className="text-red-500">{comment.by}:</span>{" "}
                     {comment.comment}
                   </div>
                 ))}
@@ -405,7 +405,7 @@ const ProjectApprovalPage = () => {
             </div>
             <button
               onClick={handleCloseDetails}
-              className="mt-6 bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-6 py-2 rounded-full hover:from-cyan-500 hover:to-blue-500 transition-all"
+              className="mt-6 bg-gradient-to-r from-red-500 to-red-600 text-white px-6 py-2 rounded-full hover:from-red-600 hover:to-red-500 transition-all"
             >
               Close
             </button>

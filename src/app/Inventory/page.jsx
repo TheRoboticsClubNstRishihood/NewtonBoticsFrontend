@@ -32,7 +32,7 @@ const InventoryPage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-blue-900 text-white font-body py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-black text-white font-sans py-12 px-4 sm:px-6 lg:px-8">
       {/* Header Section */}
       <motion.div
         className="max-w-7xl mx-auto mb-12 text-center"
@@ -40,10 +40,10 @@ const InventoryPage = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1 }}
       >
-        <h1 className="text-4xl md:text-5xl font-bold mb-4 font-display bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-400">
+        <h1 className="text-4xl md:text-5xl font-bold mb-4 font-display bg-clip-text text-transparent bg-gradient-to-r from-red-500 to-red-600">
           Robotics Lab Inventory
         </h1>
-        <p className="text-lg text-blue-100">
+        <p className="text-lg text-white/80">
           Explore all the tools, components, and equipment available in our lab.
         </p>
       </motion.div>
@@ -63,9 +63,9 @@ const InventoryPage = () => {
               placeholder="Search inventory..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full p-3 pl-10 rounded-lg border border-blue-500/20 bg-white/10 text-white placeholder:text-blue-100 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+              className="w-full p-3 pl-10 rounded-lg border border-white/10 bg-white/5 text-white placeholder:text-white/80 focus:outline-none focus:ring-2 focus:ring-red-500"
             />
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-100" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/80" />
           </div>
 
           {/* Category Filter */}
@@ -73,7 +73,7 @@ const InventoryPage = () => {
             <select
               value={filterCategory}
               onChange={(e) => setFilterCategory(e.target.value)}
-              className="w-full p-3 pl-10 rounded-lg border border-blue-500/20 bg-white/10 text-white focus:outline-none focus:ring-2 focus:ring-cyan-400"
+              className="w-full p-3 pl-10 rounded-lg border border-white/10 bg-white/5 text-white focus:outline-none focus:ring-2 focus:ring-red-500"
             >
               {categories.map((category, index) => (
                 <option key={index} value={category}>
@@ -81,7 +81,7 @@ const InventoryPage = () => {
                 </option>
               ))}
             </select>
-            <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-100" />
+            <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-white/80" />
           </div>
         </div>
       </motion.div>
@@ -96,7 +96,7 @@ const InventoryPage = () => {
         {filteredInventory.map((item) => (
           <motion.div
             key={item.id}
-            className="bg-white/5 backdrop-blur-lg rounded-xl p-6 border border-blue-500/20 hover:border-cyan-400/50 transition-all relative"
+            className="bg-white/5 backdrop-blur-lg rounded-xl p-6 border border-white/10 hover:border-red-500/50 transition-all relative"
             whileHover={{ scale: 1.05 }}
           >
             {/* Low Stock or Out of Stock Indicator */}
@@ -131,10 +131,10 @@ const InventoryPage = () => {
             <h3 className="text-xl font-bold text-white mb-2 font-display">
               {item.name}
             </h3>
-            <p className="text-blue-100 mb-2">{item.description}</p>
+            <p className="text-white/80 mb-2">{item.description}</p>
             <div className="flex justify-between items-center">
-              <span className="text-sm text-cyan-400">{item.category}</span>
-              <span className="text-sm text-blue-100">
+              <span className="text-sm text-red-500">{item.category}</span>
+              <span className="text-sm text-white/80">
                 Quantity: {item.quantity}
               </span>
             </div>

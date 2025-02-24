@@ -17,7 +17,6 @@ import clubData from "../AllDatas/data.json";
 const AboutUs = () => {
   return (
     <div className="min-h-screen bg-black text-white font-sans">
-      {/* <Navbar /> */}
 
       {/* Hero Section */}
       <motion.section
@@ -214,7 +213,7 @@ const AboutUs = () => {
                 <h3 className="text-xl font-semibold font-display">
                   {lecture.title}
                 </h3>
-                <p className="text-white/80">{lecture.description}</p>
+                <p className="text-white/70">{lecture.description}</p>
               </motion.div>
             ))}
           </div>

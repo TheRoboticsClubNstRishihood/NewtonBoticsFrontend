@@ -1,13 +1,14 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, ExternalLink } from "lucide-react";
+import { X, ExternalLink, Info } from "lucide-react";
 
 const NewsTicker = () => {
   const [isPaused, setIsPaused] = useState(false);
   const [textWidth, setTextWidth] = useState(0);
   const [hoveredNews, setHoveredNews] = useState(null);
   const [selectedNews, setSelectedNews] = useState(null);
+  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
   const textRef = useRef(null);
 
   const announcements = [
@@ -74,10 +75,17 @@ const NewsTicker = () => {
     return announcements.map((announcement, index) => (
       <span key={`${announcement.id}-${index}`}>
         <span
-          className={`inline-block px-2 py-1 rounded-lg transition-all duration-300 cursor-pointer hover:bg-amber-200/80 hover:shadow-md hover:scale-105 ${
+          className={`inline-block px-2 py-1 rounded-lg transition-all duration-300 cursor-pointer hover:bg-amber-200/80 hover:shadow-md hover:scale-105 relative ${
             hoveredNews === announcement.id ? 'bg-amber-200/80 shadow-md scale-105' : ''
           }`}
-          onMouseEnter={() => setHoveredNews(announcement.id)}
+          onMouseEnter={(e) => {
+            setHoveredNews(announcement.id);
+            const rect = e.currentTarget.getBoundingClientRect();
+            setTooltipPosition({
+              x: rect.left + rect.width / 2,
+              y: rect.top - 10
+            });
+          }}
           onMouseLeave={() => setHoveredNews(null)}
           onClick={(e) => {
             e.stopPropagation();
@@ -179,6 +187,29 @@ const NewsTicker = () => {
           </div>
         </div>
       </div>
+
+      {/* Tooltip */}
+      <AnimatePresence>
+        {hoveredNews && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            className="fixed z-50 pointer-events-none"
+            style={{
+              left: tooltipPosition.x,
+              top: tooltipPosition.y,
+              transform: 'translateX(-50%)'
+            }}
+          >
+            <div className="bg-gray-800 text-white px-3 py-2 rounded-lg shadow-lg text-xs whitespace-nowrap flex items-center gap-2">
+              <Info className="w-3 h-3" />
+              Click for details
+            </div>
+            <div className="w-2 h-2 bg-gray-800 rotate-45 mx-auto -mt-1"></div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* News Details Modal */}
       <AnimatePresence>

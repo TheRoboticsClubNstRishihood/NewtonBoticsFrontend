@@ -2,10 +2,13 @@
 "use client";
 import { useState, useEffect } from "react";
 import { FiMenu, FiX } from "react-icons/fi";
+import { usePathname } from "next/navigation";
+import Link from "next/link";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const pathname = usePathname();
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
@@ -24,6 +27,30 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Function to check if a link is active
+  const isActive = (path) => {
+    if (path === "/DashBoard" || path === "/") {
+      return pathname === "/DashBoard" || pathname === "/";
+    }
+    return pathname === path;
+  };
+
+  // Function to get active styles
+  const getActiveStyles = (path) => {
+    const active = isActive(path);
+    return active
+      ? "text-red-500 font-semibold border-b-2 border-red-500"
+      : "text-white hover:text-red-500 transition";
+  };
+
+  // Function to get mobile active styles
+  const getMobileActiveStyles = (path) => {
+    const active = isActive(path);
+    return active
+      ? "block py-2 px-4 text-red-500 font-semibold bg-red-900/50 border-l-4 border-red-500 transition"
+      : "block py-2 px-4 text-white hover:bg-red-900 transition";
+  };
+
   return (
     <nav
       className={`sticky top-0 z-[100] w-full transition-all duration-300 ${
@@ -33,71 +60,83 @@ const Navbar = () => {
       <div className="container mx-auto px-4 py-3 flex items-center justify-between relative">
         {/* Logo */}
         <div className="flex items-center">
-          <a
+          <Link
             href="/DashBoard"
             className="text-2xl font-bold text-white hover:text-red-500 transition"
           >
             Robotics Club
-          </a>
+          </Link>
         </div>
 
         {/* Desktop Menu */}
         <div className="hidden md:flex space-x-6 items-center">
-          <a
+          <Link
             href="/DashBoard"
-            className="text-white hover:text-red-500 transition"
+            className={`${getActiveStyles("/DashBoard")} pb-1`}
           >
             Home
-          </a>
-          <a
+          </Link>
+          <Link
             href="/aboutus"
-            className="text-white hover:text-red-500 transition"
+            className={`${getActiveStyles("/aboutus")} pb-1`}
           >
             About Us
-          </a>
-          <a
+          </Link>
+          <Link
             href="/Projects"
-            className="text-white hover:text-red-500 transition"
+            className={`${getActiveStyles("/Projects")} pb-1`}
           >
             Projects
-          </a>
-          <a
+          </Link>
+          <Link
             href="/Workshops"
-            className="text-white hover:text-red-500 transition"
+            className={`${getActiveStyles("/Workshops")} pb-1`}
           >
             Workshops
-          </a>
-          <a
+          </Link>
+          <Link
+            href="/Events"
+            className={`${getActiveStyles("/Events")} pb-1`}
+          >
+            Events
+          </Link>
+          <Link
+            href="/News"
+            className={`${getActiveStyles("/News")} pb-1`}
+          >
+            News
+          </Link>
+          <Link
             href="/Inventory"
-            className="text-white hover:text-red-500 transition"
+            className={`${getActiveStyles("/Inventory")} pb-1`}
           >
             Inventory
-          </a>
-          <a
+          </Link>
+          <Link
             href="/ourTeam"
-            className="text-white hover:text-red-500 transition"
+            className={`${getActiveStyles("/ourTeam")} pb-1`}
           >
             Team
-          </a>
-          <a
+          </Link>
+          <Link
             href="/ProjectRequests"
-            className="text-white hover:text-red-500 transition"
+            className={`${getActiveStyles("/ProjectRequests")} pb-1`}
           >
             Project Requests
-          </a>
-          <a
+          </Link>
+          <Link
             href="/contact"
-            className="text-white hover:text-red-500 transition"
+            className={`${getActiveStyles("/contact")} pb-1`}
           >
             Contact Us
-          </a>
+          </Link>
           {/* Register Button */}
-          <a
+          <Link
             href="/login"
             className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
           >
             Register
-          </a>
+          </Link>
         </div>
 
         {/* Mobile Menu Button */}
@@ -118,70 +157,84 @@ const Navbar = () => {
         style={{ zIndex: 90 }}
       >
         <div className="py-2">
-          <a
+          <Link
             href="/DashBoard"
-            className="block py-2 px-4 text-white hover:bg-red-900 transition"
+            className={getMobileActiveStyles("/DashBoard")}
             onClick={() => setIsOpen(false)}
           >
             Home
-          </a>
-          <a
+          </Link>
+          <Link
             href="/aboutus"
-            className="block py-2 px-4 text-white hover:bg-red-900 transition"
+            className={getMobileActiveStyles("/aboutus")}
             onClick={() => setIsOpen(false)}
           >
             About Us
-          </a>
-          <a
+          </Link>
+          <Link
             href="/Projects"
-            className="block py-2 px-4 text-white hover:bg-red-900 transition"
+            className={getMobileActiveStyles("/Projects")}
             onClick={() => setIsOpen(false)}
           >
             Projects
-          </a>
-          <a
+          </Link>
+          <Link
             href="/Workshops"
-            className="block py-2 px-4 text-white hover:bg-red-900 transition"
+            className={getMobileActiveStyles("/Workshops")}
             onClick={() => setIsOpen(false)}
           >
             Workshops
-          </a>
-          <a
+          </Link>
+          <Link
+            href="/Events"
+            className={getMobileActiveStyles("/Events")}
+            onClick={() => setIsOpen(false)}
+          >
+            Events
+          </Link>
+          <Link
+            href="/News"
+            className={getMobileActiveStyles("/News")}
+            onClick={() => setIsOpen(false)}
+          >
+            News
+          </Link>
+          <Link
             href="/Inventory"
-            className="block py-2 px-4 text-white hover:bg-red-900 transition"
+            className={getMobileActiveStyles("/Inventory")}
             onClick={() => setIsOpen(false)}
           >
             Inventory
-          </a>
-          <a
+          </Link>
+          <Link
             href="/ourTeam"
-            className="block py-2 px-4 text-white hover:bg-red-900 transition"
+            className={getMobileActiveStyles("/ourTeam")}
             onClick={() => setIsOpen(false)}
           >
             Team
-          </a>
-          <a
+          </Link>
+          <Link
             href="/ProjectRequests"
-            className="block py-2 px-4 text-white hover:bg-red-900 transition"
+            className={getMobileActiveStyles("/ProjectRequests")}
             onClick={() => setIsOpen(false)}
           >
             Project Requests
-          </a>
-          <a
+          </Link>
+          <Link
             href="/contact"
-            className="block py-2 px-4 text-white hover:bg-red-900 transition"
+            className={getMobileActiveStyles("/contact")}
             onClick={() => setIsOpen(false)}
           >
             Contact Us
-          </a>
+          </Link>
           {/* Register Button */}
-          <a
+          <Link
             href="/login"
             className="block mx-4 my-3 py-2 bg-red-600 text-white text-center rounded-lg hover:bg-red-700 transition"
             onClick={() => setIsOpen(false)}
           >
             Register
-          </a>
+          </Link>
         </div>
       </div>
     </nav>

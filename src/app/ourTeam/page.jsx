@@ -6,10 +6,16 @@ import { Users, Award, Star, Filter, Search } from "lucide-react";
 import Navbar from "../components/navbar";
 import clubData from "../AllDatas/data.json";
 
-// Placeholder function for team member images
+// Fallback images array for team members
+const fallbackImages = [
+  "/servilancerobot.jpeg",
+  "/humanoidRobotHealthcare.webp", 
+  "/bgImageforroboticslab.jpg"
+];
+
+// Function to get a fallback image for team members
 const getPlaceholderImage = (index) => {
-  // In production, replace with actual image import or dynamic image generation
-  return `/api/placeholder/400/400?text=Member+${index + 1}`;
+  return fallbackImages[index % fallbackImages.length];
 };
 
 const TeamPage = () => {
@@ -41,8 +47,9 @@ const TeamPage = () => {
       <motion.section
         className="relative h-screen flex items-center justify-center overflow-hidden"
         initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
+        whileInView={{ opacity: 1 }}
         transition={{ duration: 1 }}
+        viewport={{ once: true }}
       >
         {/* Animated Background Grid */}
         <div className="absolute inset-0 grid grid-cols-8 grid-rows-8 opacity-20">
@@ -64,15 +71,17 @@ const TeamPage = () => {
         <div className="container mx-auto px-6 text-center">
           <motion.h1
             initial={{ opacity: 0, y: -50 }}
-            animate={{ opacity: 1, y: 0 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
             className="text-5xl md:text-7xl font-bold mb-6 font-display bg-clip-text text-transparent bg-gradient-to-r from-red-500 to-red-600"
           >
             Our Robotics Team
           </motion.h1>
           <motion.p
             initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
+            whileInView={{ opacity: 1 }}
             transition={{ delay: 0.3 }}
+            viewport={{ once: true }}
             className="text-xl md:text-2xl text-white/80 mb-8 font-light"
           >
             Innovators, Creators, Problem Solvers
@@ -123,6 +132,7 @@ const TeamPage = () => {
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
             className="flex items-center mb-8"
           >
             <Users className="w-12 h-12 text-red-500 mr-4" />
@@ -138,6 +148,7 @@ const TeamPage = () => {
                 initial={{ opacity: 0, scale: 0.9 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 transition={{ delay: index * 0.2 }}
+                viewport={{ once: true }}
                 className="bg-white/5 backdrop-blur-lg rounded-xl p-6 text-center border border-white/10"
               >
                 <div className="w-32 h-32 mx-auto mb-4 rounded-full overflow-hidden">
@@ -147,6 +158,9 @@ const TeamPage = () => {
                     width={128}
                     height={128}
                     className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.target.src = getPlaceholderImage(index);
+                    }}
                   />
                 </div>
                 <h3 className="text-xl font-semibold text-white font-display">
@@ -170,6 +184,7 @@ const TeamPage = () => {
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
             className="flex items-center mb-8"
           >
             <Star className="w-12 h-12 text-red-500 mr-4" />
@@ -188,6 +203,7 @@ const TeamPage = () => {
                 initial={{ opacity: 0, scale: 0.9 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 transition={{ delay: index * 0.1 }}
+                viewport={{ once: true }}
                 className="bg-white/5 backdrop-blur-lg rounded-xl p-4 text-center border border-white/10"
               >
                 <div className="w-24 h-24 mx-auto mb-4 rounded-full overflow-hidden">
@@ -197,14 +213,15 @@ const TeamPage = () => {
                     width={96}
                     height={96}
                     className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.target.src = getPlaceholderImage(index);
+                    }}
                   />
                 </div>
-                <h3 className="font-semibold text-white font-display">
+                <h3 className="text-lg font-semibold text-white font-display">
                   {member.name}
                 </h3>
-                <p className="text-sm text-white/80">
-                  {member.role || "Core Member"}
-                </p>
+                <p className="text-white/80 text-sm">{member.role}</p>
               </motion.div>
             ))}
           </div>

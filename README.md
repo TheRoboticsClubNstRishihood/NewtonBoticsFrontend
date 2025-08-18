@@ -12,6 +12,8 @@ A modern, feature-rich web application for the NewtonBotics Robotics Club at Ris
 - **Workshop & Event Management** with registration and filtering capabilities
 - **Inventory Management** for lab equipment and components
 - **Member Management** with role-based access control
+- **Dynamic Navigation** that adapts based on user role (Student, Team Member, Mentor, Researcher)
+- **Role-Specific Features** including Inventory access for Team Members and Project Request approval for Mentors
 - **News & Updates** system for club announcements
 - **Gallery** showcasing robotics projects and lab activities
 - **Contact & Communication** tools for team collaboration
@@ -98,13 +100,55 @@ Modern authentication interface with:
 - **Local Storage**: Demo account management for UI preview
 - **Responsive Design**: Mobile-first approach with beautiful animations
 
+### 3. Role-Based Access Control & Navigation
+The application implements sophisticated role-based access control that dynamically adjusts the navigation menu based on user authentication status and role:
+
+#### **Guest Users (Not Logged In)**
+- **Basic Navigation**: Home, About Us, Projects, Workshops, Events, News, Team, Gallery, Contact
+- **Limited Access**: View-only access to public content
+- **Authentication Required**: Must sign in to access member features
+
+#### **Student Members**
+- **Standard Navigation**: All guest features + Profile Completion
+- **Member Benefits**: Access to workshop registrations, event participation
+- **Profile Management**: Complete profile setup and maintenance
+
+#### **Team Members**
+- **Enhanced Navigation**: Student features + **Inventory Management**, **Project Requests**
+- **Lab Access**: View and manage lab equipment inventory
+- **Project Participation**: Submit and track project requests
+- **Team Collaboration**: Access to team-specific tools and resources
+
+#### **Mentors**
+- **Full Navigation**: Team member features + **Advanced Project Management**
+- **Mentorship Tools**: Guide student projects and provide feedback
+- **Resource Allocation**: Approve project requests and allocate resources
+- **Lab Oversight**: Monitor inventory and lab usage
+
+#### **Researchers**
+- **Specialized Access**: Advanced research tools and data analysis
+- **Project Leadership**: Lead research initiatives and mentor students
+- **Resource Management**: Access to specialized equipment and resources
+
+#### **Community Members**
+- **Limited Member Access**: Basic member benefits with restricted features
+- **Event Participation**: Access to public workshops and events
+- **Newsletter Access**: Stay updated with club activities
+
+#### **Navigation Menu Adaptation**
+The navbar dynamically updates based on user role:
+- **Conditional Rendering**: Menu items appear/disappear based on authentication
+- **Role-Specific Links**: Different navigation options for different user types
+- **Access Control**: Protected routes and features based on user permissions
+- **Seamless UX**: Smooth transitions between different access levels
+
 **Features:**
 - Email validation and error handling
 - Role-based account creation
 - Smooth transitions between auth modes
 - Background visual effects with gradient overlays
 
-### 3. Project Management (`/Projects`)
+### 4. Project Management (`/Projects`)
 Comprehensive project showcase system:
 - **Project Categories**: Highlighted, Ongoing, Upcoming, Completed
 - **Interactive Elements**: Rocket launch animations, progress bars
@@ -118,7 +162,7 @@ Comprehensive project showcase system:
 - **Upcoming**: Planned projects with timeline information
 - **Completed**: Finished projects with achievement details
 
-### 4. Workshop Management (`/Workshops`)
+### 5. Workshop Management (`/Workshops`)
 Educational workshop platform featuring:
 - **Past Workshops**: Historical workshop data with impact metrics
 - **Upcoming Workshops**: Future events with registration links
@@ -133,7 +177,7 @@ Educational workshop platform featuring:
 - Impact assessment metrics
 - Registration system for upcoming events
 
-### 5. Events System (`/Events`)
+### 6. Events System (`/Events`)
 Dynamic event management with:
 - **Advanced Filtering**: Category, type, and search functionality
 - **Registration Tracking**: Capacity management and progress bars
@@ -146,7 +190,7 @@ Dynamic event management with:
 - Training, Networking, Competition
 - Technical, Educational, Showcase
 
-### 6. News & Updates (`/News`)
+### 7. News & Updates (`/News`)
 Content management system featuring:
 - **Category Filtering**: Achievement, Workshop, Project Update, etc.
 - **Search Functionality**: Full-text search across all content
@@ -161,7 +205,7 @@ Content management system featuring:
 - Industry partnerships
 - Research publications
 
-### 7. Team Management (`/ourTeam`)
+### 8. Team Management (`/ourTeam`)
 Comprehensive team directory with:
 - **Leadership Profiles**: Club mentors and executive positions
 - **Core Members**: Active club participants
@@ -177,7 +221,7 @@ Comprehensive team directory with:
 - Inventory Manager (Sourabh Kumar)
 - 25+ Core Members
 
-### 8. Inventory Management (`/Inventory`)
+### 9. Inventory Management (`/Inventory`)
 Lab equipment tracking system:
 - **Category Organization**: Microcontrollers, Motors, Accessories
 - **Stock Monitoring**: Quantity tracking with visual indicators
@@ -192,7 +236,7 @@ Lab equipment tracking system:
 - Breadboards, 3D Printers
 - Sensor Kits, Computer Workstations
 
-### 9. Project Requests (`/ProjectRequests`)
+### 10. Project Requests (`/ProjectRequests`)
 Project approval workflow system:
 - **Request Submission**: Comprehensive project proposal forms
 - **Team Assignment**: Member selection and role allocation
@@ -207,7 +251,7 @@ Project approval workflow system:
 - Resource requirement planning
 - Approval status tracking
 
-### 10. Gallery (`/Gallery`)
+### 11. Gallery (`/Gallery`)
 Interactive media showcase:
 - **Collage Layout**: Dynamic grid with varying image sizes
 - **Lightbox Viewing**: Full-screen media exploration
@@ -222,7 +266,7 @@ Interactive media showcase:
 - Video demonstrations
 - Achievement celebrations
 
-### 11. Contact System (`/contact`)
+### 12. Contact System (`/contact`)
 Communication platform featuring:
 - **Contact Form**: Message submission system
 - **Team Directory**: Direct contact with core members

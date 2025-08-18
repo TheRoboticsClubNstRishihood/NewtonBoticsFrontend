@@ -17,6 +17,40 @@ const HomePage = () => {
   const [hasAnimated, setHasAnimated] = useState(false);
   const { scrollYProgress } = useScroll();
   const y = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
+  
+  // Desktop background animation transforms
+  const desktopBgOpacity = useTransform(
+    scrollYProgress,
+    [0, 0.15, 0.3, 1], // Scroll progress breakpoints - starts after hero
+    [0, 0, 0.15, 0.2] // Opacity values - 0 until after hero section
+  );
+  
+  // Desktop background scale and position transforms
+  const desktopBgScale = useTransform(
+    scrollYProgress,
+    [0, 0.15, 0.5, 1], // Starts after hero section
+    [0.8, 0.8, 1.2, 1.5]
+  );
+  
+  const desktopBgX = useTransform(
+    scrollYProgress,
+    [0, 0.15, 0.5, 1], // Starts after hero section
+    ["100%", "100%", "0%", "-20%"]
+  );
+  
+  // Desktop background rotation for smooth transition
+  const desktopBgRotate = useTransform(
+    scrollYProgress,
+    [0, 0.15, 0.5, 1], // Starts after hero section
+    [15, 15, 2, 0]
+  );
+  
+  // Desktop background blur effect
+  const desktopBgBlur = useTransform(
+    scrollYProgress,
+    [0, 0.15, 0.5, 1], // Starts after hero section
+    [0, 0, 4, 8]
+  );
 
   useEffect(() => {
     // Only run initial animations once
@@ -420,6 +454,25 @@ const HomePage = () => {
         </div>
       </div>
 
+      {/* Desktop Sticky Robot Background (After Hero Scroll) */}
+      <div className="hidden lg:block fixed inset-0 z-0 pointer-events-none">
+        <motion.div 
+          className="absolute inset-0 flex items-center justify-center"
+          style={{ 
+            opacity: desktopBgOpacity,
+            transform: `translateX(${desktopBgX}) scale(${desktopBgScale}) rotate(${desktopBgRotate}deg)`,
+            filter: `blur(${desktopBgBlur}px)`
+          }}
+        >
+          <div className="w-full h-full max-w-4xl">
+            <SplineScene
+              scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
+              className="w-full h-full"
+            />
+          </div>
+        </motion.div>
+      </div>
+
       {/* Features Section */}
       <section className="py-12 sm:py-16 md:py-20 lg:py-24 relative overflow-hidden z-10">
         {/* Subtle Red Texture Background */}
@@ -513,7 +566,7 @@ const HomePage = () => {
           />
         </div>
         
-        <div className="container mx-auto px-4 sm:px-6 relative z-10">
+        <div className="container mx-auto px-4 sm:px-6 relative z-20">
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -585,7 +638,7 @@ const HomePage = () => {
       </section>
 
       {/* Enhanced Statistics Section */}
-      <section className="py-12 sm:py-16 md:py-20 lg:py-24 relative bg-black">
+      <section className="py-12 sm:py-16 md:py-20 lg:py-24 relative bg-black z-10">
         {/* Subtle Red Texture Background */}
         <div className="absolute inset-0">
           <motion.div
@@ -609,7 +662,7 @@ const HomePage = () => {
           whileInView={{ opacity: 1 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
           viewport={{ once: true }}
-          className="container mx-auto px-4 sm:px-6 relative z-10"
+          className="container mx-auto px-4 sm:px-6 relative z-20"
         >
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -663,7 +716,7 @@ const HomePage = () => {
       </section>
 
       {/* Upcoming Events Section */}
-      <section className="py-12 sm:py-16 md:py-20 lg:py-24 bg-gradient-to-b from-gray-900 to-black relative overflow-hidden">
+      <section className="py-12 sm:py-16 md:py-20 lg:py-24 bg-gradient-to-b from-gray-900 to-black relative overflow-hidden z-10">
         {/* Subtle Red Texture Background */}
         <div className="absolute inset-0">
           <motion.div
@@ -681,7 +734,7 @@ const HomePage = () => {
           />
         </div>
         
-        <div className="container mx-auto px-4 sm:px-6 relative z-10">
+        <div className="container mx-auto px-4 sm:px-6 relative z-20">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -746,7 +799,7 @@ const HomePage = () => {
       </section>
 
       {/* View All Events Button */}
-      <section className="relative z-20 bg-black">
+      <section className="relative z-30 bg-black">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -768,12 +821,12 @@ const HomePage = () => {
       </section>
 
       {/* Raw Media Collage Section */}
-      <section className="py-12 sm:py-16 md:py-20 lg:py-24 bg-[#0b0f16]">
+      <section className="py-12 sm:py-16 md:py-20 lg:py-24 bg-[#0b0f16] relative z-10">
         <RawGallery />
       </section>
 
       {/* Enhanced Newsletter Section */}
-      <section className="py-12 sm:py-16 md:py-20 lg:py-24 bg-black relative overflow-hidden">
+      <section className="py-12 sm:py-16 md:py-20 lg:py-24 bg-black relative overflow-hidden z-10">
         {/* Subtle Red Texture Background */}
         <div className="absolute inset-0">
           <motion.div
@@ -791,7 +844,7 @@ const HomePage = () => {
           />
         </div>
         
-        <div className="container mx-auto px-4 sm:px-6 relative z-10">
+        <div className="container mx-auto px-4 sm:px-6 relative z-20">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}

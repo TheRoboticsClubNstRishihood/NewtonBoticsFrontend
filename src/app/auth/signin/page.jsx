@@ -67,34 +67,50 @@ export default function SignInPage() {
         </div>
       </div>
 
-      {/* Card on the right */}
-      <div className="relative z-10 container mx-auto px-6 py-10 flex justify-end">
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="w-full max-w-md rounded-3xl border border-white/15 bg-white/[0.06] backdrop-blur-xl shadow-2xl p-6 md:p-8"
-        >
-          <h1 className="text-2xl md:text-3xl font-bold mb-1">Welcome back</h1>
-          <p className="text-white/70 mb-6">Sign in to your NewtonBotics account.</p>
+      {/* Two-column layout: left form, right video */}
+      <div className="relative z-10 container mx-auto px-6 py-10">
+        <div className="mx-auto grid lg:grid-cols-2 gap-8 items-stretch">
+          {/* Left video */}
+          <motion.div
+            initial={{ opacity: 0, x: -12 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5 }}
+            className="hidden lg:flex relative overflow-hidden rounded-3xl border border-white/15 bg-black/30"
+          >
+            <video src="/authentication.mp4" autoPlay muted loop playsInline className="w-full h-full object-cover opacity-90" />
+          </motion.div>
 
-          <form onSubmit={onSubmit} className="space-y-4">
-            <Input icon={Mail} type="email" placeholder="Email address" value={email} onChange={(e) => setEmail(e.target.value)} />
-            <Input icon={Lock} type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
-            {error && <div className="text-red-400 text-sm">{error}</div>}
-            {message && <div className="text-emerald-400 text-sm">{message}</div>}
-            <button
-              type="submit"
-              className="w-full py-3 rounded-xl bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 transition font-semibold flex items-center justify-center gap-2"
-            >
-              <LogIn className="w-4 h-4" /> Continue
-            </button>
-          </form>
+          {/* Right form */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="w-full max-w-md lg:max-w-none rounded-3xl border border-white/15 bg-white/[0.06] backdrop-blur-xl shadow-2xl p-6 md:p-8"
+          >
+            <h1 className="text-2xl md:text-3xl font-bold mb-1">Welcome back</h1>
+            <p className="text-white/70 mb-6">Sign in to your NewtonBotics account.</p>
 
-          <div className="mt-4 text-sm text-white/70 text-center">
-            New to the club? <a href="/auth/signup" className="text-white hover:underline">Create an account</a>
-          </div>
-        </motion.div>
+            <form onSubmit={onSubmit} className="space-y-4">
+              <Input icon={Mail} type="email" placeholder="Email address" value={email} onChange={(e) => setEmail(e.target.value)} />
+              <Input icon={Lock} type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
+              <div className="text-right -mt-2">
+                <a href="/auth/forgot" className="text-sm text-white/70 hover:text-white hover:underline">Forgot password?</a>
+              </div>
+              {error && <div className="text-red-400 text-sm">{error}</div>}
+              {message && <div className="text-emerald-400 text-sm">{message}</div>}
+              <button
+                type="submit"
+                className="w-full py-3 rounded-xl bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 transition font-semibold flex items-center justify-center gap-2"
+              >
+                <LogIn className="w-4 h-4" /> Continue
+              </button>
+            </form>
+
+            <div className="mt-4 text-sm text-white/70 text-center">
+              New to the club? <a href="/auth/signup" className="text-white hover:underline">Create an account</a>
+            </div>
+          </motion.div>
+        </div>
       </div>
     </div>
   );

@@ -94,62 +94,29 @@ export default function AuthPage() {
         <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[60vw] h-[60vw] max-w-[900px] rounded-full bg-white/[0.03] blur-3xl" />
       </div>
 
-      <div className="relative container mx-auto px-6 py-10">
-        {/* Header */}
-        <div className="text-center mb-10">
-          <motion.h1
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-4xl md:text-6xl font-extrabold bg-clip-text text-transparent bg-gradient-to-b from-white via-gray-300 to-gray-500"
-          >
-            Join NewtonBotics
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="text-white/70 mt-3"
-          >
-            Build, learn, and innovate with our robotics club.
-          </motion.p>
-        </div>
-
-        {/* Card */}
-        <div className="mx-auto grid lg:grid-cols-2 gap-8 items-stretch max-w-6xl">
-          {/* Left visuals */}
+      <div className="relative container mx-auto px-6 py-10 flex flex-col lg:flex-row items-center justify-center gap-8">
+          {/* Left: Video */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="hidden lg:flex relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-white/[0.04] to-white/[0.02] p-10"
+            className="relative w-full max-w-lg lg:max-w-xl h-64 md:h-96 lg:h-[500px] rounded-3xl overflow-hidden border border-white/10 shadow-2xl lg:order-1"
           >
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.08),transparent_40%),radial-gradient(circle_at_70%_80%,rgba(239,68,68,0.12),transparent_45%)]" />
-            <div className="relative z-10 space-y-6 self-center">
-              <div className="flex items-center gap-3">
-                <Bot className="w-8 h-8 text-red-400" />
-                <div className="text-2xl font-semibold">Robotics Club Portal</div>
-              </div>
-              <p className="text-white/75 max-w-md">
-                Create your account to access workshops, projects, and our community. Choose your role so we can tailor your experience.
-              </p>
-              <div className="grid grid-cols-2 gap-4 pt-2">
-                {roles.slice(0,4).map((r, i) => (
-                  <div key={r.id} className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
-                    <r.icon className="w-5 h-5 text-white/80" />
-                    <div>
-                      <div className="font-medium">{r.name}</div>
-                      <div className="text-xs text-white/60">{r.blurb}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <video
+              src="/authentication.mp4"
+              autoPlay
+              muted
+              loop
+              playsInline
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-black/40" /> {/* Overlay for readability */}
           </motion.div>
 
-          {/* Right form */}
+          {/* Right: Form */}
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="relative rounded-3xl border border-white/10 bg-gradient-to-br from-white/[0.06] to-white/[0.03] p-6 md:p-8"
+            className="relative w-full max-w-md rounded-3xl border border-white/10 bg-gradient-to-br from-white/[0.06] to-white/[0.03] p-6 md:p-8 lg:order-2"
           >
             {/* Tabs */}
             <div className="flex items-center gap-2 bg-white/5 rounded-xl p-1 w-fit mx-auto mb-6 border border-white/10">
@@ -233,6 +200,6 @@ export default function AuthPage() {
           </motion.div>
         </div>
       </div>
-    </div>
+    // </div>
   );
 } 

@@ -10,6 +10,7 @@ import { SplineScene } from "@/components/components/ui/splite.tsx";
 import { Spotlight } from "@/components/components/ui/spotlight";
 import clubData from "../AllDatas/data.json";
 import Link from "next/link";
+import RawGallery from "../components/RawGallery";
 
 const HomePage = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -196,26 +197,22 @@ const HomePage = () => {
     {
       icon: <Cpu className="w-12 h-12" />,
       title: "Advanced AI Integration",
-      description: "State-of-the-art machine learning algorithms powering our robotic systems",
-      color: "from-blue-500 to-cyan-500"
+      description: "State-of-the-art machine learning algorithms powering our robotic systems"
     },
     {
       icon: <Camera className="w-12 h-12" />,
       title: "Computer Vision",
-      description: "Real-time image processing and object recognition capabilities",
-      color: "from-purple-500 to-pink-500"
+      description: "Real-time image processing and object recognition capabilities"
     },
     {
       icon: <Wifi className="w-12 h-12" />,
       title: "IoT Connectivity",
-      description: "Seamless integration with IoT devices and cloud platforms",
-      color: "from-green-500 to-emerald-500"
+      description: "Seamless integration with IoT devices and cloud platforms"
     },
     {
       icon: <Shield className="w-12 h-12" />,
       title: "Safety Systems",
-      description: "Advanced safety protocols and fail-safe mechanisms",
-      color: "from-red-500 to-orange-500"
+      description: "Advanced safety protocols and fail-safe mechanisms"
     }
   ];
 
@@ -256,7 +253,7 @@ const HomePage = () => {
         {/* Animated Background Elements */}
         <div className="absolute inset-0 overflow-hidden">
           <motion.div
-            className="absolute top-20 left-20 w-72 h-72 bg-red-500/20 rounded-full blur-3xl"
+            className="absolute top-20 left-20 w-72 h-72 bg-white/10 rounded-full blur-3xl"
             animate={{
               scale: [1, 1.2, 1],
               opacity: [0.3, 0.6, 0.3],
@@ -268,7 +265,7 @@ const HomePage = () => {
             }}
           />
           <motion.div
-            className="absolute bottom-20 right-20 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl"
+            className="absolute bottom-20 right-20 w-96 h-96 bg-white/10 rounded-full blur-3xl"
             animate={{
               scale: [1.2, 1, 1.2],
               opacity: [0.4, 0.7, 0.4],
@@ -279,9 +276,36 @@ const HomePage = () => {
               ease: "easeInOut",
             }}
           />
+          {/* Subtle Red Texture Elements */}
+          <motion.div
+            className="absolute top-40 right-40 w-48 h-48 bg-red-500/5 rounded-full blur-2xl"
+            animate={{
+              scale: [1, 1.3, 1],
+              opacity: [0.2, 0.4, 0.2],
+            }}
+            transition={{
+              duration: 6,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: 1,
+            }}
+          />
+          <motion.div
+            className="absolute bottom-40 left-40 w-32 h-32 bg-red-500/8 rounded-full blur-xl"
+            animate={{
+              scale: [1.2, 1, 1.2],
+              opacity: [0.3, 0.5, 0.3],
+            }}
+            transition={{
+              duration: 7,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: 2,
+            }}
+          />
         </div>
 
-        <div className="relative z-10 flex h-full">
+        <div className="relative z-10 flex h-full ">
           {/* Left content */}
           <div className="flex-1 p-12 md:p-20 relative z-10 flex flex-col justify-center">
             <motion.div
@@ -297,7 +321,7 @@ const HomePage = () => {
                 className="flex items-center gap-2 mb-4"
               >
                 <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
-                <span className="text-red-400 font-medium">Innovation Hub</span>
+                <span className="text-white/80 font-medium">Innovation Hub</span>
               </motion.div>
               
               <h1 className="text-6xl md:text-8xl font-extrabold bg-clip-text text-transparent bg-gradient-to-b from-white via-gray-300 to-gray-500 drop-shadow-2xl leading-tight">
@@ -323,7 +347,7 @@ const HomePage = () => {
                 <motion.button
                   whileHover={{ scale: 1.05, boxShadow: "0 20px 40px rgba(239, 68, 68, 0.3)" }}
                   whileTap={{ scale: 0.95 }}
-                  className="bg-gradient-to-r from-red-500 to-red-600 px-8 py-4 rounded-full text-lg font-semibold text-white shadow-lg shadow-red-500/40 hover:shadow-red-500/50 transition-all flex items-center justify-center gap-2 group"
+                  className="bg-gradient-to-r from-red-500 to-red-600 text-white px-8 py-4 rounded-full text-lg font-semibold shadow-lg shadow-red-500/30 hover:shadow-red-500/50 transition-all flex items-center justify-center gap-2 group"
                 >
                   Discover Our Innovations
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -388,7 +412,36 @@ const HomePage = () => {
 
       {/* Features Section */}
       <section className="py-24 relative overflow-hidden">
-        <div className="container mx-auto px-6">
+        {/* Subtle Red Texture Background */}
+        <div className="absolute inset-0">
+          <motion.div
+            className="absolute top-20 left-1/4 w-64 h-64 bg-red-500/3 rounded-full blur-3xl"
+            animate={{
+              scale: [1, 1.2, 1],
+              opacity: [0.2, 0.4, 0.2],
+            }}
+            transition={{
+              duration: 8,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          />
+          <motion.div
+            className="absolute bottom-20 right-1/4 w-48 h-48 bg-red-500/4 rounded-full blur-2xl"
+            animate={{
+              scale: [1.2, 1, 1.2],
+              opacity: [0.3, 0.5, 0.3],
+            }}
+            transition={{
+              duration: 10,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: 2,
+            }}
+          />
+        </div>
+        
+        <div className="container mx-auto px-6 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -396,7 +449,7 @@ const HomePage = () => {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="text-5xl font-extrabold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-red-400 to-red-600">
+            <h2 className="text-5xl font-extrabold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-white via-red-400 to-white">
               Cutting-Edge Technology
             </h2>
             <p className="text-xl text-white/80 max-w-3xl mx-auto">
@@ -414,9 +467,9 @@ const HomePage = () => {
                 transition={{ delay: index * 0.1, duration: 0.8 }}
                 viewport={{ once: true }}
                 whileHover={{ scale: 1.05, y: -10 }}
-                className="bg-white/5 backdrop-blur-lg rounded-2xl p-8 border border-white/10 hover:border-white/20 transition-all group"
+                className="bg-white/5 backdrop-blur-lg rounded-2xl p-8 border border-white/10 hover:border-red-500/20 transition-all group"
               >
-                <div className={`bg-gradient-to-r ${feature.color} p-4 rounded-xl w-fit mb-6 shadow-lg group-hover:shadow-2xl transition-all`}>
+                <div className="bg-gradient-to-br from-white/10 to-red-500/10 p-4 rounded-xl w-fit mb-6 shadow-lg group-hover:shadow-2xl transition-all">
                   {feature.icon}
                 </div>
                 <h3 className="text-2xl font-bold mb-4 text-white group-hover:text-red-400 transition-colors">
@@ -433,13 +486,30 @@ const HomePage = () => {
 
       {/* Research Areas Section */}
       <section className="py-24 relative overflow-hidden">
-        <div className="container mx-auto px-6">
+        {/* Subtle Red Texture Background */}
+        <div className="absolute inset-0">
+          <motion.div
+            className="absolute top-1/2 left-20 w-56 h-56 bg-red-500/4 rounded-full blur-3xl"
+            animate={{
+              scale: [1, 1.3, 1],
+              opacity: [0.2, 0.4, 0.2],
+            }}
+            transition={{
+              duration: 12,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: 1,
+            }}
+          />
+        </div>
+        
+        <div className="container mx-auto px-6 relative z-10">
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
             viewport={{ once: true }}
-            className="text-5xl font-extrabold text-center mb-16 text-white drop-shadow-md"
+            className="text-5xl font-extrabold text-center mb-16 bg-clip-text text-transparent bg-gradient-to-r from-white via-red-400 to-white drop-shadow-md"
           >
             Research Areas
           </motion.h2>
@@ -450,28 +520,24 @@ const HomePage = () => {
                 icon: <Box className="w-10 h-10 text-white" />,
                 title: "Humanoid Robotics",
                 description: "Development of human-like robots for complex interactions",
-                color: "from-red-500 to-red-600",
                 projects: "12 Active Projects"
               },
               {
                 icon: <Brain className="w-10 h-10 text-white" />,
                 title: "Neural Networks",
                 description: "Advanced AI algorithms for robotic decision making",
-                color: "from-red-600 to-red-500",
                 projects: "8 Active Projects"
               },
               {
                 icon: <Box className="w-10 h-10 text-white" />,
                 title: "Swarm Robotics",
                 description: "Multi-robot systems for collaborative tasks",
-                color: "from-red-500 to-red-400",
                 projects: "6 Active Projects"
               },
               {
                 icon: <Layout className="w-10 h-10 text-white" />,
                 title: "Computer Vision",
                 description: "Visual perception systems for autonomous navigation",
-                color: "from-red-400 to-red-500",
                 projects: "15 Active Projects"
               },
             ].map((area, index) => (
@@ -486,10 +552,10 @@ const HomePage = () => {
                 }}
                 viewport={{ once: true }}
                 whileHover={{ scale: 1.05, y: -10 }}
-                className="bg-white/5 backdrop-blur-lg rounded-xl p-8 hover:bg-white/10 transition-all border border-white/10 shadow-lg shadow-red-500/10 group"
+                className="bg-white/5 backdrop-blur-lg rounded-xl p-8 hover:bg-white/10 transition-all border border-white/10 hover:border-red-500/20 shadow-lg shadow-white/10 group"
               >
                 <div
-                  className={`bg-gradient-to-r ${area.color} p-4 rounded-xl w-fit mb-5 shadow-lg group-hover:shadow-2xl transition-all`}
+                  className="bg-gradient-to-br from-white/10 to-red-500/10 p-4 rounded-xl w-fit mb-5 shadow-lg group-hover:shadow-2xl transition-all"
                 >
                   {area.icon}
                 </div>
@@ -510,7 +576,24 @@ const HomePage = () => {
 
       {/* Enhanced Statistics Section */}
       <section className="py-24 relative bg-black">
-        <div className="absolute inset-0 bg-gradient-to-r from-red-900/20 to-blue-900/20"></div>
+        {/* Subtle Red Texture Background */}
+        <div className="absolute inset-0">
+          <motion.div
+            className="absolute top-1/3 right-20 w-72 h-72 bg-red-500/3 rounded-full blur-3xl"
+            animate={{
+              scale: [1, 1.2, 1],
+              opacity: [0.2, 0.4, 0.2],
+            }}
+            transition={{
+              duration: 15,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: 3,
+            }}
+          />
+        </div>
+        
+        <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-white/5"></div>
         <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
@@ -524,7 +607,7 @@ const HomePage = () => {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="text-5xl font-extrabold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-red-400 to-red-600">
+            <h2 className="text-5xl font-extrabold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-white via-red-400 to-white">
               Our Impact
             </h2>
             <p className="text-xl text-white/80 max-w-3xl mx-auto">
@@ -545,13 +628,13 @@ const HomePage = () => {
                 }}
                 viewport={{ once: true }}
                 whileHover={{ scale: 1.05 }}
-                className="bg-white/5 backdrop-blur-lg rounded-2xl p-8 border border-white/10 shadow-lg shadow-red-500/10 text-center group hover:bg-white/10 transition-all"
+                className="bg-white/5 backdrop-blur-lg rounded-2xl p-8 border border-white/10 shadow-lg shadow-white/10 text-center group hover:bg-white/10 hover:border-red-500/20 transition-all"
               >
-                <div className="bg-gradient-to-r from-red-500 to-red-600 p-4 rounded-xl w-fit mx-auto mb-4 shadow-lg group-hover:shadow-2xl transition-all">
+                <div className="bg-gradient-to-br from-white/10 to-red-500/10 p-4 rounded-xl w-fit mx-auto mb-4 shadow-lg group-hover:shadow-2xl transition-all">
                   {stat.icon}
                 </div>
                 <motion.h3
-                  className="text-4xl font-bold bg-gradient-to-r from-red-500 to-red-600 bg-clip-text text-transparent font-display mb-2"
+                  className="text-4xl font-bold text-red-400 font-display mb-2"
                   animate={{ scale: [1, 1.1, 1] }}
                   transition={{
                     duration: 2,
@@ -570,15 +653,32 @@ const HomePage = () => {
       </section>
 
       {/* Upcoming Events Section */}
-      <section className="py-24 bg-gradient-to-b from-gray-900 to-black">
-        <div className="container mx-auto px-6">
+      <section className="py-24 bg-gradient-to-b from-gray-900 to-black relative overflow-hidden">
+        {/* Subtle Red Texture Background */}
+        <div className="absolute inset-0">
+          <motion.div
+            className="absolute top-1/4 left-1/3 w-64 h-64 bg-red-500/3 rounded-full blur-3xl"
+            animate={{
+              scale: [1, 1.2, 1],
+              opacity: [0.2, 0.4, 0.2],
+            }}
+            transition={{
+              duration: 18,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: 4,
+            }}
+          />
+        </div>
+        
+        <div className="container mx-auto px-6 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="text-5xl font-extrabold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-red-400 to-red-600">
+            <h2 className="text-5xl font-extrabold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-white via-red-400 to-white">
               Upcoming Events
             </h2>
             <p className="text-xl text-white/80 max-w-3xl mx-auto">
@@ -595,13 +695,10 @@ const HomePage = () => {
                 transition={{ delay: index * 0.2 }}
                 viewport={{ once: true }}
                 whileHover={{ scale: 1.05, y: -10 }}
-                className="bg-white/5 backdrop-blur-lg rounded-2xl p-8 border border-white/10 shadow-lg shadow-red-500/10 group hover:bg-white/10 transition-all"
+                className="bg-white/5 backdrop-blur-lg rounded-2xl p-8 border border-white/10 shadow-lg shadow-white/10 group hover:bg-white/10 hover:border-red-500/20 transition-all"
               >
                 <div className="flex items-center justify-between mb-4">
-                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                    event.type === 'Workshop' ? 'bg-blue-500/80' : 
-                    event.type === 'Seminar' ? 'bg-purple-500/80' : 'bg-green-500/80'
-                  }`}>
+                  <span className="px-3 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-white/20 to-red-500/20 text-white">
                     {event.type}
                   </span>
                   <Calendar className="w-5 h-5 text-white/60" />
@@ -627,7 +724,7 @@ const HomePage = () => {
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    className="mt-6 w-full bg-gradient-to-r from-red-500 to-red-600 px-6 py-3 rounded-lg font-semibold text-white shadow-lg shadow-red-500/30 hover:shadow-red-500/50 transition-all"
+                    className="mt-6 w-full bg-gradient-to-r from-red-500 to-red-600 text-white px-6 py-3 rounded-lg font-semibold shadow-lg shadow-red-500/30 hover:shadow-red-500/50 transition-all"
                   >
                     Register Now
                   </motion.button>
@@ -639,43 +736,68 @@ const HomePage = () => {
       </section>
 
       {/* View All Events Button */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, delay: 0.8 }}
-        viewport={{ once: true }}
-        className="text-center -mt-8 mb-16"
-      >
-        <Link href="/Events">
-          <motion.button
-            whileHover={{ scale: 1.05, boxShadow: "0 20px 40px rgba(239, 68, 68, 0.3)" }}
-            whileTap={{ scale: 0.95 }}
-            className="bg-gradient-to-r from-red-500 to-red-600 px-8 py-4 rounded-full font-semibold text-white shadow-lg shadow-red-500/30 hover:shadow-red-500/50 transition-all flex items-center gap-2 mx-auto group"
-          >
-            View All Events
-            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-          </motion.button>
-        </Link>
-      </motion.div>
+      <section className="relative z-20 bg-black">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.8 }}
+          viewport={{ once: true }}
+          className="text-center py-12"
+        >
+          <Link href="/Events">
+            <motion.button
+              whileHover={{ scale: 1.05, boxShadow: "0 20px 40px rgba(239, 68, 68, 0.3)" }}
+              whileTap={{ scale: 0.95 }}
+              className="bg-gradient-to-r from-red-500 to-red-600 text-white px-8 py-4 rounded-full font-semibold shadow-lg shadow-red-500/30 hover:shadow-red-500/50 transition-all flex items-center justify-center gap-2 mx-auto group min-w-fit"
+            >
+              View All Events
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            </motion.button>
+          </Link>
+        </motion.div>
+      </section>
+
+      {/* Raw Media Collage Section */}
+      <section className="py-24 bg-[#0b0f16]">
+        <RawGallery />
+      </section>
 
       {/* Enhanced Newsletter Section */}
-      <section className="py-24 bg-black">
-        <div className="container mx-auto px-6">
+      <section className="py-24 bg-black relative overflow-hidden">
+        {/* Subtle Red Texture Background */}
+        <div className="absolute inset-0">
+          <motion.div
+            className="absolute top-1/2 right-1/4 w-80 h-80 bg-red-500/2 rounded-full blur-3xl"
+            animate={{
+              scale: [1, 1.3, 1],
+              opacity: [0.1, 0.3, 0.1],
+            }}
+            transition={{
+              duration: 20,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: 5,
+            }}
+          />
+        </div>
+        
+        <div className="container mx-auto px-6 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
             viewport={{ once: true }}
-            className="bg-gradient-to-r from-red-900/30 to-red-800/30 rounded-3xl p-12 text-center backdrop-blur-xl border border-white/10 shadow-2xl shadow-red-500/20 relative overflow-hidden"
+            className="bg-white/5 rounded-3xl p-12 text-center backdrop-blur-xl border border-white/10 shadow-2xl shadow-white/10 relative overflow-hidden"
           >
             {/* Background decoration */}
             <div className="absolute top-0 left-0 w-full h-full">
-              <div className="absolute top-10 left-10 w-32 h-32 bg-red-500/20 rounded-full blur-2xl"></div>
-              <div className="absolute bottom-10 right-10 w-40 h-40 bg-blue-500/20 rounded-full blur-2xl"></div>
+              <div className="absolute top-10 left-10 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+              <div className="absolute bottom-10 right-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
+              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-24 h-24 bg-red-500/10 rounded-full blur-xl"></div>
             </div>
             
             <div className="relative z-10">
-              <h2 className="text-5xl font-extrabold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-red-400 to-red-600">
+              <h2 className="text-5xl font-extrabold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-white via-red-400 to-white">
                 Stay Connected
               </h2>
               <p className="text-xl text-white/80 mb-8 max-w-2xl mx-auto leading-relaxed">
@@ -686,12 +808,12 @@ const HomePage = () => {
                 <input
                   type="email"
                   placeholder="Enter your email address"
-                  className="flex-1 px-6 py-4 rounded-xl bg-white/10 border border-white/20 focus:outline-none focus:ring-2 focus:ring-red-500 text-white placeholder-white/60 backdrop-blur-lg"
+                  className="flex-1 px-6 py-4 rounded-xl bg-white/10 border border-white/20 focus:outline-none focus:ring-2 focus:ring-red-500/50 text-white placeholder-white/60 backdrop-blur-lg"
                 />
                 <motion.button
                   whileHover={{ scale: 1.05, boxShadow: "0 20px 40px rgba(239, 68, 68, 0.3)" }}
                   whileTap={{ scale: 0.95 }}
-                  className="px-8 py-4 bg-gradient-to-r from-red-500 to-red-600 rounded-xl font-semibold text-white shadow-lg shadow-red-500/30 hover:shadow-red-500/50 transition-all flex items-center justify-center gap-2 group"
+                  className="px-8 py-4 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl font-semibold shadow-lg shadow-red-500/30 hover:shadow-red-500/50 transition-all flex items-center justify-center gap-2 group"
                 >
                   Subscribe
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />

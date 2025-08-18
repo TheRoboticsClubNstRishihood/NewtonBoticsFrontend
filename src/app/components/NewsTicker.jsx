@@ -75,8 +75,8 @@ const NewsTicker = () => {
     return announcements.map((announcement, index) => (
       <span key={`${announcement.id}-${index}`}>
         <span
-          className={`inline-block px-2 py-1 rounded-lg transition-all duration-300 cursor-pointer hover:bg-amber-200/80 hover:shadow-md hover:scale-105 relative ${
-            hoveredNews === announcement.id ? 'bg-amber-200/80 shadow-md scale-105' : ''
+          className={`inline-block px-2 py-1 rounded-lg transition-all duration-300 cursor-pointer hover:bg-white/10 hover:shadow-md hover:scale-105 relative ${
+            hoveredNews === announcement.id ? 'bg-white/10 shadow-md scale-105' : ''
           }`}
           onMouseEnter={(e) => {
             setHoveredNews(announcement.id);
@@ -95,7 +95,7 @@ const NewsTicker = () => {
           {announcement.text}
         </span>
         {index < announcements.length - 1 && (
-          <span className="inline-block mx-4 text-amber-400">•</span>
+          <span className="inline-block mx-4 text-white/40">•</span>
         )}
       </span>
     ));
@@ -132,29 +132,29 @@ const NewsTicker = () => {
 
   return (
     <>
-      <div className="bg-gradient-to-r from-amber-50 via-yellow-50 to-amber-50 border-b border-amber-200 shadow-sm relative overflow-hidden hover:shadow-md transition-shadow duration-300">
+      <div className="bg-black border-b border-white/10 shadow-sm relative overflow-hidden hover:shadow-md transition-shadow duration-300">
         {/* Diagonal pattern overlay */}
         <div className="absolute inset-0 opacity-5">
-          <div className="absolute bottom-0 left-0 w-full h-4 bg-gradient-to-r from-transparent via-amber-300 to-transparent transform -skew-y-1"></div>
+          <div className="absolute bottom-0 left-0 w-full h-4 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-y-1"></div>
         </div>
         
         <div className="container mx-auto px-4 py-2.5 relative">
           <div className="flex items-center justify-between min-h-[32px]">
             {/* News indicator */}
             <div className="flex items-center gap-2 mr-4 md:mr-6 flex-shrink-0">
-              <div className={`w-2 h-2 rounded-full ${isPaused ? 'bg-yellow-500' : 'bg-red-500 animate-pulse'}`}></div>
-              <span className="text-xs font-bold text-gray-700 uppercase tracking-wide hidden sm:inline">Latest News</span>
-              <span className="text-xs font-bold text-gray-700 uppercase tracking-wide sm:hidden">News</span>
+              <div className={`w-2 h-2 rounded-full ${isPaused ? 'bg-white' : 'bg-white animate-pulse'}`}></div>
+              <span className="text-xs font-bold text-white uppercase tracking-wide hidden sm:inline">Latest News</span>
+              <span className="text-xs font-bold text-white uppercase tracking-wide sm:hidden">News</span>
             </div>
             
             {/* Continuous scrolling announcements */}
             <div 
-              className="flex-1 overflow-hidden relative min-h-[20px] flex items-center cursor-pointer hover:bg-amber-100/50 rounded-lg transition-colors duration-200"
+              className="flex-1 overflow-hidden relative min-h-[20px] flex items-center cursor-pointer hover:bg-white/5 rounded-lg transition-colors duration-200"
               onClick={handleTickerClick}
             >
               <motion.div
                 ref={textRef}
-                className="flex items-center whitespace-nowrap text-sm font-medium text-gray-800"
+                className="flex items-center whitespace-nowrap text-sm font-medium text-white/80"
                 animate={isPaused ? {} : { x: [0, -textWidth] }}
                 transition={{
                   x: {
@@ -179,8 +179,8 @@ const NewsTicker = () => {
                 onClick={handleTickerClick}
                 className={`w-3 h-3 rounded-full transition-all duration-300 cursor-pointer hover:scale-125 ${
                   isPaused 
-                    ? "bg-yellow-500 scale-125 shadow-sm" 
-                    : "bg-red-500 animate-pulse"
+                    ? "bg-white scale-125 shadow-sm" 
+                    : "bg-white/60 animate-pulse"
                 }`}
               />
             </div>
@@ -202,11 +202,11 @@ const NewsTicker = () => {
               transform: 'translateX(-50%)'
             }}
           >
-            <div className="bg-gray-800 text-white px-3 py-2 rounded-lg shadow-lg text-xs whitespace-nowrap flex items-center gap-2">
+            <div className="bg-black border border-white/10 text-white px-3 py-2 rounded-lg shadow-lg text-xs whitespace-nowrap flex items-center gap-2">
               <Info className="w-3 h-3" />
               Click for details
             </div>
-            <div className="w-2 h-2 bg-gray-800 rotate-45 mx-auto -mt-1"></div>
+            <div className="w-2 h-2 bg-black border-l border-b border-white/10 rotate-45 mx-auto -mt-1"></div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -225,38 +225,38 @@ const NewsTicker = () => {
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[80vh] overflow-hidden"
+              className="bg-black border border-white/10 rounded-2xl shadow-2xl max-w-md w-full max-h-[80vh] overflow-hidden"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Modal Header */}
-              <div className="bg-gradient-to-r from-amber-500 to-yellow-500 p-6 text-white relative">
+              <div className="bg-white/5 border-b border-white/10 p-6 text-white relative">
                 <button
                   onClick={closeModal}
-                  className="absolute top-4 right-4 p-2 rounded-full bg-white/20 hover:bg-white/30 transition-colors"
+                  className="absolute top-4 right-4 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
                 >
                   <X className="w-4 h-4" />
                 </button>
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="text-xs font-medium bg-white/20 px-2 py-1 rounded-full">
+                  <span className="text-xs font-medium bg-white/10 px-2 py-1 rounded-full text-white">
                     {selectedNews.category}
                   </span>
-                  <span className="text-xs opacity-80">
+                  <span className="text-xs text-white/60">
                     {new Date(selectedNews.date).toLocaleDateString()}
                   </span>
                 </div>
-                <h3 className="text-lg font-bold">{selectedNews.text}</h3>
+                <h3 className="text-lg font-bold text-white">{selectedNews.text}</h3>
               </div>
 
               {/* Modal Content */}
               <div className="p-6">
-                <p className="text-gray-700 leading-relaxed mb-6">
+                <p className="text-white/80 leading-relaxed mb-6">
                   {selectedNews.details}
                 </p>
                 
                 <div className="flex gap-3">
                   <button
                     onClick={closeModal}
-                    className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                    className="flex-1 px-4 py-2 bg-white/10 text-white rounded-lg hover:bg-white/20 transition-colors"
                   >
                     Close
                   </button>
@@ -265,7 +265,7 @@ const NewsTicker = () => {
                       // You can implement navigation to a detailed page here
                       console.log('Navigate to detailed page for:', selectedNews);
                     }}
-                    className="flex-1 px-4 py-2 bg-gradient-to-r from-amber-500 to-yellow-500 text-white rounded-lg hover:from-amber-600 hover:to-yellow-600 transition-all flex items-center justify-center gap-2"
+                    className="flex-1 px-4 py-2 bg-white text-black rounded-lg hover:bg-white/90 transition-all flex items-center justify-center gap-2"
                   >
                     Read More
                     <ExternalLink className="w-4 h-4" />

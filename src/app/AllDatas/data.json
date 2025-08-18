@@ -212,7 +212,7 @@
     "Ananya Mishra",
     "Vikram Reddy",
     "Shreya Joshi",
-    "Rahul Malhotra",
+    "Mouli Shrivastab",
     "Deepak Choudhary",
     "Anjali Kumari",
     "Sanjay Yadav",
@@ -533,7 +533,7 @@
         "name": "Swarm Robotics for Disaster Management",
         "description": "Developing a swarm of robots for search and rescue operations in disaster zones.",
         "image": "/servilancerobot.jpeg",
-        "team": ["Rohit Sharma", "Shreya Joshi", "Gaurav Singh"],
+        "team": ["Rohit Sharma", "Shreya Joshi", "Mouli Shrivastab"],
         "startDate": "2024-06-01",
         "status": "Upcoming"
       },

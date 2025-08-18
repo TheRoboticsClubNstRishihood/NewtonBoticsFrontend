@@ -3,11 +3,11 @@
 import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { GraduationCap, Users, Shield, Cpu, Robot, User2, Mail, Lock } from "lucide-react";
+import { GraduationCap, Users, Shield, Cpu, Bot, User2, Mail, Lock } from "lucide-react";
 
 const roles = [
   { id: "student", name: "Student", icon: GraduationCap, blurb: "Learning and building" },
-  { id: "team", name: "Team Member", icon: Robot, blurb: "Core robotics team" },
+  { id: "team", name: "Team Member", icon: Bot, blurb: "Core robotics team" },
   { id: "mentor", name: "Mentor", icon: Shield, blurb: "Guiding and reviewing" },
   { id: "research", name: "Researcher", icon: Cpu, blurb: "AI & systems research" },
   { id: "community", name: "Community", icon: Users, blurb: "Helping the club" },
@@ -125,7 +125,7 @@ export default function AuthPage() {
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.08),transparent_40%),radial-gradient(circle_at_70%_80%,rgba(239,68,68,0.12),transparent_45%)]" />
             <div className="relative z-10 space-y-6 self-center">
               <div className="flex items-center gap-3">
-                <Robot className="w-8 h-8 text-red-400" />
+                <Bot className="w-8 h-8 text-red-400" />
                 <div className="text-2xl font-semibold">Robotics Club Portal</div>
               </div>
               <p className="text-white/75 max-w-md">

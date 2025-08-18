@@ -10,40 +10,145 @@ import {
   Star,
   Calendar,
   BookOpen,
+  Rocket,
 } from "lucide-react";
-import Navbar from "../components/navbar";
+// Navbar is provided by root layout
 import clubData from "../AllDatas/data.json";
 
 const AboutUs = () => {
-  return (
-    <div className="min-h-screen bg-black text-white font-sans">
+  // Derived data for About content
+  const establishedYear = clubData?.clubInfo?.founded;
+  const founders = clubData?.clubInfo?.foundedBy || [];
+  const mission = clubData?.clubInfo?.mission;
+  const vision = clubData?.clubInfo?.vision;
+  const foundersData = clubData?.founders || [];
 
-      {/* Hero Section */}
-      <motion.section
-        className="relative h-[60vh] flex items-center justify-center overflow-hidden"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
+  const completed = clubData?.projects?.completed || [];
+  const ongoing = clubData?.projects?.ongoing || [];
+  const upcomingProjects = clubData?.projects?.upcoming || [];
+  const highlighted = clubData?.projects?.highlighted || [];
+  const allProjects = [...completed, ...ongoing, ...upcomingProjects, ...highlighted];
+  const projectsShowcased = new Set(allProjects.map((p) => p.id)).size || allProjects.length;
+
+  const workshopsCount = (clubData?.workshops?.past?.length || 0) + (clubData?.workshops?.upcoming?.length || 0);
+  const eventsUpcoming = clubData?.events?.upcoming?.length || 0;
+  const achievementsCount = clubData?.achievements?.length || 0;
+  const coreMembers = clubData?.coreMemberCount || clubData?.coreMembers?.length || 0;
+
+  return (
+    <div className="min-h-screen bg-black text-white font-sans py-12 px-4 sm:px-6 lg:px-8">
+
+      {/* Header Section (simple like other pages) */}
+      <motion.div
+        className="max-w-7xl mx-auto mb-12 text-center"
+        initial={{ opacity: 0, y: -50 }}
+        whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 1 }}
+        viewport={{ once: true }}
       >
-        <div className="absolute inset-0 bg-gray-900 backdrop-blur-sm" />
-        <div className="container mx-auto text-center z-10">
-          <motion.h1
-            initial={{ opacity: 0, y: -50 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-4xl md:text-6xl font-bold mb-4 font-display bg-clip-text text-transparent bg-gradient-to-r from-red-500 to-red-600"
-          >
-            About Robotics Club
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
-            className="text-xl md:text-2xl max-w-2xl mx-auto text-white/80"
-          >
-            Innovating the future through cutting-edge robotics and technology
-          </motion.p>
+        <h1 className="text-4xl md:text-5xl font-bold mb-4 font-display bg-clip-text text-transparent bg-gradient-to-r from-red-500 to-red-600">
+          About NewtonBotics
+        </h1>
+        <p className="text-lg text-white/80 max-w-2xl mx-auto">
+          Innovating the future through cutting-edge robotics and technology.
+        </p>
+      </motion.div>
+
+      {/* Our Story */}
+      <section className="max-w-7xl mx-auto mb-12">
+        <div className="grid md:grid-cols-2 gap-6">
+          <div className="bg-white/5 backdrop-blur-lg rounded-xl p-6 border border-white/10">
+            <h3 className="text-xl font-bold mb-3 font-display flex items-center gap-2">
+              <Calendar className="w-5 h-5 text-red-500" /> Established
+            </h3>
+            <p className="text-white/80">Founded in <span className="text-red-400 font-semibold">{establishedYear}</span> at Rishihood University.</p>
+          </div>
+          <div className="bg-white/5 backdrop-blur-lg rounded-xl p-6 border border-white/10">
+            <h3 className="text-xl font-bold mb-3 font-display flex items-center gap-2">
+              <Users className="w-5 h-5 text-red-500" /> Founded By
+            </h3>
+            <p className="text-white/80">{founders.join(", ")}</p>
+          </div>
+          <div className="bg-white/5 backdrop-blur-lg rounded-xl p-6 border border-white/10">
+            <h3 className="text-xl font-bold mb-3 font-display flex items-center gap-2">
+              <BookOpen className="w-5 h-5 text-red-500" /> Mission
+            </h3>
+            <p className="text-white/80">{mission}</p>
+          </div>
+          <div className="bg-white/5 backdrop-blur-lg rounded-xl p-6 border border-white/10">
+            <h3 className="text-xl font-bold mb-3 font-display flex items-center gap-2">
+              <Star className="w-5 h-5 text-red-500" /> Vision
+            </h3>
+            <p className="text-white/80">{vision}</p>
+          </div>
         </div>
-      </motion.section>
+      </section>
+
+      {/* At a Glance */}
+      <section className="max-w-7xl mx-auto mb-12">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          <div className="bg-white/5 backdrop-blur-lg rounded-xl p-4 border border-white/10 text-center">
+            <div className="text-2xl font-bold text-red-400">{coreMembers}</div>
+            <div className="text-xs text-white/60">Core Members</div>
+          </div>
+          <div className="bg-white/5 backdrop-blur-lg rounded-xl p-4 border border-white/10 text-center">
+            <div className="text-2xl font-bold text-red-400">{projectsShowcased}</div>
+            <div className="text-xs text-white/60">Projects Showcased</div>
+          </div>
+          <div className="bg-white/5 backdrop-blur-lg rounded-xl p-4 border border-white/10 text-center">
+            <div className="text-2xl font-bold text-red-400">{workshopsCount}</div>
+            <div className="text-xs text-white/60">Workshops</div>
+          </div>
+          <div className="bg-white/5 backdrop-blur-lg rounded-xl p-4 border border-white/10 text-center">
+            <div className="text-2xl font-bold text-red-400">{eventsUpcoming}</div>
+            <div className="text-xs text-white/60">Upcoming Events</div>
+          </div>
+          <div className="bg-white/5 backdrop-blur-lg rounded-xl p-4 border border-white/10 text-center">
+            <div className="text-2xl font-bold text-red-400">{achievementsCount}</div>
+            <div className="text-xs text-white/60">Major Achievements</div>
+          </div>
+          <div className="bg-white/5 backdrop-blur-lg rounded-xl p-4 border border-white/10 text-center">
+            <div className="text-2xl font-bold text-red-400">{clubData?.labDetails?.equipment?.length || 0}</div>
+            <div className="text-xs text-white/60">Key Lab Assets</div>
+          </div>
+        </div>
+      </section>
+
+      {/* History Section */}
+      <section className="max-w-7xl mx-auto mb-12">
+        <h2 className="text-3xl font-bold mb-6 font-display">Our History</h2>
+        <div className="bg-white/5 backdrop-blur-lg rounded-xl p-6 border border-white/10 leading-relaxed text-white/80">
+          <p className="mb-4">
+            NewtonBotics was established in <span className="text-red-400 font-semibold">2024</span> by four pioneering members of the
+            first batch at Rishihood University — driven by a shared vision to build a hands-on robotics culture from the ground up.
+            Starting with a small lab and a few kits, the founders grew the club into a collaborative hub for humanoid systems,
+            drone technology, computer vision, and embedded platforms. Today, NewtonBotics hosts workshops, drives competitive teams,
+            and contributes research aligned with our mission to empower learners through real-world robotics.
+          </p>
+          <p>
+            Our journey continues as we partner with industry, publish research, and mentor the next wave of innovators who will shape
+            the future of intelligent machines.
+          </p>
+        </div>
+      </section>
+
+      {/* Founders Section */}
+      <section className="max-w-7xl mx-auto mb-12">
+        <h2 className="text-3xl font-bold mb-6 font-display">Founding Team (2024)</h2>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {foundersData.map((f, idx) => (
+            <div key={idx} className="bg-white/5 backdrop-blur-lg rounded-xl p-6 border border-white/10 text-center hover:bg-white/10 transition-colors">
+              <div className="relative w-28 h-28 mx-auto mb-4 rounded-full overflow-hidden bg-white/10">
+                {/* Using Next/Image would be ideal, but keep div for simplicity */}
+                <img src={f.image} alt={f.name} className="w-full h-full object-cover" />
+              </div>
+              <h3 className="text-lg font-bold font-display">{f.name}</h3>
+              <p className="text-sm text-white/60">{f.role} • {f.batch}</p>
+              <p className="text-sm text-white/80 mt-3 leading-relaxed">{f.bio}</p>
+            </div>
+          ))}
+        </div>
+      </section>
 
       {/* Lab Details Section */}
       <section className="py-16 bg-black">

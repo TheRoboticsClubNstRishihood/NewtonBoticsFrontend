@@ -5,9 +5,39 @@
     "mission": "To foster creativity, innovation, and technical skills in robotics.",
     "vision": "To be a leading hub for robotics research and development.",
     "logo": "/images/logo.png",
-    "founded": 2015,
-    "foundedBy": ["Rishihood University", "Newton School of Technology"]
+    "founded": 2024,
+    "foundedBy": ["Monu Raj", "Sourabh Sarkar", "Manish Kumar", "Aman Kumar"]
   },
+  "founders": [
+    {
+      "name": "Monu Raj",
+      "role": "Co-Founder",
+      "batch": "Batch, 2023",
+      "image": "/monu.jpeg",
+      "bio": "Visionary lead behind NewtonBotics with a focus on humanoid robotics and system design."
+    },
+    {
+      "name": "Sourabh Sarkar",
+      "role": "Co-Founder",
+      "batch": "Batch, 2023",
+      "image": "/monu.jpeg",
+      "bio": "Specializes in lab infrastructure, safety systems, and embedded platforms."
+    },
+    {
+      "name": "Manish Kumar",
+      "role": "Co-Founder",
+      "batch": "Batch, 2023",
+      "image": "/monu.jpeg",
+      "bio": "Drives project operations, events, and industry collaboration initiatives."
+    },
+    {
+      "name": "Aman Kumar",
+      "role": "Co-Founder",
+      "batch": "Batch, 2023",
+      "image": "/monu.jpeg",
+      "bio": "Leads AI research programs and student mentorship for competitions."
+    }
+  ],
   "leadership": [
     {
       "name": "Sachin Sir",

@@ -303,10 +303,10 @@ Communication platform featuring:
    ```
 
 4. **Run development server**
-   ```bash
-   npm run dev
-   # or
-   yarn dev
+```bash
+npm run dev
+# or
+yarn dev
    ```
 
 5. **Build for production**

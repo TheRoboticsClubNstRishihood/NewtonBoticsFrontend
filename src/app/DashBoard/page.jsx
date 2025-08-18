@@ -1,6 +1,6 @@
 "use client";
-import { motion, useScroll, useTransform } from "framer-motion";
-import { Box, Brain, Layout, Rocket, Users, Award, Calendar, ArrowRight, Play, Star, Globe, Cpu, Wifi, Camera, Shield } from "lucide-react";
+import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
+import { Box, Brain, Layout, Rocket, Users, Award, Calendar, ArrowRight, Play, Star, Globe, Cpu, Wifi, Camera, Shield, ChevronDown } from "lucide-react";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import autonomousDrone from "../assets/automousdronesystem.jpg";
@@ -15,6 +15,7 @@ import RawGallery from "../components/RawGallery";
 const HomePage = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [hasAnimated, setHasAnimated] = useState(false);
+  const [showScrollIndicator, setShowScrollIndicator] = useState(true);
   const { scrollYProgress } = useScroll();
   const y = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
   
@@ -63,6 +64,27 @@ const HomePage = () => {
     }, 5000);
     return () => clearInterval(interval);
   }, [hasAnimated]);
+
+  // Hide scroll indicator once user starts scrolling
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 40) {
+        setShowScrollIndicator(false);
+      } else {
+        setShowScrollIndicator(true);
+      }
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const scrollToFeatures = () => {
+    const target = document.getElementById("features");
+    if (target) {
+      target.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
 
   const beams = [
     {
@@ -275,7 +297,7 @@ const HomePage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-black text-white font-sans overflow-hidden">
+    <div className=" min-h-screen bg-black text-white font-sans overflow-hidden">
       {/* Hero Section with Enhanced Animations */}
       <div className="relative min-h-screen lg:h-screen">
         <div className="absolute inset-0 bg-gradient-to-br from-black via-gray-900 to-black"></div>
@@ -339,7 +361,7 @@ const HomePage = () => {
           />
         </div>
 
-        <div className="relative z-10 flex flex-col lg:flex-row h-full min-h-screen">
+        <div className="relative z-10 flex flex-col lg:flex-row h-full min-h-screen md:mt-[-100px]">
           {/* Left content */}
           <div className="flex-1 p-4 sm:p-8 md:p-12 lg:p-20 relative z-10 flex flex-col justify-center order-2 lg:order-1">
             <motion.div
@@ -378,23 +400,17 @@ const HomePage = () => {
                 transition={{ delay: 0.6, duration: 0.8 }}
                 className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start"
               >
-                <motion.button
-                  whileHover={{ scale: 1.05, boxShadow: "0 20px 40px rgba(239, 68, 68, 0.3)" }}
-                  whileTap={{ scale: 0.95 }}
-                  className="bg-gradient-to-r from-red-500 to-red-600 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-full text-base sm:text-lg font-semibold shadow-lg shadow-red-500/30 hover:shadow-red-500/50 transition-all flex items-center justify-center gap-2 group"
-                >
-                  Discover Our Innovations
-                  <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" />
-                </motion.button>
-                
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="border-2 border-white/20 px-6 sm:px-8 py-3 sm:py-4 rounded-full text-base sm:text-lg font-semibold text-white hover:bg-white/10 transition-all flex items-center justify-center gap-2 group"
-                >
-                  <Play className="w-4 h-4 sm:w-5 sm:h-5" />
-                  Watch Demo
-                </motion.button>
+                <Link href="/Projects" className="inline-block">
+                  <motion.div
+                    whileHover={{ scale: 1.05, boxShadow: "0 20px 40px rgba(239, 68, 68, 0.3)" }}
+                    whileTap={{ scale: 0.95 }}
+                    className="bg-gradient-to-r from-red-500 to-red-600 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-full text-base sm:text-lg font-semibold shadow-lg shadow-red-500/30 hover:shadow-red-500/50 transition-all flex items-center justify-center gap-2 group"
+                  >
+                    Discover Our Innovations
+                    <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" />
+                  </motion.div>
+                </Link>
+
               </motion.div>
 
               {/* Quick Stats */}
@@ -415,7 +431,7 @@ const HomePage = () => {
           </div>
 
           {/* Right content - 3D Scene (Desktop only) */}
-          <div className="hidden lg:block flex-1 relative order-1 lg:order-2 h-full">
+          <div className="hidden lg:block flex-1 relative order-1 lg:order-2 h-full ">
             <SplineScene
               scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
               className="w-full h-full"
@@ -423,25 +439,38 @@ const HomePage = () => {
           </div>
         </div>
 
-        {/* Scroll Indicator */}
-        <motion.div
-          initial={hasAnimated ? false : { opacity: 0 }}
-          animate={hasAnimated ? { opacity: 1 } : { opacity: 1 }}
-          transition={{ delay: 1.5, duration: 1 }}
-          className="absolute bottom-4 sm:bottom-8 left-1/2 transform -translate-x-1/2 hidden sm:block"
-        >
-          <motion.div
-            animate={{ y: [0, 10, 0] }}
-            transition={{ duration: 2, repeat: Infinity }}
-            className="w-6 h-10 border-2 border-white/30 rounded-full flex justify-center"
-          >
+        {/* Enhanced Robotics Scroll Indicator */}
+        <AnimatePresence>
+          {showScrollIndicator && (
             <motion.div
-              animate={{ y: [0, 12, 0] }}
-              transition={{ duration: 2, repeat: Infinity }}
-              className="w-1 h-3 bg-white/60 rounded-full mt-2"
-            />
-          </motion.div>
-        </motion.div>
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25, ease: "easeOut" }}
+              className="absolute bottom-4 sm:bottom-32 left-1/2 -translate-x-1/2 hidden sm:block z-40"
+            >
+              <div className="relative flex flex-col items-center gap-2">
+                <motion.button
+                  onClick={scrollToFeatures}
+                  whileHover={{ scale: 1.06 }}
+                  whileTap={{ scale: 0.96 }}
+                  aria-label="Scroll to explore"
+                  className="relative flex items-center justify-center p-0"
+                >
+                  {/* Down chevron only (no circle) */}
+                  <motion.div
+                    animate={{ y: [0, 4, 0], rotate: 0 }}
+                    transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
+                    className="relative rotate-0"
+                  >
+                    <ChevronDown className="w-6 h-6 text-white/80" />
+                  </motion.div>
+                </motion.button>
+                <span className="text-xs text-white/60 select-none">Scroll to explore</span>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Mobile Sticky Robot Background */}
@@ -474,7 +503,7 @@ const HomePage = () => {
       </div>
 
       {/* Features Section */}
-      <section className="py-12 sm:py-16 md:py-20 lg:py-24 relative overflow-hidden z-10">
+      <section id="features" className="py-12 sm:py-16 md:py-20 lg:py-24 relative overflow-hidden z-10">
         {/* Subtle Red Texture Background */}
         <div className="absolute inset-0">
           <motion.div
@@ -638,7 +667,7 @@ const HomePage = () => {
       </section>
 
       {/* Enhanced Statistics Section */}
-      <section className="py-12 sm:py-16 md:py-20 lg:py-24 relative bg-black z-10">
+      <section className="py-12 sm:py-16 md:py-20 lg:py-24 relative bg-black/70 z-10">
         {/* Subtle Red Texture Background */}
         <div className="absolute inset-0">
           <motion.div
@@ -716,7 +745,7 @@ const HomePage = () => {
       </section>
 
       {/* Upcoming Events Section */}
-      <section className="py-12 sm:py-16 md:py-20 lg:py-24 bg-gradient-to-b from-gray-900 to-black relative overflow-hidden z-10">
+      <section className="py-12 sm:py-16 md:py-20 lg:py-24 bg-gradient-to-b from-gray-900/70 to-black/70 relative overflow-hidden z-10">
         {/* Subtle Red Texture Background */}
         <div className="absolute inset-0">
           <motion.div
@@ -821,12 +850,12 @@ const HomePage = () => {
       </section>
 
       {/* Raw Media Collage Section */}
-      <section className="py-12 sm:py-16 md:py-20 lg:py-24 bg-[#0b0f16] relative z-10">
+      <section className="py-12 sm:py-16 md:py-20 lg:py-24 bg-[#0b0f16]/70 relative z-10">
         <RawGallery />
       </section>
 
       {/* Enhanced Newsletter Section */}
-      <section className="py-12 sm:py-16 md:py-20 lg:py-24 bg-black relative overflow-hidden z-10">
+      <section className="py-12 sm:py-16 md:py-20 lg:py-24 bg-black/70 relative overflow-hidden z-10">
         {/* Subtle Red Texture Background */}
         <div className="absolute inset-0">
           <motion.div

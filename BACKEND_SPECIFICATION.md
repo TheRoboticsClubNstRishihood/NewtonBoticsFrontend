@@ -69,7 +69,6 @@ This document outlines the complete backend architecture and API specifications 
   expiresAt: { type: Date, required: true, index: true },
   createdAt: { type: Date, default: Date.now }
 }
-```
 
 ### **2. Projects Management**
 
@@ -116,7 +115,6 @@ This document outlines the complete backend architecture and API specifications 
   createdAt: { type: Date, default: Date.now, index: true },
   updatedAt: { type: Date, default: Date.now }
 }
-```
 
 ### **3. Workshops & Events**
 
@@ -201,7 +199,6 @@ This document outlines the complete backend architecture and API specifications 
   }],
   createdAt: { type: Date, default: Date.now, index: true }
 }
-```
 
 ### **4. Inventory Management**
 
@@ -258,7 +255,6 @@ This document outlines the complete backend architecture and API specifications 
   createdAt: { type: Date, default: Date.now, index: true },
   updatedAt: { type: Date, default: Date.now }
 }
-```
 
 ### **5. Project Requests & Approvals**
 
@@ -310,7 +306,6 @@ This document outlines the complete backend architecture and API specifications 
     }
   }]
 }
-```
 
 ### **6. News & Updates**
 
@@ -352,7 +347,6 @@ This document outlines the complete backend architecture and API specifications 
   subscribedAt: { type: Date, default: Date.now },
   unsubscribedAt: { type: Date }
 }
-```
 
 ### **7. Gallery & Media**
 
@@ -380,8 +374,8 @@ This document outlines the complete backend architecture and API specifications 
     index: true
   },
   fileSize: { type: Number, min: 0 },
-  dimensions: { type: String, maxlength: 50 }, // For images/videos: "1920x1080"
-  duration: { type: Number, min: 0 }, // For videos/audio in seconds
+  dimensions: { type: String, maxlength: 50 }, // e.g., "1920x1080"
+  duration: { type: Number, min: 0 },
   categoryId: { type: ObjectId, ref: 'MediaCategory', index: true },
   uploadedBy: { type: ObjectId, ref: 'User', required: true, index: true },
   tags: [{ type: String, maxlength: 100, index: true }],
@@ -390,7 +384,7 @@ This document outlines the complete backend architecture and API specifications 
   createdAt: { type: Date, default: Date.now, index: true }
 }
 
-// Media Collections Collection (for galleries)
+// Media Collections (for galleries)
 {
   _id: ObjectId,
   name: { type: String, required: true, maxlength: 255, index: true },
@@ -409,7 +403,7 @@ This document outlines the complete backend architecture and API specifications 
 
 ### **8. Contact & Communication**
 
-```sql
+```javascript
 // Contact Submissions Collection
 {
   _id: ObjectId,
@@ -450,120 +444,6 @@ This document outlines the complete backend architecture and API specifications 
   isArchived: { type: Boolean, default: false, index: true },
   createdAt: { type: Date, default: Date.now, index: true }
 }
-```
-
-## 📊 MongoDB Data Modeling Best Practices
-
-### **Embedded vs Referenced Documents**
-```javascript
-// Embedded approach for frequently accessed data
-// Example: Project with embedded team members and milestones
-{
-  _id: ObjectId,
-  title: "Robotic Arm Project",
-  teamMembers: [
-    {
-      userId: ObjectId("..."),
-      role: "Team Leader",
-      joinedAt: Date,
-      // Embedded user info for quick access
-      userInfo: {
-        firstName: "John",
-        lastName: "Doe",
-        email: "john@example.com",
-        profileImageUrl: "..."
-      }
-    }
-  ],
-  milestones: [
-    {
-      title: "Design Phase",
-      status: "completed",
-      completedAt: Date
-    }
-  ]
-}
-
-// Referenced approach for large datasets
-// Example: User references in projects
-{
-  _id: ObjectId,
-  title: "AI Robot Project",
-  mentorId: ObjectId("..."), // Reference to User collection
-  teamLeaderId: ObjectId("..."), // Reference to User collection
-  // Use populate() to get full user details when needed
-}
-```
-
-### **Aggregation Pipeline Examples**
-```javascript
-// Get projects with populated user information
-db.projects.aggregate([
-  {
-    $lookup: {
-      from: "users",
-      localField: "mentorId",
-      foreignField: "_id",
-      as: "mentor"
-    }
-  },
-  {
-    $lookup: {
-      from: "users",
-      localField: "teamMembers.userId",
-      foreignField: "_id",
-      as: "teamMemberDetails"
-    }
-  },
-  {
-    $project: {
-      title: 1,
-      status: 1,
-      mentor: { $arrayElemAt: ["$mentor", 0] },
-      teamMembers: 1,
-      teamMemberDetails: 1
-    }
-  }
-]);
-
-// Get workshop statistics by category
-db.workshops.aggregate([
-  {
-    $group: {
-      _id: "$category",
-      totalWorkshops: { $sum: 1 },
-      totalParticipants: { $sum: "$currentParticipants" },
-      averageRating: { $avg: "$registrations.feedbackRating" }
-    }
-  },
-  {
-    $sort: { totalWorkshops: -1 }
-  }
-]);
-
-// Get equipment checkout history
-db.equipment.aggregate([
-  {
-    $unwind: "$checkouts"
-  },
-  {
-    $lookup: {
-      from: "users",
-      localField: "checkouts.userId",
-      foreignField: "_id",
-      as: "user"
-    }
-  },
-  {
-    $project: {
-      equipmentName: "$name",
-      userName: { $arrayElemAt: ["$user.firstName", 0] },
-      checkoutDate: "$checkouts.checkoutDate",
-      returnDate: "$checkouts.actualReturnDate",
-      status: "$checkouts.status"
-    }
-  }
-]);
 ```
 
 ## 🔐 Authentication & Authorization
@@ -1092,74 +972,67 @@ const cacheTTL = {
 };
 ```
 
-### **MongoDB Indexes & Optimization**
+### **Database Optimization**
 ```javascript
-// Single field indexes for performance
-db.users.createIndex({ "email": 1 }, { unique: true });
-db.users.createIndex({ "role": 1 });
-db.users.createIndex({ "department": 1 });
-db.users.createIndex({ "isActive": 1 });
-db.users.createIndex({ "createdAt": 1 });
+// Single-field indexes
+db.users.createIndex({ email: 1 }, { unique: true });
+db.users.createIndex({ role: 1 });
+db.users.createIndex({ department: 1 });
+db.users.createIndex({ isActive: 1 });
+db.users.createIndex({ createdAt: 1 });
 
-db.projects.createIndex({ "status": 1 });
-db.projects.createIndex({ "category": 1 });
-db.projects.createIndex({ "startDate": 1 });
-db.projects.createIndex({ "mentorId": 1 });
-db.projects.createIndex({ "teamLeaderId": 1 });
-db.projects.createIndex({ "createdAt": 1 });
+db.projects.createIndex({ status: 1 });
+db.projects.createIndex({ category: 1 });
+db.projects.createIndex({ startDate: 1 });
+db.projects.createIndex({ mentorId: 1 });
+db.projects.createIndex({ teamLeaderId: 1 });
+db.projects.createIndex({ createdAt: 1 });
 
-db.workshops.createIndex({ "status": 1 });
-db.workshops.createIndex({ "startDate": 1 });
-db.workshops.createIndex({ "instructorId": 1 });
-db.workshops.createIndex({ "category": 1 });
-db.workshops.createIndex({ "level": 1 });
+db.workshops.createIndex({ status: 1 });
+db.workshops.createIndex({ startDate: 1 });
+db.workshops.createIndex({ instructorId: 1 });
+db.workshops.createIndex({ category: 1 });
+db.workshops.createIndex({ level: 1 });
 
-db.events.createIndex({ "startDate": 1 });
-db.events.createIndex({ "type": 1 });
-db.events.createIndex({ "status": 1 });
-db.events.createIndex({ "isFeatured": 1 });
-db.events.createIndex({ "organizerId": 1 });
+db.events.createIndex({ startDate: 1 });
+db.events.createIndex({ type: 1 });
+db.events.createIndex({ status: 1 });
+db.events.createIndex({ isFeatured: 1 });
+db.events.createIndex({ organizerId: 1 });
 
-db.equipment.createIndex({ "categoryId": 1 });
-db.equipment.createIndex({ "status": 1 });
-db.equipment.createIndex({ "location": 1 });
-db.equipment.createIndex({ "manufacturer": 1 });
-db.equipment.createIndex({ "nextMaintenanceDate": 1 });
+db.equipment.createIndex({ categoryId: 1 });
+db.equipment.createIndex({ status: 1 });
+db.equipment.createIndex({ location: 1 });
+db.equipment.createIndex({ manufacturer: 1 });
+db.equipment.createIndex({ nextMaintenanceDate: 1 });
 
-db.projectRequests.createIndex({ "status": 1 });
-db.projectRequests.createIndex({ "submittedBy": 1 });
-db.projectRequests.createIndex({ "mentorId": 1 });
-db.projectRequests.createIndex({ "submittedAt": 1 });
+db.projectrequests.createIndex({ status: 1 });
+db.projectrequests.createIndex({ submittedBy: 1 });
+db.projectrequests.createIndex({ mentorId: 1 });
+db.projectrequests.createIndex({ submittedAt: 1 });
 
-db.news.createIndex({ "categoryId": 1 });
-db.news.createIndex({ "isPublished": 1 });
-db.news.createIndex({ "isFeatured": 1 });
-db.news.createIndex({ "publishedAt": 1 });
-db.news.createIndex({ "tags": 1 });
+db.news.createIndex({ categoryId: 1 });
+db.news.createIndex({ isPublished: 1 });
+db.news.createIndex({ isFeatured: 1 });
+db.news.createIndex({ publishedAt: 1 });
+db.news.createIndex({ tags: 1 });
 
-db.media.createIndex({ "fileType": 1 });
-db.media.createIndex({ "categoryId": 1 });
-db.media.createIndex({ "uploadedBy": 1 });
-db.media.createIndex({ "isFeatured": 1 });
-db.media.createIndex({ "tags": 1 });
+db.media.createIndex({ fileType: 1 });
+db.media.createIndex({ categoryId: 1 });
+db.media.createIndex({ uploadedBy: 1 });
+db.media.createIndex({ isFeatured: 1 });
+db.media.createIndex({ tags: 1 });
 
-// Compound indexes for complex queries
-db.projects.createIndex({ "status": 1, "category": 1 });
-db.workshops.createIndex({ "status": 1, "startDate": 1 });
-db.events.createIndex({ "type": 1, "startDate": 1 });
-db.equipment.createIndex({ "categoryId": 1, "status": 1 });
-db.news.createIndex({ "isPublished": 1, "publishedAt": 1 });
+// Text indexes for search
+db.users.createIndex({ firstName: "text", lastName: "text", skills: "text" });
+db.projects.createIndex({ title: "text", description: "text" });
+db.workshops.createIndex({ title: "text", description: "text" });
+db.news.createIndex({ title: "text", content: "text", tags: "text" });
+db.media.createIndex({ title: "text", description: "text", tags: "text" });
 
-// Text indexes for search functionality
-db.users.createIndex({ "firstName": "text", "lastName": "text", "skills": "text" });
-db.projects.createIndex({ "title": "text", "description": "text" });
-db.workshops.createIndex({ "title": "text", "description": "text" });
-db.news.createIndex({ "title": "text", "content": "text", "tags": "text" });
-db.media.createIndex({ "title": "text", "description": "text", "tags": "text" });
-
-// TTL indexes for automatic cleanup
-db.userSessions.createIndex({ "expiresAt": 1 }, { expireAfterSeconds: 0 });
-db.passwordResetTokens.createIndex({ "expiresAt": 1 }, { expireAfterSeconds: 0 });
+// TTL indexes for cleanup
+db.usersessions.createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 });
+db.passwordresettokens.createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 ```
 
 ### **API Rate Limiting**
@@ -1406,11 +1279,8 @@ interface LogEntry {
 const environmentConfig = {
   development: {
     database: {
-      host: 'localhost',
-      port: 5432,
-      name: 'newtonbotics_dev',
-      user: 'dev_user',
-      password: 'dev_password'
+      mongodbUri: 'mongodb://localhost:27017',
+      dbName: 'newtonbotics_dev'
     },
     redis: {
       host: 'localhost',
@@ -1423,11 +1293,8 @@ const environmentConfig = {
   },
   production: {
     database: {
-      host: process.env.DB_HOST,
-      port: parseInt(process.env.DB_PORT),
-      name: process.env.DB_NAME,
-      user: process.env.DB_USER,
-      password: process.env.DB_PASSWORD
+      mongodbUri: process.env.MONGODB_URI,
+      dbName: process.env.MONGODB_DB_NAME
     },
     redis: {
       host: process.env.REDIS_HOST,
@@ -1550,11 +1417,9 @@ jobs:
 
 ### **Development Tools**
 - **API Documentation**: Swagger/OpenAPI specification
-- **Database ODM**: Mongoose.js for MongoDB schema management
-- **Database GUI**: MongoDB Compass, Studio 3T, or MongoDB Atlas
+- **Database Migrations**: Sequelize migrations or similar
 - **Code Quality**: ESLint, Prettier, Husky pre-commit hooks
 - **Testing**: Jest, Supertest, Artillery for load testing
-- **MongoDB Tools**: mongodump, mongorestore, mongoexport, mongoimport
 
 ### **Monitoring Tools**
 - **Application Performance**: New Relic, DataDog, or similar

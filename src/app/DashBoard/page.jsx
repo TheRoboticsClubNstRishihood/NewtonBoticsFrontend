@@ -1,6 +1,6 @@
 "use client";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
-import { Box, Brain, Layout, Rocket, Users, Award, Calendar, ArrowRight, Play, Star, Globe, Cpu, Wifi, Camera, Shield, ChevronDown } from "lucide-react";
+import { Box, Brain, Layout, Rocket, Users, Award, Calendar, ArrowRight, Play, Star, Globe, Cpu, Wifi, Camera, Shield, ChevronDown, User } from "lucide-react";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import autonomousDrone from "../assets/automousdronesystem.jpg";
@@ -11,8 +11,12 @@ import { Spotlight } from "@/components/components/ui/spotlight";
 import clubData from "../AllDatas/data.json";
 import Link from "next/link";
 import RawGallery from "../components/RawGallery";
+import { useAuth } from "../../contexts/AuthContext";
+import ProtectedRoute from "../../components/ProtectedRoute";
 
 const HomePage = () => {
+  const { user, isAuthenticated } = useAuth();
+  const [roleNotice, setRoleNotice] = useState(null);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [hasAnimated, setHasAnimated] = useState(false);
   const [showScrollIndicator, setShowScrollIndicator] = useState(true);
@@ -59,6 +63,14 @@ const HomePage = () => {
       setHasAnimated(true);
     }
     
+    try {
+      const raw = localStorage.getItem('nb_role_notice');
+      if (raw) {
+        setRoleNotice(JSON.parse(raw));
+        localStorage.removeItem('nb_role_notice');
+      }
+    } catch (_) {}
+
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % 3);
     }, 5000);
@@ -297,9 +309,29 @@ const HomePage = () => {
   ];
 
   return (
-    <div className=" min-h-screen bg-black text-white font-sans overflow-hidden">
-      {/* Hero Section with Enhanced Animations */}
-      <div className="relative min-h-screen lg:h-screen">
+    <ProtectedRoute>
+      <div className=" min-h-screen bg-black text-white font-sans overflow-hidden">
+        {/* Removed welcome back toast per request */}
+
+        {/* Role notice toast */}
+        {roleNotice && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="fixed top-24 left-1/2 -translate-x-1/2 z-50 max-w-xl w-[92%] md:w-auto bg-white/10 border border-white/15 backdrop-blur-xl rounded-2xl px-4 py-3"
+          >
+            <div className="text-sm text-white/90">
+              {roleNotice.message || (
+                <>
+                  Your requested role <span className="text-red-300">{roleNotice.requestedRole}</span> is not pre-approved. You have been registered as <span className="text-red-300">{roleNotice.assignedRole}</span>.
+                </>
+              )}
+            </div>
+          </motion.div>
+        )}
+
+        {/* Hero Section with Enhanced Animations */}
+        <div className="relative min-h-screen lg:h-screen">
         <div className="absolute inset-0 bg-gradient-to-br from-black via-gray-900 to-black"></div>
         <Spotlight
           className="-top-40 left-0 md:left-60 md:-top-20"
@@ -884,7 +916,7 @@ const HomePage = () => {
             {/* Background decoration */}
             <div className="absolute top-0 left-0 w-full h-full">
               <div className="absolute top-4 sm:top-10 left-4 sm:left-10 w-16 h-16 sm:w-32 sm:h-32 bg-white/10 rounded-full blur-2xl"></div>
-              <div className="absolute bottom-4 sm:bottom-10 right-4 sm:right-10 w-20 h-20 sm:w-40 sm:h-40 bg-white/10 rounded-full blur-2xl"></div>
+              <div className="absolute bottom-4 sm:bottom-10 right-4 sm:right-10 w-20 h-20 sm:w-40 sm:h-40 bg-white/10 rounded-full blur-xl"></div>
               <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-16 h-16 sm:w-24 sm:h-24 bg-red-500/10 rounded-full blur-xl"></div>
             </div>
             
@@ -919,8 +951,8 @@ const HomePage = () => {
         </div>
       </section>
 
-      
-    </div>
+      </div>
+    </ProtectedRoute>
   );
 };
 

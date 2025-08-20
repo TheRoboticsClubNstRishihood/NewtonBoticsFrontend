@@ -1,26 +1,20 @@
 // components/Navbar.js
 "use client";
 import { useState, useEffect, useRef } from "react";
-import { FiMenu, FiX, FiChevronDown, FiUser, FiPackage, FiList, FiLogOut } from "react-icons/fi";
+import { FiMenu, FiX, FiChevronDown, FiUser, FiPackage, FiList, FiLogOut, FiSettings } from "react-icons/fi";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
-
-const getAllowedEmails = () => {
-  const fromEnv = (process.env.NEXT_PUBLIC_ALLOWED_ADMIN_EMAILS || "").split(",")
-    .map((e) => e.trim().toLowerCase())
-    .filter(Boolean);
-  const fallback = ["admin@example.com"];
-  return fromEnv.length ? fromEnv : fallback;
-};
+import { useAuth } from "../../contexts/AuthContext";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [userEmail, setUserEmail] = useState("");
   const [showProfile, setShowProfile] = useState(false);
   const profileRef = useRef(null);
   const pathname = usePathname();
   const router = useRouter();
+  
+  const { user, isAuthenticated, logout, hasRole, hasPermission } = useAuth();
 
   const toggleMenu = () => setIsOpen((s) => !s);
 
@@ -34,23 +28,6 @@ const Navbar = () => {
   }, []);
 
   useEffect(() => {
-    const readEmail = () => {
-      try {
-        const saved = localStorage.getItem("nb_user_email") || "";
-        setUserEmail(saved);
-      } catch (_) {
-        setUserEmail("");
-      }
-    };
-    readEmail();
-    const onStorage = (e) => {
-      if (e.key === "nb_user_email") readEmail();
-    };
-    window.addEventListener("storage", onStorage);
-    return () => window.removeEventListener("storage", onStorage);
-  }, []);
-
-  useEffect(() => {
     const onClickAway = (e) => {
       if (!profileRef.current) return;
       if (!profileRef.current.contains(e.target)) setShowProfile(false);
@@ -59,17 +36,18 @@ const Navbar = () => {
     return () => document.removeEventListener("mousedown", onClickAway);
   }, []);
 
-  const isLoggedIn = Boolean(userEmail);
-  const allowedEmails = getAllowedEmails();
-  const isAdmin = isLoggedIn && allowedEmails.includes(userEmail.toLowerCase());
+  const isLoggedIn = isAuthenticated && user;
+  // Treat 'admin' role as full admin; keep legacy mentor/researcher and permission fallback
+  const isAdmin = isLoggedIn && (hasRole('admin') || hasRole('mentor') || hasRole('researcher') || hasPermission('admin:access'));
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     try {
-      localStorage.removeItem("nb_user_email");
-    } catch (_) {}
-    setUserEmail("");
-    setShowProfile(false);
-    router.refresh();
+      await logout();
+      setShowProfile(false);
+      setIsOpen(false);
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
   };
 
   const isActive = (path) => {
@@ -89,7 +67,9 @@ const Navbar = () => {
       ? "block py-2 px-4 text-red-500 font-semibold bg-red-900/50 border-l-4 border-red-500 transition"
       : "block py-2 px-4 text-white hover:bg-red-900 transition";
 
-  const avatarLabel = userEmail ? userEmail.charAt(0).toUpperCase() : "U";
+  const avatarLabel = user ? (user.firstName ? user.firstName.charAt(0).toUpperCase() : user.email.charAt(0).toUpperCase()) : "U";
+  const displayName = user ? (user.firstName ? `${user.firstName} ${user.lastName}` : user.email) : "User";
+  const userRole = user ? user.role : "Member";
 
   return (
     <nav
@@ -141,7 +121,7 @@ const Navbar = () => {
           {/* Auth area */}
           {!isLoggedIn ? (
             <Link
-              href="/auth/signin"
+              href="/auth"
               className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
             >
               Sign in
@@ -177,8 +157,8 @@ const Navbar = () => {
                   <div className="flex items-center gap-3">
                     <span className="w-9 h-9 rounded-full bg-red-600 grid place-items-center text-sm font-bold"><FiUser /></span>
                     <div className="text-sm">
-                      <div className="text-white/90 font-medium truncate max-w-[12rem]">{userEmail}</div>
-                      <div className="text-white/50">Member</div>
+                      <div className="text-white/90 font-medium truncate max-w-[12rem]">{displayName}</div>
+                      <div className="text-white/50 capitalize">{userRole}</div>
                     </div>
                   </div>
                 </div>
@@ -204,6 +184,13 @@ const Navbar = () => {
                 )}
 
                 <div className="border-t border-white/10">
+                  <Link
+                    href="/ProfileCompletion"
+                    className="flex items-center gap-2 px-4 py-2 text-white/90 hover:bg-white/10"
+                    onClick={() => setShowProfile(false)}
+                  >
+                    <FiSettings /> Profile Settings
+                  </Link>
                   <button
                     onClick={handleLogout}
                     className="w-full flex items-center gap-2 px-4 py-2 text-left text-white/80 hover:bg-white/10"
@@ -247,7 +234,7 @@ const Navbar = () => {
           {/* Mobile Profile Section */}
           {!isLoggedIn ? (
             <Link
-              href="/auth/signin"
+              href="/auth"
               className="block mx-4 my-3 py-2 bg-red-600 text-white text-center rounded-lg hover:bg-red-700 transition"
               onClick={() => setIsOpen(false)}
             >
@@ -255,13 +242,17 @@ const Navbar = () => {
             </Link>
           ) : (
             <div className="mx-2 my-2 rounded-lg border border-white/10">
-              <div className="px-4 py-2 text-white/80 text-sm border-b border-white/10">{userEmail}</div>
+              <div className="px-4 py-2 text-white/80 text-sm border-b border-white/10">
+                <div className="font-medium">{displayName}</div>
+                <div className="text-white/60 capitalize">{userRole}</div>
+              </div>
               {isAdmin && (
                 <>
                   <Link href="/Inventory" className={getMobileActiveStyles("/Inventory")} onClick={() => setIsOpen(false)}>Inventory</Link>
                   <Link href="/ProjectRequests" className={getMobileActiveStyles("/ProjectRequests")} onClick={() => setIsOpen(false)}>Project Requests</Link>
                 </>
               )}
+              <Link href="/ProfileCompletion" className={getMobileActiveStyles("/ProfileCompletion")} onClick={() => setIsOpen(false)}>Profile Settings</Link>
               <button
                 onClick={() => { handleLogout(); setIsOpen(false); }}
                 className="block w-[calc(100%-2rem)] mx-4 my-3 py-2 bg-white/10 text-white text-center rounded-lg hover:bg-white/20 transition border border-white/20"

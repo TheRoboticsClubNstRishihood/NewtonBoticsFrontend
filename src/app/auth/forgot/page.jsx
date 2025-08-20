@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Mail, ArrowLeft, CheckCircle } from "lucide-react";
+import { Mail, ArrowLeft, CheckCircle, AlertCircle } from "lucide-react";
+import { useAuth } from "../../../contexts/AuthContext";
 
 function Input({ label, icon: Icon, ...props }) {
   return (
@@ -20,15 +21,34 @@ export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  const { forgotPassword } = useAuth();
 
-  const onSubmit = (e) => {
+  const onSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    
     if (!/[^\s@]+@[^\s@]+\.[^\s@]+/.test(email)) {
       setError("Please enter a valid email address");
       return;
     }
-    setIsSubmitted(true);
+
+    setIsSubmitting(true);
+    
+    try {
+      const result = await forgotPassword(email);
+      
+      if (result.success) {
+        setIsSubmitted(true);
+      } else {
+        setError(result.error);
+      }
+    } catch (error) {
+      setError(error.message || "Failed to send reset link");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (isSubmitted) {
@@ -48,7 +68,7 @@ export default function ForgotPasswordPage() {
               transition={{ duration: 0.5 }}
               className="hidden lg:flex relative overflow-hidden rounded-3xl border border-white/15 bg-black/30"
             >
-              <video src="/authentication.mp4" autoPlay muted loop playsInline className="w-full h-full object-cover opacity-90" />
+              <video src="/forgetPassword.mp4" autoPlay muted loop playsInline className="w-full h-full object-cover opacity-90" />
             </motion.div>
 
             {/* Right success message */}
@@ -67,7 +87,7 @@ export default function ForgotPasswordPage() {
                 Click the link in your email to reset your password. If you don't see it, check your spam folder.
               </p>
               <a
-                href="/auth/signin"
+                href="/auth"
                 className="inline-flex items-center gap-2 text-sky-400 hover:text-sky-300 transition"
               >
                 <ArrowLeft className="w-4 h-4" />
@@ -106,7 +126,7 @@ export default function ForgotPasswordPage() {
             transition={{ duration: 0.5 }}
             className="hidden lg:flex relative overflow-hidden rounded-3xl border border-white/15 bg-black/30"
           >
-            <video src="/authentication.mp4" autoPlay muted loop playsInline className="w-full h-full object-cover opacity-90" />
+            <video src="/forgetPassword.mp4" autoPlay muted loop playsInline className="w-full h-full object-cover opacity-90" />
           </motion.div>
 
           {/* Right form */}
@@ -122,18 +142,31 @@ export default function ForgotPasswordPage() {
             </p>
 
             <form onSubmit={onSubmit} className="space-y-5">
-              <Input label="Email address" icon={Mail} type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} />
-              {error && <div className="text-red-400 text-sm">{error}</div>}
+              <Input 
+                label="Email address" 
+                icon={Mail} 
+                type="email" 
+                placeholder="you@example.com" 
+                value={email} 
+                onChange={(e) => setEmail(e.target.value)} 
+              />
+              {error && (
+                <div className="flex items-center gap-2 text-red-400 text-sm">
+                  <AlertCircle className="w-4 h-4" />
+                  {error}
+                </div>
+              )}
               <button
                 type="submit"
-                className="w-full py-3 rounded-xl bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 transition font-semibold"
+                disabled={isSubmitting}
+                className="w-full py-3 rounded-xl bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 disabled:from-sky-800 disabled:to-indigo-800 disabled:cursor-not-allowed transition font-semibold"
               >
-                Send reset link
+                {isSubmitting ? "Sending..." : "Send reset link"}
               </button>
             </form>
 
             <div className="mt-4 text-sm text-white/70 text-center">
-              Remember your password? <a href="/auth/signin" className="text-white hover:underline">Sign in</a>
+              Remember your password? <a href="/auth" className="text-white hover:underline">Sign in</a>
             </div>
           </motion.div>
         </div>

@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
-import { Lock, Eye, EyeOff, CheckCircle } from "lucide-react";
+import { Lock, Eye, EyeOff, CheckCircle, AlertCircle } from "lucide-react";
+import { useAuth } from "../../../contexts/AuthContext";
 
 function Input({ label, icon: Icon, ...props }) {
   return (
@@ -24,9 +25,12 @@ export default function ResetPasswordPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [token, setToken] = useState("");
   const router = useRouter();
   const searchParams = useSearchParams();
+  
+  const { resetPassword } = useAuth();
 
   useEffect(() => {
     const tokenParam = searchParams.get("token");
@@ -37,12 +41,20 @@ export default function ResetPasswordPage() {
     }
   }, [searchParams]);
 
-  const onSubmit = (e) => {
+  const isValidPassword = (password) => {
+    return password.length >= 8 && 
+           /[A-Z]/.test(password) && 
+           /[a-z]/.test(password) && 
+           /[0-9]/.test(password) && 
+           /[!@#$%^&*(),.?":{}|<>]/.test(password);
+  };
+
+  const onSubmit = async (e) => {
     e.preventDefault();
     setError("");
     
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters long");
+    if (!isValidPassword(password)) {
+      setError("Password must be at least 8 characters with uppercase, lowercase, number, and special character");
       return;
     }
     
@@ -51,19 +63,20 @@ export default function ResetPasswordPage() {
       return;
     }
 
-    // Demo: update password in localStorage
+    setIsSubmitting(true);
+    
     try {
-      const resetEmail = localStorage.getItem("nb_reset_email");
-      if (resetEmail) {
-        // In a real app, you'd verify the token and update the password on the server
-        localStorage.removeItem("nb_reset_email");
-        localStorage.removeItem("nb_reset_token");
+      const result = await resetPassword(token, password);
+      
+      if (result.success) {
         setIsSuccess(true);
       } else {
-        setError("Reset session expired. Please request a new reset link.");
+        setError(result.error);
       }
-    } catch (_) {
-      setError("Failed to reset password. Please try again.");
+    } catch (error) {
+      setError(error.message || "Failed to reset password");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -100,7 +113,7 @@ export default function ResetPasswordPage() {
                 Your password has been updated successfully. You can now sign in with your new password.
               </p>
               <button
-                onClick={() => router.push("/auth/signin")}
+                onClick={() => router.push("/auth")}
                 className="w-full py-3 rounded-xl bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 transition font-semibold"
               >
                 Continue to sign in
@@ -202,7 +215,14 @@ export default function ResetPasswordPage() {
 
             <form onSubmit={onSubmit} className="space-y-5">
               <div className="relative">
-                <Input label="New password" icon={Lock} type={showPassword ? "text" : "password"} placeholder="Enter new password" value={password} onChange={(e) => setPassword(e.target.value)} />
+                <Input 
+                  label="New password" 
+                  icon={Lock} 
+                  type={showPassword ? "text" : "password"} 
+                  placeholder="Enter new password" 
+                  value={password} 
+                  onChange={(e) => setPassword(e.target.value)} 
+                />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
@@ -213,7 +233,14 @@ export default function ResetPasswordPage() {
               </div>
 
               <div className="relative">
-                <Input label="Confirm password" icon={Lock} type={showConfirmPassword ? "text" : "password"} placeholder="Confirm new password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
+                <Input 
+                  label="Confirm password" 
+                  icon={Lock} 
+                  type={showConfirmPassword ? "text" : "password"} 
+                  placeholder="Confirm new password" 
+                  value={confirmPassword} 
+                  onChange={(e) => setConfirmPassword(e.target.value)} 
+                />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
@@ -223,18 +250,24 @@ export default function ResetPasswordPage() {
                 </button>
               </div>
 
-              {error && <div className="text-red-400 text-sm">{error}</div>}
+              {error && (
+                <div className="flex items-center gap-2 text-red-400 text-sm">
+                  <AlertCircle className="w-4 h-4" />
+                  {error}
+                </div>
+              )}
               
               <button
                 type="submit"
-                className="w-full py-3 rounded-xl bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 transition font-semibold"
+                disabled={isSubmitting}
+                className="w-full py-3 rounded-xl bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 disabled:from-sky-800 disabled:to-indigo-800 disabled:cursor-not-allowed transition font-semibold"
               >
-                Update password
+                {isSubmitting ? "Updating..." : "Update password"}
               </button>
             </form>
 
             <div className="mt-4 text-sm text-white/70 text-center">
-              Remember your password? <a href="/auth/signin" className="text-white hover:underline">Sign in</a>
+              Remember your password? <a href="/auth" className="text-white hover:underline">Sign in</a>
             </div>
           </motion.div>
         </div>

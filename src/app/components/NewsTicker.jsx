@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ExternalLink, Info } from "lucide-react";
+import newsService from "../../lib/news";
 
 const NewsTicker = () => {
   const [isPaused, setIsPaused] = useState(false);
@@ -11,7 +12,7 @@ const NewsTicker = () => {
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
   const textRef = useRef(null);
 
-  const announcements = [
+  const defaultAnnouncements = [
     {
       id: 1,
       text: "# Freshers First Workshop: Introduction to CAD Designing",
@@ -70,6 +71,8 @@ const NewsTicker = () => {
     }
   ];
 
+  const [announcements, setAnnouncements] = useState(defaultAnnouncements);
+
   // Create a continuous string of announcements with clickable spans
   const createContinuousText = () => {
     return announcements.map((announcement, index) => (
@@ -113,6 +116,31 @@ const NewsTicker = () => {
     window.addEventListener('resize', updateTextWidth);
     
     return () => window.removeEventListener('resize', updateTextWidth);
+  }, [announcements]);
+
+  // Load latest news from public API for ticker
+  useEffect(() => {
+    let isMounted = true;
+    const load = async () => {
+      try {
+        const { items } = await newsService.listNews({ isPublished: true, isFeatured: true, limit: 10, skip: 0 });
+        if (!isMounted) return;
+        if (Array.isArray(items) && items.length > 0) {
+          const mapped = items.map((n, idx) => ({
+            id: n._id || idx,
+            text: `# ${n.title}`,
+            details: n.excerpt || '',
+            date: n.publishedAt || n.createdAt || new Date().toISOString(),
+            category: n.categoryId || 'News',
+          }));
+          setAnnouncements(mapped);
+        }
+      } catch (_) {
+        // Keep default announcements on failure
+      }
+    };
+    load();
+    return () => { isMounted = false; };
   }, []);
 
   const handleTickerClick = () => {

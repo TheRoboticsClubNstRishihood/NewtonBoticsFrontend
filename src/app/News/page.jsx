@@ -14,33 +14,82 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import clubData from "../AllDatas/data.json";
+import newsService from "../../lib/news";
 
 const NewsPage = () => {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
-  const [filteredNews, setFilteredNews] = useState(clubData.news?.latest || []);
+  const [allNews, setAllNews] = useState([]);
+  const [filteredNews, setFilteredNews] = useState([]);
+  const [categories, setCategories] = useState([]); // [{id,name}]
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  // Initial fetch from public API
+  useEffect(() => {
+    let isMounted = true;
+    const load = async () => {
+      try {
+        setIsLoading(true);
+        setError("");
+        // Fetch news first
+        let items = [];
+        try {
+          const res = await newsService.listNews({ isPublished: true, limit: 20, skip: 0 });
+          items = res?.items || [];
+          if (isMounted) {
+            setAllNews(items);
+            setFilteredNews(items);
+          }
+        } catch (e) {
+          if (isMounted) setError(e.message || "Failed to load news");
+        }
+        // Fetch categories separately; do not block the news list if this fails
+        try {
+          const cats = await newsService.listCategories();
+          if (isMounted) {
+            setCategories([{ id: "All", name: "All" }, ...cats.map((c) => ({ id: c._id || c.id, name: c.name }))]);
+          }
+        } catch (_) {
+          if (isMounted && items.length > 0) {
+            // Ignore category error if news loaded; keep default "All"
+            setCategories([{ id: "All", name: "All" }]);
+            setError("");
+          }
+        }
+      } catch (e) {
+        if (!isMounted) return;
+        setError(e.message || "Failed to load news");
+      } finally {
+        if (isMounted) setIsLoading(false);
+      }
+    };
+    load();
+    return () => { isMounted = false; };
+  }, []);
 
   // Filter news based on category and search query
   useEffect(() => {
-    let filtered = clubData.news?.latest || [];
-    
-    // Filter by category
+    let filtered = allNews;
+    // Filter by category id (news.categoryId)
     if (selectedCategory !== "All") {
-      filtered = filtered.filter(news => news.category === selectedCategory);
+      filtered = filtered.filter(news => (news.categoryId || "") === selectedCategory);
     }
     
     // Filter by search query
     if (searchQuery) {
-      filtered = filtered.filter(news => 
-        news.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        news.excerpt.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        news.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        news.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
-      );
+      const q = searchQuery.toLowerCase();
+      filtered = filtered.filter(news => {
+        const title = (news.title || '').toLowerCase();
+        const excerpt = (news.excerpt || '').toLowerCase();
+        const content = (news.content || '').toLowerCase();
+        const tags = (news.tags || []).map(t => String(t).toLowerCase());
+        return title.includes(q) || excerpt.includes(q) || content.includes(q) || tags.some(t => t.includes(q));
+      });
     }
     
     setFilteredNews(filtered);
-  }, [selectedCategory, searchQuery]);
+  }, [selectedCategory, searchQuery, allNews]);
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', { 
@@ -104,19 +153,19 @@ const NewsPage = () => {
 
           {/* Category Filter */}
           <div className="flex flex-wrap gap-2">
-            {clubData.news?.categories?.map((category) => (
+            {categories.map((category) => (
               <motion.button
-                key={category}
+                key={category.id}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => setSelectedCategory(category)}
+                onClick={() => setSelectedCategory(category.id)}
                 className={`px-4 py-2 rounded-full font-medium transition-all ${
-                  selectedCategory === category
+                  selectedCategory === category.id
                     ? "bg-gradient-to-r from-red-500 to-red-600 text-white shadow-lg shadow-red-500/30"
                     : "bg-white/10 text-white/80 hover:bg-white/20 hover:text-white border border-white/20"
                 }`}
               >
-                {category}
+                {category.name}
               </motion.button>
             ))}
           </div>
@@ -133,25 +182,25 @@ const NewsPage = () => {
       >
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="bg-white/5 backdrop-blur-lg rounded-xl p-4 border border-white/10 text-center">
-            <div className="text-2xl font-bold text-red-400">{clubData.news?.latest?.length || 0}</div>
+            <div className="text-2xl font-bold text-red-400">{filteredNews?.length || 0}</div>
             <div className="text-sm text-white/60">Total Articles</div>
           </div>
           <div className="bg-white/5 backdrop-blur-lg rounded-xl p-4 border border-white/10 text-center">
             <div className="text-2xl font-bold text-red-400">
-              {clubData.news?.latest?.filter(news => news.featured).length || 0}
+              {filteredNews?.filter(news => news.isFeatured).length || 0}
             </div>
             <div className="text-sm text-white/60">Featured</div>
           </div>
           <div className="bg-white/5 backdrop-blur-lg rounded-xl p-4 border border-white/10 text-center">
             <div className="text-2xl font-bold text-red-400">
-              {new Set(clubData.news?.latest?.map(news => news.category)).size || 0}
+              {new Set(filteredNews?.map(news => news.categoryId || 'uncategorized')).size || 0}
             </div>
             <div className="text-sm text-white/60">Categories</div>
           </div>
           <div className="bg-white/5 backdrop-blur-lg rounded-xl p-4 border border-white/10 text-center">
             <div className="text-2xl font-bold text-red-400">
-              {clubData.news?.latest?.filter(news => 
-                new Date(news.date) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+              {filteredNews?.filter(news => 
+                new Date(news.publishedAt || news.createdAt) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
               ).length || 0}
             </div>
             <div className="text-sm text-white/60">This Month</div>
@@ -236,6 +285,14 @@ const NewsPage = () => {
         </motion.section>
       )}
 
+      {/* Loading / Error */}
+      {isLoading && (
+        <div className="max-w-7xl mx-auto text-center py-12 text-white/70">Loading latest news…</div>
+      )}
+      {error && (
+        <div className="max-w-7xl mx-auto text-center py-12 text-red-400">{error}</div>
+      )}
+
       {/* All News Grid */}
       <motion.section
         initial={{ opacity: 0, y: 20 }}
@@ -265,7 +322,7 @@ const NewsPage = () => {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredNews.map((news, index) => (
               <motion.div
-                key={news.id}
+                key={news._id || index}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1, duration: 0.8 }}
@@ -275,17 +332,17 @@ const NewsPage = () => {
               >
                 <div className="relative h-48 overflow-hidden">
                   <Image
-                    src={news.image}
+                    src={news.featuredImageUrl || "/next.svg"}
                     alt={news.title}
                     fill
                     className="object-cover transition-transform group-hover:scale-110"
                   />
                   <div className="absolute top-3 left-3">
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${getCategoryColor(news.category)} text-white`}>
-                      {news.category}
+                      {news.categoryId || 'News'}
                     </span>
                   </div>
-                  {news.featured && (
+                  {news.isFeatured && (
                     <div className="absolute top-3 right-3">
                       <span className="px-2 py-1 rounded-full text-xs font-medium bg-yellow-500/80 text-white">
                         Featured
@@ -296,19 +353,19 @@ const NewsPage = () => {
                 <div className="p-4">
                   <div className="flex items-center gap-2 text-xs text-white/60 mb-2">
                     <Calendar className="w-3 h-3" />
-                    <span>{formatDate(news.date)}</span>
+                    <span>{formatDate(news.publishedAt || news.createdAt)}</span>
                     <span>•</span>
                     <Clock className="w-3 h-3" />
-                    <span>{news.readTime}</span>
+                    <span>{news.readTime || '—'}</span>
                   </div>
                   <h4 className="text-lg font-bold mb-2 text-white group-hover:text-red-400 transition-colors line-clamp-2">
                     {news.title}
                   </h4>
                   <p className="text-white/80 text-sm mb-3 line-clamp-3">
-                    {news.excerpt}
+                    {news.excerpt || ''}
                   </p>
                   <div className="flex flex-wrap gap-1 mb-3">
-                    {news.tags.slice(0, 2).map((tag, tagIndex) => (
+                    {(news.tags || []).slice(0, 2).map((tag, tagIndex) => (
                       <span key={tagIndex} className="px-2 py-1 bg-white/10 rounded-full text-xs text-white/80">
                         {tag}
                       </span>
@@ -351,18 +408,7 @@ const NewsPage = () => {
             Subscribe to our newsletter to receive the latest news and updates directly in your inbox.
           </p>
           <div className="flex flex-col sm:flex-row max-w-md mx-auto gap-4">
-            <input
-              type="email"
-              placeholder="Enter your email address"
-              className="flex-1 px-4 py-3 rounded-lg bg-white/10 border border-white/20 focus:outline-none focus:ring-2 focus:ring-red-500 text-white placeholder-white/60 backdrop-blur-lg"
-            />
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 rounded-lg font-semibold text-white shadow-lg shadow-red-500/30 hover:shadow-red-500/50 transition-all"
-            >
-              Subscribe
-            </motion.button>
+            <NewsletterForm />
           </div>
         </div>
       </motion.section>
@@ -371,3 +417,54 @@ const NewsPage = () => {
 };
 
 export default NewsPage; 
+
+// Newsletter form component
+function NewsletterForm() {
+  const [email, setEmail] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+
+  const onSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    setMessage("");
+    if (!/[^\s@]+@[^\s@]+\.[^\s@]+/.test(email)) {
+      setError("Please enter a valid email.");
+      return;
+    }
+    setIsSubmitting(true);
+    try {
+      const res = await newsService.subscribeNewsletter({ email });
+      setMessage(res.message || "Subscribed successfully");
+      setEmail("");
+    } catch (e) {
+      setError(e.message || "Subscription failed");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <form onSubmit={onSubmit} className="flex flex-col sm:flex-row max-w-md mx-auto gap-4 w-full">
+      <input
+        type="email"
+        placeholder="Enter your email address"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        className="flex-1 px-4 py-3 rounded-lg bg-white/10 border border-white/20 focus:outline-none focus:ring-2 focus:ring-red-500 text-white placeholder-white/60 backdrop-blur-lg"
+      />
+      <motion.button
+        whileHover={{ scale: isSubmitting ? 1 : 1.05 }}
+        whileTap={{ scale: isSubmitting ? 1 : 0.95 }}
+        disabled={isSubmitting}
+        className="px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 rounded-lg font-semibold text-white shadow-lg shadow-red-500/30 hover:shadow-red-500/50 transition-all disabled:opacity-60"
+      >
+        {isSubmitting ? "Subscribing..." : "Subscribe"}
+      </motion.button>
+      {(message || error) && (
+        <div className={`w-full text-sm ${error ? 'text-red-400' : 'text-green-400'} sm:col-span-2`}>{error || message}</div>
+      )}
+    </form>
+  );
+}

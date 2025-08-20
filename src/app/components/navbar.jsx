@@ -185,6 +185,13 @@ const Navbar = () => {
 
                 <div className="border-t border-white/10">
                   <Link
+                    href="/ChatRoom"
+                    className="flex items-center gap-2 px-4 py-2 text-white/90 hover:bg-white/10"
+                    onClick={() => setShowProfile(false)}
+                  >
+                    <FiList /> Chat Room
+                  </Link>
+                  <Link
                     href="/ProfileCompletion"
                     className="flex items-center gap-2 px-4 py-2 text-white/90 hover:bg-white/10"
                     onClick={() => setShowProfile(false)}
@@ -246,6 +253,7 @@ const Navbar = () => {
                 <div className="font-medium">{displayName}</div>
                 <div className="text-white/60 capitalize">{userRole}</div>
               </div>
+              <Link href="/ChatRoom" className={getMobileActiveStyles("/ChatRoom")} onClick={() => setIsOpen(false)}>Chat Room</Link>
               {isAdmin && (
                 <>
                   <Link href="/Inventory" className={getMobileActiveStyles("/Inventory")} onClick={() => setIsOpen(false)}>Inventory</Link>

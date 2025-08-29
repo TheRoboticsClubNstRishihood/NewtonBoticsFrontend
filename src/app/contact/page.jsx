@@ -1,23 +1,23 @@
 "use client";
-import React, { useState } from "react";
+import React from "react";
 import { motion } from "framer-motion";
-import { Mail, Phone, MapPin, Users, Robot, AlertTriangle } from "lucide-react";
+import { Mail, Phone, MapPin, Users, Robot, AlertTriangle, Loader2 } from "lucide-react";
 import clubData from "../AllDatas/data.json";
 import Image from "next/image";
 import image1 from "../assets/image01.png";
+import { getContactCategories } from "../../lib/contact";
+import { useContactForm } from "../../hooks/useContactForm";
 
 const ContactPage = () => {
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    subject: "",
-    category: "General",
-    message: "",
-    phone: "",
-    honeypot: "",
-  });
-  const [errors, setErrors] = useState({});
-  const [submitted, setSubmitted] = useState(false);
+  const {
+    formData,
+    errors,
+    isSubmitting,
+    submitted,
+    submitError,
+    handleInputChange,
+    handleSubmit,
+  } = useContactForm();
 
   // Use leadership data from the imported JSON
   const coreMembersData = clubData.leadership.map((member) => ({
@@ -26,32 +26,8 @@ const ContactPage = () => {
     email: member.email,
   }));
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Basic validation
-    const newErrors = {};
-    if (!formData.name || formData.name.trim().length < 2) newErrors.name = "Please enter your full name.";
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) newErrors.email = "Enter a valid email address.";
-    if (!formData.subject || formData.subject.trim().length < 3) newErrors.subject = "Please add a subject.";
-    if (!formData.message || formData.message.trim().length < 10) newErrors.message = "Message should be at least 10 characters.";
-    if (formData.honeypot) return; // bot detected
-
-    setErrors(newErrors);
-    if (Object.keys(newErrors).length > 0) return;
-
-    // Simulate submit
-    console.log("Form submitted:", formData);
-    setSubmitted(true);
-    setFormData({ name: "", email: "", subject: "", category: "General", message: "", phone: "", honeypot: "" });
-  };
+  // Get available contact categories
+  const availableCategories = getContactCategories();
 
   return (
     <div className="min-h-screen bg-black text-white font-sans py-12 px-4 sm:px-6 lg:px-8">
@@ -76,7 +52,17 @@ const ContactPage = () => {
           animate={{ opacity: 1, y: 0 }}
           className="max-w-3xl mx-auto mb-6 rounded-xl border border-green-500/30 bg-green-500/10 text-green-200 px-4 py-3 text-sm"
         >
-          ✅ Thank you! Your message has been sent. Our team will get back to you soon.
+          ✅ Thank you! Your message has been sent. Our team will get back to you within 24-48 hours.
+        </motion.div>
+      )}
+
+      {submitError && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="max-w-3xl mx-auto mb-6 rounded-xl border border-red-500/30 bg-red-500/10 text-red-200 px-4 py-3 text-sm"
+        >
+          ❌ Error: {submitError}
         </motion.div>
       )}
 
@@ -153,12 +139,11 @@ const ContactPage = () => {
                   onChange={handleInputChange}
                   className="mt-1 block w-full rounded-md border border-white/10 bg-white/5 text-white shadow-sm focus:border-red-500 focus:ring focus:ring-red-500 focus:ring-opacity-50"
                 >
-                  <option>General</option>
-                  <option>Workshops</option>
-                  <option>Projects</option>
-                  <option>Inventory</option>
-                  <option>Partnership</option>
-                  <option>Other</option>
+                  {availableCategories.map((category) => (
+                    <option key={category} value={category}>
+                      {category}
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>
@@ -203,11 +188,23 @@ const ContactPage = () => {
             </div>
             <motion.button
               type="submit"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="w-full bg-gradient-to-r from-red-500 to-red-600 text-white py-3 rounded-md hover:from-red-600 hover:to-red-500 transition duration-300 ease-in-out"
+              disabled={isSubmitting}
+              whileHover={{ scale: isSubmitting ? 1 : 1.05 }}
+              whileTap={{ scale: isSubmitting ? 1 : 0.95 }}
+              className={`w-full py-3 rounded-md transition duration-300 ease-in-out flex items-center justify-center ${
+                isSubmitting
+                  ? 'bg-gray-600 cursor-not-allowed'
+                  : 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-500'
+              }`}
             >
-              Send Message
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="animate-spin mr-2 h-5 w-5" />
+                  Sending...
+                </>
+              ) : (
+                'Send Message'
+              )}
             </motion.button>
 
             {/* Core Member Notification */}

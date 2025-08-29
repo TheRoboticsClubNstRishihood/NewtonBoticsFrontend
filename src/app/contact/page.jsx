@@ -10,8 +10,14 @@ const ContactPage = () => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
+    subject: "",
+    category: "General",
     message: "",
+    phone: "",
+    honeypot: "",
   });
+  const [errors, setErrors] = useState({});
+  const [submitted, setSubmitted] = useState(false);
 
   // Use leadership data from the imported JSON
   const coreMembersData = clubData.leadership.map((member) => ({
@@ -30,36 +36,49 @@ const ContactPage = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // TODO: Implement form submission logic
+    // Basic validation
+    const newErrors = {};
+    if (!formData.name || formData.name.trim().length < 2) newErrors.name = "Please enter your full name.";
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) newErrors.email = "Enter a valid email address.";
+    if (!formData.subject || formData.subject.trim().length < 3) newErrors.subject = "Please add a subject.";
+    if (!formData.message || formData.message.trim().length < 10) newErrors.message = "Message should be at least 10 characters.";
+    if (formData.honeypot) return; // bot detected
+
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) return;
+
+    // Simulate submit
     console.log("Form submitted:", formData);
-    alert("Message sent! Our team will get back to you soon.");
+    setSubmitted(true);
+    setFormData({ name: "", email: "", subject: "", category: "General", message: "", phone: "", honeypot: "" });
   };
 
   return (
     <div className="min-h-screen bg-black text-white font-sans py-12 px-4 sm:px-6 lg:px-8">
-      {/* Robotics Header Section */}
+      {/* Header Section - simple & consistent */}
       <motion.div
-        className="max-w-7xl mx-auto mb-12 bg-white/10 backdrop-blur-lg rounded-lg overflow-hidden border border-white/10"
+        className="max-w-7xl mx-auto mb-12 text-center"
         initial={{ opacity: 0, y: -50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1 }}
       >
-        <div className="relative h-64 md:h-80">
-          <Image
-            src={image1}
-            alt="Robotics lab Image"
-            fill
-            className="object-cover w-full h-full"
-            priority
-          />
-          <div className="absolute inset-0 bg-gray-600/70"></div>
-          <div className="absolute inset-0 flex items-center justify-center">
-            <h1 className="text-4xl font-bold text-white flex items-center font-display">
-              Robotics Club Contact
-            </h1>
-          </div>
-        </div>
+        <h1 className="text-4xl md:text-5xl font-bold mb-4 font-display bg-clip-text text-transparent bg-gradient-to-r from-red-500 to-red-600">
+          Contact NewtonBotics
+        </h1>
+        <p className="text-lg text-white/80 max-w-2xl mx-auto">
+          Reach out for workshops, projects, collaborations, or general queries.
+        </p>
       </motion.div>
+
+      {submitted && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="max-w-3xl mx-auto mb-6 rounded-xl border border-green-500/30 bg-green-500/10 text-green-200 px-4 py-3 text-sm"
+        >
+          ✅ Thank you! Your message has been sent. Our team will get back to you soon.
+        </motion.div>
+      )}
 
       <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-8">
         {/* Contact Form */}
@@ -69,9 +88,8 @@ const ContactPage = () => {
           whileInView={{ opacity: 1, x: 0 }}
           transition={{ duration: 1 }}
         >
-          <h2 className="text-3xl font-bold text-white mb-6 text-center font-display">
-            Get In Touch
-          </h2>
+          <h2 className="text-3xl font-bold text-white mb-2 text-center font-display">Get In Touch</h2>
+          <p className="text-white/60 text-center mb-6">We typically respond within 24–48 hours.</p>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label
@@ -87,8 +105,10 @@ const ContactPage = () => {
                 required
                 value={formData.name}
                 onChange={handleInputChange}
+                aria-invalid={errors.name ? "true" : "false"}
                 className="mt-1 block w-full rounded-md border border-white/10 bg-white/5 text-white shadow-sm focus:border-red-500 focus:ring focus:ring-red-500 focus:ring-opacity-50"
               />
+              {errors.name && <p className="mt-1 text-xs text-red-400">{errors.name}</p>}
             </div>
             <div>
               <label
@@ -103,6 +123,52 @@ const ContactPage = () => {
                 id="email"
                 required
                 value={formData.email}
+                onChange={handleInputChange}
+                aria-invalid={errors.email ? "true" : "false"}
+                className="mt-1 block w-full rounded-md border border-white/10 bg-white/5 text-white shadow-sm focus:border-red-500 focus:ring focus:ring-red-500 focus:ring-opacity-50"
+              />
+              {errors.email && <p className="mt-1 text-xs text-red-400">{errors.email}</p>}
+            </div>
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="subject" className="block text-sm font-medium text-white/80">Subject</label>
+                <input
+                  type="text"
+                  name="subject"
+                  id="subject"
+                  required
+                  value={formData.subject}
+                  onChange={handleInputChange}
+                  aria-invalid={errors.subject ? "true" : "false"}
+                  className="mt-1 block w-full rounded-md border border-white/10 bg-white/5 text-white shadow-sm focus:border-red-500 focus:ring focus:ring-red-500 focus:ring-opacity-50"
+                />
+                {errors.subject && <p className="mt-1 text-xs text-red-400">{errors.subject}</p>}
+              </div>
+              <div>
+                <label htmlFor="category" className="block text-sm font-medium text-white/80">Category</label>
+                <select
+                  name="category"
+                  id="category"
+                  value={formData.category}
+                  onChange={handleInputChange}
+                  className="mt-1 block w-full rounded-md border border-white/10 bg-white/5 text-white shadow-sm focus:border-red-500 focus:ring focus:ring-red-500 focus:ring-opacity-50"
+                >
+                  <option>General</option>
+                  <option>Workshops</option>
+                  <option>Projects</option>
+                  <option>Inventory</option>
+                  <option>Partnership</option>
+                  <option>Other</option>
+                </select>
+              </div>
+            </div>
+            <div>
+              <label htmlFor="phone" className="block text-sm font-medium text-white/80">Phone (optional)</label>
+              <input
+                type="tel"
+                name="phone"
+                id="phone"
+                value={formData.phone}
                 onChange={handleInputChange}
                 className="mt-1 block w-full rounded-md border border-white/10 bg-white/5 text-white shadow-sm focus:border-red-500 focus:ring focus:ring-red-500 focus:ring-opacity-50"
               />
@@ -121,8 +187,19 @@ const ContactPage = () => {
                 required
                 value={formData.message}
                 onChange={handleInputChange}
+                maxLength={1000}
+                aria-invalid={errors.message ? "true" : "false"}
                 className="mt-1 block w-full rounded-md border border-white/10 bg-white/5 text-white shadow-sm focus:border-red-500 focus:ring focus:ring-red-500 focus:ring-opacity-50"
               />
+              <div className="flex items-center justify-between mt-1">
+                {errors.message ? (
+                  <p className="text-xs text-red-400">{errors.message}</p>
+                ) : (
+                  <span className="text-xs text-white/50">{formData.message.length}/1000</span>
+                )}
+              </div>
+              {/* Honeypot for bots */}
+              <input type="text" name="honeypot" value={formData.honeypot} onChange={handleInputChange} className="hidden" autoComplete="off" tabIndex={-1} />
             </div>
             <motion.button
               type="submit"

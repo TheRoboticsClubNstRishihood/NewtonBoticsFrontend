@@ -1,36 +1,233 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# NewtonBotics Frontend
 
-## Getting Started
+A modern, responsive frontend application for the NewtonBotics Robotics Lab, built with Next.js 15, React 18, and Tailwind CSS.
 
-First, run the development server:
+## 🚀 Features
 
+### Core Application
+- **Modern UI/UX**: Beautiful, responsive design with smooth animations
+- **Robotics Lab Management**: Projects, workshops, events, and team management
+- **Interactive 3D Elements**: Spline.js integration for engaging user experience
+- **News & Updates**: Real-time news ticker and announcements
+- **Gallery System**: Media management and display
+- **Contact & Support**: Integrated contact forms and support system
+
+### 🔐 Authentication System (NEW!)
+- **User Registration & Login**: Complete authentication flow with JWT tokens
+- **Role-based Access Control**: Student, Team Member, Mentor, Researcher, Community roles
+- **Password Management**: Secure password reset and change functionality
+- **Protected Routes**: Automatic route protection and redirects
+- **Profile Management**: User profile completion and settings
+- **Token Management**: Automatic refresh and secure storage
+- **Security Features**: Input validation, XSS protection, and secure practices
+
+## 🛠️ Technology Stack
+
+- **Framework**: Next.js 15 (App Router)
+- **Frontend**: React 18 with TypeScript support
+- **Styling**: Tailwind CSS with custom animations
+- **Animations**: Framer Motion
+- **3D Graphics**: Spline.js, Three.js
+- **Icons**: Lucide React
+- **Authentication**: Custom JWT-based system
+- **State Management**: React Context API
+
+## 📁 Project Structure
+
+```
+NewtonBoticsFrontend/
+├── src/
+│   ├── app/                    # Next.js app router pages
+│   │   ├── auth/              # Authentication pages
+│   │   │   ├── page.jsx       # Login/Register
+│   │   │   ├── forgot/        # Forgot password
+│   │   │   └── reset/         # Reset password
+│   │   ├── DashBoard/         # Main dashboard
+│   │   ├── ProfileCompletion/ # User profile management
+│   │   └── components/        # Shared components
+│   ├── lib/                   # Utility libraries
+│   │   └── auth.js           # Authentication service
+│   ├── contexts/              # React contexts
+│   │   └── AuthContext.jsx   # Authentication context
+│   ├── components/            # Reusable components
+│   │   ├── ProtectedRoute.jsx # Route protection
+│   │   ├── LoadingSpinner.jsx # Loading states
+│   │   └── AuthErrorBoundary.jsx # Error handling
+│   └── hooks/                 # Custom hooks
+│       └── useAuthRedirect.js # Authentication redirects
+├── public/                    # Static assets
+├── components.json            # Component configuration
+└── tailwind.config.mjs       # Tailwind configuration
+```
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Node.js 18+ 
+- npm or yarn
+
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd NewtonBoticsFrontend
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   # or
+   yarn install
+   ```
+
+3. **Environment Setup**
+   Create a `.env.local` file in the root directory:
+   ```bash
+   # API Configuration
+   NEXT_PUBLIC_API_URL=http://localhost:3000/api
+   
+   # Authentication Configuration
+   NEXT_PUBLIC_AUTH_ENABLED=true
+   
+   # Development Configuration
+   NODE_ENV=development
+   ```
+
+4. **Run the development server**
 ```bash
 npm run dev
 # or
 yarn dev
-# or
-pnpm dev
-# or
-bun dev
+   ```
+
+5. **Open your browser**
+   Navigate to [http://localhost:3000](http://localhost:3000)
+
+## 🔐 Authentication Setup
+
+### Backend Requirements
+The authentication system requires a backend API with these endpoints:
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/auth/register` | POST | User registration |
+| `/api/auth/login` | POST | User login |
+| `/api/auth/logout` | POST | User logout |
+| `/api/auth/refresh` | POST | Token refresh |
+| `/api/auth/forgot-password` | POST | Request password reset |
+| `/api/auth/reset-password` | POST | Reset password |
+| `/api/auth/me` | GET | Get current user profile |
+| `/api/auth/me` | PUT | Update user profile |
+
+### Testing the Authentication System
+Visit `/auth-demo` to test the authentication functionality:
+- Demo login/register/logout
+- Role and permission testing
+- Protected route testing
+- Error handling demonstration
+
+## 🎨 Customization
+
+### Styling
+- **Colors**: Modify `tailwind.config.mjs` for brand colors
+- **Components**: Edit component files in `src/components/`
+- **Pages**: Customize page layouts in `src/app/`
+
+### Authentication
+- **Roles**: Modify role definitions in `src/contexts/AuthContext.jsx`
+- **Permissions**: Update permission system in the same file
+- **Validation**: Adjust validation rules in `src/lib/auth.js`
+
+## 📱 Responsive Design
+
+The application is fully responsive and optimized for:
+- **Desktop**: Full-featured experience with 3D elements
+- **Tablet**: Optimized layout for medium screens
+- **Mobile**: Touch-friendly interface with mobile-specific features
+
+## 🔒 Security Features
+
+- **JWT Token Management**: Secure token storage and refresh
+- **Input Validation**: Client and server-side validation
+- **XSS Protection**: Proper escaping and sanitization
+- **CORS Configuration**: Cross-origin request handling
+- **Rate Limiting**: Ready for backend implementation
+
+## 🧪 Testing
+
+### Manual Testing
+1. **Authentication Flow**: Test registration, login, logout
+2. **Route Protection**: Verify protected routes redirect properly
+3. **Role Access**: Test different user roles and permissions
+4. **Error Handling**: Test various error scenarios
+
+### Development Tools
+- **Browser DevTools**: Check Network tab for API calls
+- **Console Logs**: Authentication state and error logging
+- **Local Storage**: Token and user data inspection
+
+## 🚀 Deployment
+
+### Build for Production
+```bash
+npm run build
+npm start
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Environment Variables for Production
+```bash
+NEXT_PUBLIC_API_URL=https://your-api-domain.com/api
+NEXT_PUBLIC_AUTH_ENABLED=true
+NODE_ENV=production
+```
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+## 🤝 Contributing
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-## Learn More
+### Development Guidelines
+- Follow the existing code style
+- Add proper error handling
+- Include loading states
+- Test authentication flows
+- Update documentation
 
-To learn more about Next.js, take a look at the following resources:
+## 📚 Documentation
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **Authentication Setup**: See `AUTHENTICATION_SETUP.md` for detailed setup instructions
+- **API Documentation**: Check backend API specifications
+- **Component Library**: Review component usage in `src/components/`
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🆘 Support
 
-## Deploy on Vercel
+For authentication-related issues:
+1. Check the authentication setup documentation
+2. Verify environment configuration
+3. Review browser console for errors
+4. Check network requests in DevTools
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+For general issues:
+1. Review this README
+2. Check existing issues
+3. Create a new issue with detailed information
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🙏 Acknowledgments
+
+- **Next.js Team**: For the amazing framework
+- **Tailwind CSS**: For the utility-first CSS framework
+- **Framer Motion**: For smooth animations
+- **Spline**: For 3D graphics integration
+- **NewtonBotics Team**: For the robotics lab vision
+
+---
+
+**Note**: This is a development version. For production use, implement additional security measures like 2FA, session management, and audit logging.

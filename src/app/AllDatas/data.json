@@ -5,9 +5,39 @@
     "mission": "To foster creativity, innovation, and technical skills in robotics.",
     "vision": "To be a leading hub for robotics research and development.",
     "logo": "/images/logo.png",
-    "founded": 2015,
-    "foundedBy": ["Rishihood University", "Newton School of Technology"]
+    "founded": 2024,
+    "foundedBy": ["Monu Raj", "Sourabh Sarkar", "Manish Kumar", "Aman Kumar"]
   },
+  "founders": [
+    {
+      "name": "Monu Raj",
+      "role": "CSAI ",
+      "batch": "Batch, 2023",
+      "image": "/monu.jpeg",
+      "bio":"Drives project operations, events, and industry collaboration initiatives."
+    },
+    {
+      "name": "Sourabh Sarkar",
+      "role": "CSAI",
+      "batch": "Batch, 2023",
+      "image": "/sourabh.jpeg",
+      "bio": "Works on hardware design, robotics, and embedded systems."
+    },
+    {
+      "name": "Manish Kumar",
+      "role": "CSAI",
+      "batch": "Batch, 2023",
+      "image": "/manish.jpeg",
+      "bio": "Manages club operations, sponsorships, and event logistics."
+    },
+    {
+      "name": "Aman Kumar",
+      "role": "CSAI",
+      "batch": "Batch, 2023",
+      "image": "/aman.jpeg",
+      "bio": "Manages club operations, sponsorships, and event logistics."
+    }
+  ],
   "leadership": [
     {
       "name": "Sachin Sir",
@@ -212,7 +242,7 @@
     "Ananya Mishra",
     "Vikram Reddy",
     "Shreya Joshi",
-    "Rahul Malhotra",
+    "Mouli Shrivastab",
     "Deepak Choudhary",
     "Anjali Kumari",
     "Sanjay Yadav",
@@ -533,7 +563,7 @@
         "name": "Swarm Robotics for Disaster Management",
         "description": "Developing a swarm of robots for search and rescue operations in disaster zones.",
         "image": "/servilancerobot.jpeg",
-        "team": ["Rohit Sharma", "Shreya Joshi", "Gaurav Singh"],
+        "team": ["Rohit Sharma", "Shreya Joshi", "Mouli Shrivastab"],
         "startDate": "2024-06-01",
         "status": "Upcoming"
       },

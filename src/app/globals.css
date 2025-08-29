@@ -2,6 +2,22 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Custom utilities */
+@layer utilities {
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}
 
 
 @layer base {
@@ -116,4 +132,81 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Custom 404 Page Animations */
+@keyframes bounce-left {
+  0%, 100% { 
+    transform: translateY(0) translateX(0) rotate(0deg); 
+  }
+  25% { 
+    transform: translateY(-8px) translateX(-12px) rotate(-2deg); 
+  }
+  50% { 
+    transform: translateY(-15px) translateX(-20px) rotate(-3deg); 
+  }
+  75% { 
+    transform: translateY(-8px) translateX(-12px) rotate(-1deg); 
+  }
+}
+
+@keyframes bounce-right {
+  0%, 100% { 
+    transform: translateY(0) translateX(0) rotate(0deg); 
+  }
+  25% { 
+    transform: translateY(-8px) translateX(12px) rotate(2deg); 
+  }
+  50% { 
+    transform: translateY(-15px) translateX(20px) rotate(3deg); 
+  }
+  75% { 
+    transform: translateY(-8px) translateX(12px) rotate(1deg); 
+  }
+}
+
+@keyframes float {
+  0%, 100% { 
+    transform: translateY(0) rotate(2deg) scale(1); 
+  }
+  25% { 
+    transform: translateY(-5px) rotate(1deg) scale(1.02); 
+  }
+  50% { 
+    transform: translateY(-10px) rotate(2deg) scale(1.05); 
+  }
+  75% { 
+    transform: translateY(-5px) rotate(3deg) scale(1.02); 
+  }
+}
+
+@keyframes wobble {
+  0%, 100% { 
+    transform: rotate(2deg); 
+  }
+  25% { 
+    transform: rotate(-1deg); 
+  }
+  50% { 
+    transform: rotate(3deg); 
+  }
+  75% { 
+    transform: rotate(0deg); 
+  }
+}
+
+.animate-bounce-left {
+  animation: bounce-left 4s ease-in-out infinite;
+}
+
+.animate-bounce-right {
+  animation: bounce-right 4s ease-in-out infinite 0.2s;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite 0.5s;
+}
+
+.animate-wobble {
+  animation: wobble 2s ease-in-out infinite;
 }

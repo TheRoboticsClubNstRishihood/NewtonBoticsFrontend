@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ExternalLink, Info } from "lucide-react";
 import newsService from "../../lib/news";
+import { useRouter } from "next/navigation";
 
 const NewsTicker = () => {
   const [isPaused, setIsPaused] = useState(false);
@@ -72,6 +73,7 @@ const NewsTicker = () => {
   ];
 
   const [announcements, setAnnouncements] = useState(defaultAnnouncements);
+  const router = useRouter();
 
   // Create a continuous string of announcements with clickable spans
   const createContinuousText = () => {
@@ -290,8 +292,10 @@ const NewsTicker = () => {
                   </button>
                   <button
                     onClick={() => {
-                      // You can implement navigation to a detailed page here
-                      console.log('Navigate to detailed page for:', selectedNews);
+                      if (selectedNews?.id) {
+                        router.push(`/News/${selectedNews.id}`);
+                        setSelectedNews(null);
+                      }
                     }}
                     className="flex-1 px-4 py-2 bg-white text-black rounded-lg hover:bg-white/90 transition-all flex items-center justify-center gap-2"
                   >

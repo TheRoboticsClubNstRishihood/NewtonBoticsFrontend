@@ -11,31 +11,31 @@
   "founders": [
     {
       "name": "Monu Raj",
-      "role": "Co-Founder",
+      "role": "CSAI ",
       "batch": "Batch, 2023",
       "image": "/monu.jpeg",
-      "bio": "Visionary lead behind NewtonBotics with a focus on humanoid robotics and system design."
+      "bio":"Drives project operations, events, and industry collaboration initiatives."
     },
     {
       "name": "Sourabh Sarkar",
-      "role": "Co-Founder",
+      "role": "CSAI",
       "batch": "Batch, 2023",
-      "image": "/monu.jpeg",
-      "bio": "Specializes in lab infrastructure, safety systems, and embedded platforms."
+      "image": "/sourabh.jpeg",
+      "bio": "Works on hardware design, robotics, and embedded systems."
     },
     {
       "name": "Manish Kumar",
-      "role": "Co-Founder",
+      "role": "CSAI",
       "batch": "Batch, 2023",
-      "image": "/monu.jpeg",
-      "bio": "Drives project operations, events, and industry collaboration initiatives."
+      "image": "/manish.jpeg",
+      "bio": "Manages club operations, sponsorships, and event logistics."
     },
     {
       "name": "Aman Kumar",
-      "role": "Co-Founder",
+      "role": "CSAI",
       "batch": "Batch, 2023",
-      "image": "/monu.jpeg",
-      "bio": "Leads AI research programs and student mentorship for competitions."
+      "image": "/aman.jpeg",
+      "bio": "Manages club operations, sponsorships, and event logistics."
     }
   ],
   "leadership": [

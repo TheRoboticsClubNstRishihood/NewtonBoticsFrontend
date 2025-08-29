@@ -99,9 +99,9 @@ const Navbar = () => {
           <Link href="/Projects" className={`${getActiveStyles("/Projects")} pb-1`}>
             Projects
           </Link>
-          <Link href="/Workshops" className={`${getActiveStyles("/Workshops")} pb-1`}>
+          {/* <Link href="/Workshops" className={`${getActiveStyles("/Workshops")} pb-1`}>
             Workshops
-          </Link>
+          </Link> */}
           <Link href="/Events" className={`${getActiveStyles("/Events")} pb-1`}>
             Events
           </Link>
@@ -231,7 +231,7 @@ const Navbar = () => {
           <Link href="/DashBoard" className={getMobileActiveStyles("/DashBoard")} onClick={() => setIsOpen(false)}>Home</Link>
           <Link href="/aboutus" className={getMobileActiveStyles("/aboutus")} onClick={() => setIsOpen(false)}>About Us</Link>
           <Link href="/Projects" className={getMobileActiveStyles("/Projects")} onClick={() => setIsOpen(false)}>Projects</Link>
-          <Link href="/Workshops" className={getMobileActiveStyles("/Workshops")} onClick={() => setIsOpen(false)}>Workshops</Link>
+          {/* <Link href="/Workshops" className={getMobileActiveStyles("/Workshops")} onClick={() => setIsOpen(false)}>Workshops</Link> */}
           <Link href="/Events" className={getMobileActiveStyles("/Events")} onClick={() => setIsOpen(false)}>Events</Link>
           <Link href="/News" className={getMobileActiveStyles("/News")} onClick={() => setIsOpen(false)}>News</Link>
           <Link href="/ourTeam" className={getMobileActiveStyles("/ourTeam")} onClick={() => setIsOpen(false)}>Team</Link>

@@ -21,76 +21,121 @@ function toQuery(params = {}) {
 export const newsService = {
   // GET /api/news
   async listNews({ isPublished = true, isFeatured, categoryId, q, limit = 20, skip = 0 } = {}) {
-    const query = toQuery({ isPublished, isFeatured, categoryId, q, limit, skip });
-    const res = await fetch(`${API_BASE_URL}/news${query}`, { cache: 'no-store' });
-    const data = await safeParseJson(res);
-    if (!res.ok || data?.success === false) {
-      const msg = data?.error?.message || data?.message || 'Failed to load news';
-      const err = new Error(msg);
-      err.status = res.status;
-      throw err;
+    try {
+      const query = toQuery({ isPublished, isFeatured, categoryId, q, limit, skip });
+      const res = await fetch(`${API_BASE_URL}/news${query}`, { cache: 'no-store' });
+      
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+      }
+      
+      const data = await safeParseJson(res);
+      if (data?.success === false) {
+        const msg = data?.error?.message || data?.message || 'Failed to load news';
+        throw new Error(msg);
+      }
+      
+      return data?.data || { items: [], pagination: { total: 0, limit, skip, hasMore: false } };
+    } catch (error) {
+      console.error('Error fetching news:', error);
+      throw new Error(`Failed to load news: ${error.message}`);
     }
-    return data?.data || { items: [], pagination: { total: 0, limit, skip, hasMore: false } };
   },
 
   // GET /api/news/:id
   async getNews(id) {
-    const res = await fetch(`${API_BASE_URL}/news/${id}`, { cache: 'no-store' });
-    const data = await safeParseJson(res);
-    if (!res.ok || data?.success === false) {
-      const msg = data?.error?.message || data?.message || 'Failed to load news item';
-      const err = new Error(msg);
-      err.status = res.status;
-      throw err;
+    try {
+      const res = await fetch(`${API_BASE_URL}/news/${id}`, { cache: 'no-store' });
+      
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+      }
+      
+      const data = await safeParseJson(res);
+      if (data?.success === false) {
+        const msg = data?.error?.message || data?.message || 'Failed to load news item';
+        throw new Error(msg);
+      }
+      
+      return data?.data?.item;
+    } catch (error) {
+      console.error('Error fetching news item:', error);
+      throw new Error(`Failed to load news item: ${error.message}`);
     }
-    return data?.data?.item;
   },
 
   // GET /api/news/categories
   async listCategories() {
-    const res = await fetch(`${API_BASE_URL}/news/categories`, { cache: 'no-store' });
-    const data = await safeParseJson(res);
-    if (!res.ok || data?.success === false) {
-      const msg = data?.error?.message || data?.message || 'Failed to load categories';
-      const err = new Error(msg);
-      err.status = res.status;
-      throw err;
+    try {
+      const res = await fetch(`${API_BASE_URL}/news/categories`, { cache: 'no-store' });
+      
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+      }
+      
+      const data = await safeParseJson(res);
+      if (data?.success === false) {
+        const msg = data?.error?.message || data?.message || 'Failed to load categories';
+        throw new Error(msg);
+      }
+      
+      return data?.data?.items || [];
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+      throw new Error(`Failed to load categories: ${error.message}`);
     }
-    return data?.data?.items || [];
   },
 
   // POST /api/newsletter/subscribe
   async subscribeNewsletter({ email, firstName, lastName }) {
-    const res = await fetch(`${API_BASE_URL}/newsletter/subscribe`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, firstName, lastName }),
-    });
-    const data = await safeParseJson(res);
-    if (!res.ok || data?.success === false) {
-      const msg = data?.error?.message || data?.message || 'Subscription failed';
-      const err = new Error(msg);
-      err.status = res.status;
-      throw err;
+    try {
+      const res = await fetch(`${API_BASE_URL}/newsletter/subscribe`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, firstName, lastName }),
+      });
+      
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+      }
+      
+      const data = await safeParseJson(res);
+      if (data?.success === false) {
+        const msg = data?.error?.message || data?.message || 'Subscription failed';
+        throw new Error(msg);
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('Error subscribing to newsletter:', error);
+      throw new Error(`Subscription failed: ${error.message}`);
     }
-    return data;
   },
 
   // DELETE /api/newsletter/unsubscribe
   async unsubscribeNewsletter({ email }) {
-    const res = await fetch(`${API_BASE_URL}/newsletter/unsubscribe`, {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email }),
-    });
-    const data = await safeParseJson(res);
-    if (!res.ok || data?.success === false) {
-      const msg = data?.error?.message || data?.message || 'Unsubscribe failed';
-      const err = new Error(msg);
-      err.status = res.status;
-      throw err;
+    try {
+      const res = await fetch(`${API_BASE_URL}/newsletter/unsubscribe`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+      }
+      
+      const data = await safeParseJson(res);
+      if (data?.success === false) {
+        const msg = data?.error?.message || data?.message || 'Unsubscribe failed';
+        throw new Error(msg);
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('Error unsubscribing from newsletter:', error);
+      throw new Error(`Unsubscribe failed: ${error.message}`);
     }
-    return data;
   },
 };
 

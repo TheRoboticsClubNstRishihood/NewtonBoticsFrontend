@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Mail, Lock, LogIn } from "lucide-react";
+import { useAuth } from "../../../contexts/AuthContext";
 
 function Input({ icon: Icon, ...props }) {
   return (
@@ -22,20 +23,41 @@ export default function SignInPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const { login } = useAuth();
 
-  const onSubmit = (e) => {
+  const onSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setMessage("");
+    
     if (!/[^\s@]+@[^\s@]+\.[^\s@]+/.test(email)) {
       setError("Please enter a valid email");
       return;
     }
+    
+    if (!password) {
+      setError("Please enter your password");
+      return;
+    }
+
+    setIsLoading(true);
+    
     try {
-      localStorage.setItem("nb_user_email", email.trim());
-    } catch (_) {}
-    setMessage("Welcome back! Redirecting...");
-    setTimeout(() => router.push("/DashBoard"), 500);
+      const result = await login({ email: email.trim(), password });
+      
+      if (result.success) {
+        setMessage("Welcome back! Redirecting...");
+        setTimeout(() => router.push("/DashBoard"), 500);
+      } else {
+        setError(result.error || "Login failed");
+      }
+    } catch (error) {
+      setError(error.message || "Login failed");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -98,12 +120,22 @@ export default function SignInPage() {
               </div>
               {error && <div className="text-red-400 text-sm">{error}</div>}
               {message && <div className="text-emerald-400 text-sm">{message}</div>}
-              <button
-                type="submit"
-                className="w-full py-3 rounded-xl bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 transition font-semibold flex items-center justify-center gap-2"
-              >
-                <LogIn className="w-4 h-4" /> Continue
-              </button>
+                             <button
+                 type="submit"
+                 disabled={isLoading}
+                 className="w-full py-3 rounded-xl bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 disabled:from-sky-800 disabled:to-indigo-800 disabled:cursor-not-allowed transition font-semibold flex items-center justify-center gap-2"
+               >
+                 {isLoading ? (
+                   <>
+                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                     Signing in...
+                   </>
+                 ) : (
+                   <>
+                     <LogIn className="w-4 h-4" /> Continue
+                   </>
+                 )}
+               </button>
             </form>
 
             <div className="mt-4 text-sm text-white/70 text-center">

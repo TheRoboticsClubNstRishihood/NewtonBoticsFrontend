@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { Lock, Eye, EyeOff, CheckCircle, AlertCircle } from "lucide-react";
+import { useAuth } from "../../../contexts/AuthContext";
 
 function Input({ label, icon: Icon, ...props }) {
   return (
@@ -28,6 +29,7 @@ export default function ResetPasswordClient() {
   const [token, setToken] = useState("");
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { resetPassword } = useAuth();
   
   useEffect(() => {
     const tokenParam = searchParams.get("token");
@@ -63,13 +65,16 @@ export default function ResetPasswordClient() {
     setIsSubmitting(true);
     
     try {
-      // For now, just simulate success since we don't have backend
-      setTimeout(() => {
+      const result = await resetPassword(token, password);
+      
+      if (result.success) {
         setIsSuccess(true);
-        setIsSubmitting(false);
-      }, 1000);
+      } else {
+        setError(result.error || "Failed to reset password");
+      }
     } catch (error) {
       setError(error.message || "Failed to reset password");
+    } finally {
       setIsSubmitting(false);
     }
   };
@@ -261,3 +266,4 @@ export default function ResetPasswordClient() {
     </div>
   );
 }
+

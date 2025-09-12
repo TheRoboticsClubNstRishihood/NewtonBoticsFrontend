@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { GraduationCap, Users, Shield, Cpu, Bot, User, Mail, Lock, UserPlus } from "lucide-react";
+import { useAuth } from "../../../contexts/AuthContext";
 
 const roles = [
   { id: "student", name: "Student", icon: GraduationCap },
@@ -32,25 +33,40 @@ export default function SignUpPage() {
   const [role, setRole] = useState("student");
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const { register } = useAuth();
 
-  const onSubmit = (e) => {
+  const onSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setMessage("");
+    
     if (!name.trim()) return setError("Please enter your name");
     if (!/[^\s@]+@[^\s@]+\.[^\s@]+/.test(email)) return setError("Enter a valid email");
     if (password.length < 6) return setError("Password must be at least 6 characters");
+
+    setIsLoading(true);
+    
     try {
-      localStorage.setItem("nb_user_email", email.trim());
-      localStorage.setItem("nb_user_role", role);
-      const raw = localStorage.getItem("nb_accounts");
-      const accounts = raw ? JSON.parse(raw) : [];
-      const existing = accounts.find((a) => a.email.toLowerCase() === email.toLowerCase());
-      if (!existing) accounts.push({ name, email, role });
-      localStorage.setItem("nb_accounts", JSON.stringify(accounts));
-    } catch(_) {}
-    setMessage("Account created! Redirecting...");
-    setTimeout(()=>router.push("/DashBoard"), 600);
+      const result = await register({
+        name: name.trim(),
+        email: email.trim(),
+        password,
+        role
+      });
+      
+      if (result.success) {
+        setMessage("Account created! Redirecting...");
+        setTimeout(() => router.push("/DashBoard"), 500);
+      } else {
+        setError(result.error || "Registration failed");
+      }
+    } catch (error) {
+      setError(error.message || "Registration failed");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -111,8 +127,21 @@ export default function SignUpPage() {
 
               {error && <div className="text-red-400 text-sm">{error}</div>}
               {message && <div className="text-emerald-400 text-sm">{message}</div>}
-              <button type="submit" className="w-full py-3 rounded-xl bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 transition font-semibold flex items-center justify-center gap-2">
-                <UserPlus className="w-4 h-4" /> Create account
+              <button 
+                type="submit" 
+                disabled={isLoading}
+                className="w-full py-3 rounded-xl bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 disabled:from-sky-800 disabled:to-indigo-800 disabled:cursor-not-allowed transition font-semibold flex items-center justify-center gap-2"
+              >
+                {isLoading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    Creating account...
+                  </>
+                ) : (
+                  <>
+                    <UserPlus className="w-4 h-4" /> Create account
+                  </>
+                )}
               </button>
             </form>
 

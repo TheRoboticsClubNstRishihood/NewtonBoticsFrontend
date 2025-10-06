@@ -1,6 +1,6 @@
 "use client";
 
-import CloudinaryUploader from "@/components/CloudinaryUploader";
+import CloudinaryUploader from "../../components/CloudinaryUploader";
 import { useState } from "react";
 import { CldImage } from "next-cloudinary";
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { Lock, Eye, EyeOff, CheckCircle, AlertCircle } from "lucide-react";
@@ -18,7 +18,7 @@ function Input({ label, icon: Icon, ...props }) {
   );
 }
 
-export default function ResetPasswordOtpPage() {
+function ResetPasswordOtpContent() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -264,4 +264,17 @@ export default function ResetPasswordOtpPage() {
   );
 }
 
-
+export default function ResetPasswordOtpPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-[#070b12] text-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-sky-400 mx-auto mb-4"></div>
+          <p className="text-white/70">Loading...</p>
+        </div>
+      </div>
+    }>
+      <ResetPasswordOtpContent />
+    </Suspense>
+  );
+}

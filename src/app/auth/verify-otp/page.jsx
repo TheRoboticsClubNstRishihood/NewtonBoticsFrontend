@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, useRef } from "react";
+import { useEffect, useMemo, useState, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { AlertCircle, ShieldCheck } from "lucide-react";
@@ -66,7 +66,7 @@ function OtpInputs({ value, onChange, disabled }) {
   );
 }
 
-export default function VerifyOtpPage() {
+function VerifyOtpContent() {
   const { verifyResetOtp } = useAuth();
   const router = useRouter();
   const params = useSearchParams();
@@ -193,4 +193,17 @@ export default function VerifyOtpPage() {
   );
 }
 
-
+export default function VerifyOtpPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-[#070b12] text-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-sky-400 mx-auto mb-4"></div>
+          <p className="text-white/70">Loading...</p>
+        </div>
+      </div>
+    }>
+      <VerifyOtpContent />
+    </Suspense>
+  );
+}

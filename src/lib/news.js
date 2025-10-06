@@ -26,19 +26,31 @@ export const newsService = {
       const res = await fetch(`${API_BASE_URL}/news${query}`, { cache: 'no-store' });
       
       if (!res.ok) {
+        // Gracefully degrade on rate limiting
+        if (res.status === 429) {
+          return { items: [], pagination: { total: 0, limit, skip, hasMore: false } };
+        }
         throw new Error(`HTTP ${res.status}: ${res.statusText}`);
       }
       
-      const data = await safeParseJson(res);
+      let data;
+      try {
+        data = await safeParseJson(res);
+      } catch (_) {
+        // If parse fails under heavy load, just return empty list
+        return { items: [], pagination: { total: 0, limit, skip, hasMore: false } };
+      }
       if (data?.success === false) {
         const msg = data?.error?.message || data?.message || 'Failed to load news';
-        throw new Error(msg);
+        // Do not crash UI for ticker; return empty gracefully
+        return { items: [], pagination: { total: 0, limit, skip, hasMore: false }, message: msg };
       }
       
       return data?.data || { items: [], pagination: { total: 0, limit, skip, hasMore: false } };
     } catch (error) {
       console.error('Error fetching news:', error);
-      throw new Error(`Failed to load news: ${error.message}`);
+      // Graceful fallback for ticker
+      return { items: [], pagination: { total: 0, limit, skip, hasMore: false } };
     }
   },
 

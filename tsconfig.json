@@ -24,6 +24,15 @@
     ],
     "baseUrl": ".",
     "paths": {
+      "@/*": [
+        "src/*"
+      ],
+      "@/lib/*": [
+        "src/lib/*"
+      ],
+      "@/contexts/*": [
+        "src/contexts/*"
+      ],
       "@/components/*": [
         "components/*"
       ]

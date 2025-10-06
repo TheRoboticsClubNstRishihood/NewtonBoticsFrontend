@@ -56,25 +56,30 @@ const TeamPage = () => {
       setLoading(true);
       setError(null);
 
-      // Fetch all team data in parallel
+      const requestInit = { cache: 'no-store' };
+
+      // Fetch all team data in parallel; don't fail whole page if one endpoint fails
       const [leadershipRes, teamRes, mentorsRes, researchersRes] = await Promise.all([
-        fetch(`${API_BASE_URL}/public/leadership-team`),
-        fetch(`${API_BASE_URL}/public/team-members`),
-        fetch(`${API_BASE_URL}/public/mentors`),
-        fetch(`${API_BASE_URL}/public/researchers`)
+        fetch(`${API_BASE_URL}/public/leadership-team`, requestInit),
+        fetch(`${API_BASE_URL}/public/team-members`, requestInit),
+        fetch(`${API_BASE_URL}/public/mentors`, requestInit),
+        fetch(`${API_BASE_URL}/public/researchers`, requestInit)
       ]);
 
-      // Check if all responses are ok
-      if (!leadershipRes.ok || !teamRes.ok || !mentorsRes.ok || !researchersRes.ok) {
-        throw new Error('Failed to fetch team data');
-      }
+      // Collect any failing endpoints to improve error clarity (but continue rendering with partial data)
+      const failing = [
+        leadershipRes.ok ? null : 'leadership-team',
+        teamRes.ok ? null : 'team-members',
+        mentorsRes.ok ? null : 'mentors',
+        researchersRes.ok ? null : 'researchers'
+      ].filter(Boolean);
 
-      // Parse all responses
+      // Parse all responses (ensure correct order)
       const [leadershipData, teamData, mentorsData, researchersData] = await Promise.all([
-        leadershipRes.json(),
-        teamRes.json(),
-        researchersRes.json(),
-        mentorsRes.json()
+        leadershipRes.ok ? leadershipRes.json() : Promise.resolve({ success: false, data: { items: [] } }),
+        teamRes.ok ? teamRes.json() : Promise.resolve({ success: false, data: { items: [] } }),
+        mentorsRes.ok ? mentorsRes.json() : Promise.resolve({ success: false, data: { items: [] } }),
+        researchersRes.ok ? researchersRes.json() : Promise.resolve({ success: false, data: { items: [] } })
       ]);
 
       // Set data if successful
@@ -82,6 +87,11 @@ const TeamPage = () => {
       if (teamData.success) setTeamMembers(teamData.data.items || []);
       if (mentorsData.success) setMentors(mentorsData.data.items || []);
       if (researchersData.success) setResearchers(researchersData.data.items || []);
+
+      // If some endpoints failed, surface a concise error (but don't block UI)
+      if (failing.length > 0) {
+        setError(`Some team sections failed to load: ${failing.join(', ')}`);
+      }
 
       // Extract unique departments
       const allPeople = [
@@ -96,7 +106,7 @@ const TeamPage = () => {
 
     } catch (err) {
       console.error('Error fetching team data:', err);
-      setError(err.message);
+      setError(err.message || 'Failed to fetch team data');
     } finally {
       setLoading(false);
     }

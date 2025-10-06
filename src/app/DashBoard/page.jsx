@@ -1,6 +1,6 @@
 "use client";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
-import { Box, Brain, Layout, Calendar, ArrowRight, Play, Star, Cpu, Wifi, Camera, Shield, ChevronDown, User } from "lucide-react";
+import { Box, Brain, Layout, Calendar, ArrowRight, Play, Star, Cpu, Wifi, Camera, Shield, ChevronDown, User, X } from "lucide-react";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import autonomousDrone from "../assets/automousdronesystem.jpg";
@@ -94,6 +94,13 @@ const HomePage = () => {
     handleScroll();
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Auto-dismiss role notice after 5 seconds
+  useEffect(() => {
+    if (!roleNotice) return;
+    const timeoutId = setTimeout(() => setRoleNotice(null), 5000);
+    return () => clearTimeout(timeoutId);
+  }, [roleNotice]);
 
   // Fetch research areas
   useEffect(() => {
@@ -314,7 +321,14 @@ const HomePage = () => {
             animate={{ opacity: 1, y: 0 }}
             className="fixed top-24 left-1/2 -translate-x-1/2 z-50 max-w-xl w-[92%] md:w-auto bg-white/10 border border-white/15 backdrop-blur-xl rounded-2xl px-4 py-3"
           >
-            <div className="text-sm text-white/90">
+            <button
+              onClick={() => setRoleNotice(null)}
+              aria-label="Dismiss notification"
+              className="absolute top-2 right-2 inline-flex items-center justify-center rounded-md p-1 text-white/70 hover:text-white hover:bg-white/10 transition"
+            >
+              <X className="w-4 h-4" />
+            </button>
+            <div className="text-sm text-white/90 pr-6">
               {roleNotice.message || (
                 <>
                   Your requested role <span className="text-red-300">{roleNotice.requestedRole}</span> is not pre-approved. You have been registered as <span className="text-red-300">{roleNotice.assignedRole}</span>.

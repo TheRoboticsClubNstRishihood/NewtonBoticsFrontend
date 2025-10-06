@@ -187,6 +187,84 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
+  // ---------------------- OTP-BASED RESET FLOW ----------------------
+  // Request OTP to email
+  const requestResetOtp = useCallback(async (email) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const response = await authService.requestResetOtp(email);
+      // returns possibly data.data.otpToken in no-Redis mode
+      return { success: true, data: response?.data };
+    } catch (error) {
+      if (error?.status === 429) {
+        const msg = 'Too many OTP requests. Please try again later.';
+        setError(msg);
+        return { success: false, error: msg, code: 429 };
+      }
+      const msg = error?.message || 'Failed to send OTP';
+      setError(msg);
+      return { success: false, error: msg };
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  // Verify OTP → returns short-lived reset token
+  const verifyResetOtp = useCallback(async ({ email, otp, otpToken }) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const payload = otpToken ? { email, otp, otpToken } : { email, otp };
+      const response = await authService.verifyResetOtp(payload);
+      return { success: true, data: response?.data };
+    } catch (error) {
+      const status = error?.status;
+      if (status === 400 || status === 401) {
+        const msg = error?.message || 'Invalid OTP';
+        setError(msg);
+        return { success: false, error: msg, code: status };
+      }
+      if (status === 429) {
+        const msg = 'Too many attempts. Please try again later.';
+        setError(msg);
+        return { success: false, error: msg, code: 429 };
+      }
+      const msg = error?.message || 'OTP verification failed';
+      setError(msg);
+      return { success: false, error: msg };
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  // Reset password with short-lived reset token
+  const resetPasswordWithOtp = useCallback(async (token, newPassword) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const response = await authService.resetPasswordWithOtp(token, newPassword);
+      return { success: true, message: response?.message };
+    } catch (error) {
+      const status = error?.status;
+      if (status === 400 || status === 401) {
+        const msg = error?.message || 'Password reset failed';
+        setError(msg);
+        return { success: false, error: msg, code: status };
+      }
+      if (status === 429) {
+        const msg = 'Too many attempts. Please try again later.';
+        setError(msg);
+        return { success: false, error: msg, code: 429 };
+      }
+      const msg = error?.message || 'Password reset failed';
+      setError(msg);
+      return { success: false, error: msg };
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
   // Update profile function
   const updateProfile = useCallback(async (profileData) => {
     try {
@@ -245,6 +323,21 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
+  // Fetch current user's dashboard activity
+  const getMyDashboard = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const response = await authService.getMyDashboard();
+      return { success: true, dashboard: response?.data?.dashboard || null };
+    } catch (error) {
+      setError(error.message);
+      return { success: false, error: error.message };
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
   // Clear error
   const clearError = useCallback(() => {
     setError(null);
@@ -272,8 +365,12 @@ export const AuthProvider = ({ children }) => {
     logout,
     forgotPassword,
     resetPassword,
+    requestResetOtp,
+    verifyResetOtp,
+    resetPasswordWithOtp,
     updateProfile,
     changePassword,
+    getMyDashboard,
     clearError,
     hasPermission,
     hasRole,

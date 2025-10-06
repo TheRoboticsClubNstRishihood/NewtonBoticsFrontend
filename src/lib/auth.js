@@ -25,6 +25,90 @@ class AuthService {
     }
   }
 
+  // ---------------------- OTP-BASED RESET FLOW ----------------------
+  // Step 1: Request OTP
+  async requestResetOtp(email) {
+    try {
+      const response = await fetch(`${this.baseURL}/forgot-password-otp`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await this.parseJsonResponse(response);
+
+      if (!response.ok || data?.success === false) {
+        const message = data?.message || 'Failed to send OTP';
+        throw new ApiError(message, response.status, data);
+      }
+
+      // When Redis is disabled, backend can return { data: { otpToken } }
+      return data;
+    } catch (error) {
+      if (error?.message && error.message.includes('Failed to fetch')) {
+        throw new Error('Unable to reach authentication server. Check API URL and CORS.');
+      }
+      throw error;
+    }
+  }
+
+  // Step 2: Verify OTP → returns short-lived reset token
+  async verifyResetOtp(payload) {
+    // payload: { email, otp, otpToken? }
+    try {
+      const response = await fetch(`${this.baseURL}/verify-reset-otp`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await this.parseJsonResponse(response);
+
+      if (!response.ok || data?.success === false) {
+        const message = data?.message || 'OTP verification failed';
+        throw new ApiError(message, response.status, data);
+      }
+
+      return data; // expect data.data.token
+    } catch (error) {
+      if (error?.message && error.message.includes('Failed to fetch')) {
+        throw new Error('Unable to reach authentication server. Check API URL and CORS.');
+      }
+      throw error;
+    }
+  }
+
+  // Step 3: Reset password using short-lived reset token
+  async resetPasswordWithOtp(token, newPassword) {
+    try {
+      const response = await fetch(`${this.baseURL}/reset-password-otp`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ token, newPassword }),
+      });
+
+      const data = await this.parseJsonResponse(response);
+
+      if (!response.ok || data?.success === false) {
+        const message = data?.message || 'Password reset failed';
+        throw new ApiError(message, response.status, data);
+      }
+
+      return data;
+    } catch (error) {
+      if (error?.message && error.message.includes('Failed to fetch')) {
+        throw new Error('Unable to reach authentication server. Check API URL and CORS.');
+      }
+      throw error;
+    }
+  }
+
   // Parse JSON safely; if server returns HTML or non-JSON, show a helpful error
   async parseJsonResponse(response) {
     const contentType = response.headers.get('content-type') || '';
@@ -350,6 +434,39 @@ class AuthService {
       if (error?.message && error.message.includes('Failed to fetch')) {
         throw new Error('Unable to reach authentication server. Check API URL and CORS.');
       }
+      throw error;
+    }
+  }
+
+  // Get current user's dashboard activity summary
+  async getMyDashboard() {
+    try {
+      // Primary: current user endpoint
+      const primaryUrl = `${API_BASE_URL}/users/dashboard`;
+      console.debug('[AuthService] Fetching dashboard (primary):', primaryUrl);
+      const response = await this.makeAuthenticatedRequest(primaryUrl, { method: 'GET' });
+      console.debug('[AuthService] Primary dashboard response status:', response.status);
+      const data = await this.parseJsonResponse(response);
+      if (!response.ok) {
+        // Log a small snippet to aid debugging
+        const message = data?.message || data?.error?.message || data?.error;
+        console.error('[AuthService] Dashboard fetch failed:', {
+          status: response.status,
+          message,
+        });
+      } else {
+        console.debug('[AuthService] Dashboard fetch success');
+      }
+      if (!response.ok) {
+        const serverMessage = data?.message || data?.error?.message || data?.error || 'Failed to fetch dashboard';
+        throw new ApiError(serverMessage, response.status, data);
+      }
+      return data;
+    } catch (error) {
+      if (error?.message && error.message.includes('Failed to fetch')) {
+        throw new Error('Unable to reach server. Check API URL and CORS.');
+      }
+      console.error('[AuthService] getMyDashboard error:', error);
       throw error;
     }
   }

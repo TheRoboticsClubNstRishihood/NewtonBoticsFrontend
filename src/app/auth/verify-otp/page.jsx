@@ -1,0 +1,196 @@
+"use client";
+
+import { useEffect, useMemo, useState, useRef } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { motion } from "framer-motion";
+import { AlertCircle, ShieldCheck } from "lucide-react";
+import { useAuth } from "../../../contexts/AuthContext";
+
+function OtpInputs({ value, onChange, disabled }) {
+  const digits = value.split("");
+  const inputRefs = useRef([]);
+
+  const handleChange = (e, idx) => {
+    const v = e.target.value.replace(/[^0-9]/g, "").slice(0, 1);
+    const next = (value.substring(0, idx) + v + value.substring(idx + 1)).padEnd(6, "");
+    onChange(next);
+
+    // Auto-focus to next input if current input has a value
+    if (v && idx < 5) {
+      inputRefs.current[idx + 1]?.focus();
+    }
+  };
+
+  const handleKeyDown = (e, idx) => {
+    // Handle backspace - move to previous input if current is empty
+    if (e.key === "Backspace" && !digits[idx] && idx > 0) {
+      inputRefs.current[idx - 1]?.focus();
+    }
+    // Handle arrow keys
+    else if (e.key === "ArrowLeft" && idx > 0) {
+      inputRefs.current[idx - 1]?.focus();
+    } else if (e.key === "ArrowRight" && idx < 5) {
+      inputRefs.current[idx + 1]?.focus();
+    }
+  };
+
+  const handlePaste = (e) => {
+    e.preventDefault();
+    const pastedData = e.clipboardData.getData("text").replace(/[^0-9]/g, "").slice(0, 6);
+    if (pastedData.length > 0) {
+      onChange(pastedData.padEnd(6, ""));
+      // Focus on the last filled input or the next empty one
+      const focusIdx = Math.min(pastedData.length - 1, 5);
+      inputRefs.current[focusIdx]?.focus();
+    }
+  };
+
+  return (
+    <div className="flex gap-2 justify-center">
+      {new Array(6).fill(0).map((_, idx) => (
+        <input
+          key={idx}
+          ref={(el) => (inputRefs.current[idx] = el)}
+          type="text"
+          inputMode="numeric"
+          maxLength={1}
+          value={digits[idx] || ""}
+          onChange={(e) => handleChange(e, idx)}
+          onKeyDown={(e) => handleKeyDown(e, idx)}
+          onPaste={handlePaste}
+          className="w-12 h-12 text-center text-lg rounded-lg bg-black/50 border border-white/25 text-white focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+          disabled={disabled}
+        />
+      ))}
+    </div>
+  );
+}
+
+export default function VerifyOtpPage() {
+  const { verifyResetOtp } = useAuth();
+  const router = useRouter();
+  const params = useSearchParams();
+  const email = params.get("email") || "";
+  const otpToken = params.get("otpToken") || undefined;
+
+  const [otp, setOtp] = useState("");
+  const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [expiresIn, setExpiresIn] = useState(600); // 10 minutes
+
+  useEffect(() => {
+    if (!email) setError("Missing email");
+  }, [email]);
+
+  // countdown
+  useEffect(() => {
+    if (expiresIn <= 0) return;
+    const id = setInterval(() => setExpiresIn((s) => Math.max(0, s - 1)), 1000);
+    return () => clearInterval(id);
+  }, [expiresIn]);
+
+  const mmss = useMemo(() => {
+    const m = Math.floor(expiresIn / 60)
+      .toString()
+      .padStart(2, "0");
+    const s = (expiresIn % 60).toString().padStart(2, "0");
+    return `${m}:${s}`;
+  }, [expiresIn]);
+
+  const submit = async (e) => {
+    e.preventDefault();
+    setError("");
+    if (!/^[0-9]{6}$/.test(otp)) {
+      setError("Enter the 6-digit OTP");
+      return;
+    }
+    setIsSubmitting(true);
+    try {
+      const result = await verifyResetOtp({ email, otp, otpToken });
+      if (result.success) {
+        const token = result?.data?.token;
+        router.push(`/auth/reset-otp?token=${encodeURIComponent(token)}`);
+      } else {
+        setError(result.error || "OTP verification failed");
+      }
+    } catch (err) {
+      setError(err?.message || "OTP verification failed");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="relative min-h-screen overflow-visible bg-[#070b12] text-white">
+      {/* Background */}
+      <div className="absolute inset-0 -z-10">
+        <div className="absolute -top-24 -left-10 w-[40rem] h-[40rem] rounded-full bg-sky-500/15 blur-3xl" />
+        <div className="absolute bottom-[-8rem] right-[-6rem] w-[42rem] h-[42rem] rounded-full bg-indigo-500/15 blur-3xl" />
+        <div
+          className="absolute inset-0 opacity-[0.08] hidden md:block"
+          style={{
+            backgroundImage:
+              "linear-gradient(to right, rgba(255,255,255,.6) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,.6) 1px, transparent 1px)",
+            backgroundSize: "46px 46px",
+          }}
+        />
+      </div>
+
+      {/* Grid: left video, right form */}
+      <div className="relative z-10 container mx-auto px-6 py-10">
+        <div className="mx-auto grid lg:grid-cols-2 gap-8 items-stretch">
+          {/* Left video */}
+          <motion.div
+            initial={{ opacity: 0, x: -12 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5 }}
+            className="hidden lg:flex relative overflow-hidden rounded-3xl border border-white/15 bg-black/30"
+          >
+            <video src="/forgetpasswords.mp4" autoPlay muted loop playsInline className="w-full h-full object-cover opacity-90" />
+          </motion.div>
+
+          {/* Right form */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="w-full max-w-md lg:max-w-none rounded-3xl border border-white/15 bg-white/[0.06] backdrop-blur-xl shadow-2xl p-6 md:p-8"
+          >
+            <div className="flex items-center gap-2 mb-2">
+              <ShieldCheck className="w-5 h-5 text-sky-400" />
+              <h1 className="text-2xl md:text-3xl font-bold">Verify OTP</h1>
+            </div>
+            <p className="text-white/70 mb-6">
+              Enter the 6-digit code sent to <span className="text-white font-medium">{email}</span>. Expires in {mmss}.
+            </p>
+
+            <form onSubmit={submit} className="space-y-5">
+              <div className="flex justify-center">
+                <OtpInputs value={otp} onChange={setOtp} disabled={isSubmitting} />
+              </div>
+              {error && (
+                <div className="flex items-center gap-2 text-red-400 text-sm">
+                  <AlertCircle className="w-4 h-4" />
+                  {error}
+                </div>
+              )}
+              <button
+                type="submit"
+                disabled={isSubmitting || expiresIn === 0}
+                className="w-full py-3 rounded-xl bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 disabled:from-sky-800 disabled:to-indigo-800 disabled:cursor-not-allowed transition font-semibold"
+              >
+                {isSubmitting ? "Verifying..." : expiresIn === 0 ? "OTP expired" : "Verify"}
+              </button>
+            </form>
+
+            <div className="mt-4 text-sm text-white/70 text-center">
+              Didn't receive it? You can request a new OTP from the previous page.
+            </div>
+          </motion.div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+

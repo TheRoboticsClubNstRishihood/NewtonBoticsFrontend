@@ -5,8 +5,9 @@ import { useAuth } from "../../contexts/AuthContext";
 import { motion } from "framer-motion";
 import { User2, Mail, Phone, Building, Calendar, Lock, Eye, EyeOff, Save, AlertCircle, CheckCircle } from "lucide-react";
 import ProtectedRoute from "../../components/ProtectedRoute";
+import CloudinaryUploader from "../../components/CloudinaryUploader";
 
-function Input({ label, icon: Icon, ...props }) {
+function Input({ label, icon: Icon, disabled: isDisabled, ...props }) {
   return (
     <label className="block">
       {label && <span className="mb-2 block text-sm text-white/80">{label}</span>}
@@ -14,14 +15,15 @@ function Input({ label, icon: Icon, ...props }) {
         {Icon && <Icon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/60" />}
         <input 
           {...props} 
-          className={`w-full ${Icon ? "pl-10" : "pl-4"} pr-4 py-3 rounded-xl bg-white/10 border border-white/15 focus:outline-none focus:ring-2 focus:ring-red-500/40 text-white placeholder-white/50`} 
+          disabled={isDisabled}
+          className={`w-full ${Icon ? "pl-10" : "pl-4"} pr-4 py-3 rounded-xl bg-white/10 border border-white/15 focus:outline-none focus:ring-2 focus:ring-red-500/40 text-white placeholder-white/50 ${isDisabled ? "opacity-60 cursor-not-allowed" : ""}`} 
         />
       </div>
     </label>
   );
 }
 
-function Select({ label, icon: Icon, children, ...props }) {
+function Select({ label, icon: Icon, disabled: isDisabled, children, ...props }) {
   return (
     <label className="block">
       {label && <span className="mb-2 block text-sm text-white/80">{label}</span>}
@@ -29,7 +31,8 @@ function Select({ label, icon: Icon, children, ...props }) {
         {Icon && <Icon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/60 pointer-events-none" />}
         <select
           {...props}
-          className={`w-full ${Icon ? "pl-10" : "pl-4"} pr-4 py-3 rounded-xl bg-white/10 border border-white/15 focus:outline-none focus:ring-2 focus:ring-red-500/40 text-white`}
+          disabled={isDisabled}
+          className={`w-full ${Icon ? "pl-10" : "pl-4"} pr-4 py-3 rounded-xl bg-white/10 border border-white/15 focus:outline-none focus:ring-2 focus:ring-red-500/40 text-white ${isDisabled ? "opacity-60 cursor-not-allowed" : ""}`}
         >
           {children}
         </select>
@@ -79,6 +82,7 @@ export default function ProfileCompletionPage() {
   const [passwordMessage, setPasswordMessage] = useState("");
   const [profileError, setProfileError] = useState("");
   const [passwordError, setPasswordError] = useState("");
+  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -144,26 +148,34 @@ export default function ProfileCompletionPage() {
     setProfileMessage("");
 
     try {
-      // Build a payload with only provided (non-empty) fields
       const payload = {};
       const trimOrNull = (v) => (typeof v === 'string' ? v.trim() : v);
-      const stringFields = ['firstName','lastName','studentId','department','phone','profileImageUrl','bio'];
+      const stringFields = ['firstName','lastName','studentId','department','phone','bio'];
       stringFields.forEach((key) => {
         const val = trimOrNull(profileData[key]);
         if (val !== undefined && val !== null && val !== '') payload[key] = val;
       });
+      const url = trimOrNull(profileData.profileImageUrl);
+      if (url) {
+        const isHttp = /^https?:\/\//i.test(url);
+        const isImage = /(\.png|\.jpg|\.jpeg|\.gif|\.webp)(\?|#|$)/i.test(url);
+        if (isHttp && isImage) {
+          payload.profileImageUrl = url;
+        }
+      }
       if (profileData.yearOfStudy !== '' && !Number.isNaN(parseInt(profileData.yearOfStudy))) {
         const y = parseInt(profileData.yearOfStudy);
         if (y >= 1 && y <= 8) payload.yearOfStudy = y;
       }
       if (Array.isArray(profileData.skills) && profileData.skills.length > 0) {
-        payload.skills = profileData.skills;
+        const uniqueSkills = Array.from(new Set(profileData.skills.map((s) => String(s).trim()))).filter(Boolean);
+        if (uniqueSkills.length > 0) payload.skills = uniqueSkills;
       }
 
       const result = await updateProfile(payload);
-      
       if (result.success) {
         setProfileMessage("Profile updated successfully!");
+        setIsEditing(false);
       } else {
         setProfileError(result.error);
       }
@@ -215,6 +227,8 @@ export default function ProfileCompletionPage() {
     return null;
   }
 
+  const displayName = `${profileData.firstName || ''} ${profileData.lastName || ''}`.trim() || user.email;
+
   return (
     <ProtectedRoute>
       <div className="relative min-h-screen bg-[#070b12] text-white overflow-hidden">
@@ -243,39 +257,87 @@ export default function ProfileCompletionPage() {
                 animate={{ opacity: 1, x: 0 }}
                 className="bg-white/[0.06] rounded-3xl border border-white/10 p-6"
               >
-                <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
-                  <User2 className="w-5 h-5" />
-                  Profile Information
-                </h2>
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-xl font-semibold flex items-center gap-2">
+                    <User2 className="w-5 h-5" />
+                    Profile Information
+                  </h2>
+                  <button
+                    type="button"
+                    onClick={() => setIsEditing((e) => !e)}
+                    className="px-3 py-1.5 rounded-lg bg-white/10 border border-white/20 hover:bg-white/15 text-sm"
+                  >
+                    {isEditing ? "Cancel" : "Edit"}
+                  </button>
+                </div>
+
+                {/* Avatar + Name row */}
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="relative h-16 w-16 shrink-0">
+                    <img
+                      src={profileData.profileImageUrl || '/vercel.svg'}
+                      alt="Profile"
+                      className="h-16 w-16 rounded-full object-cover border border-white/20"
+                    />
+                    {isEditing && (
+                      <div className="absolute -bottom-1 -right-1">
+                        <CloudinaryUploader
+                          folder="newtonbotics/profile"
+                          showPreview={false}
+                          maxFileSizeBytes={5 * 1024 * 1024}
+                          renderTrigger={({ open }) => (
+                            <button
+                              type="button"
+                              onClick={open}
+                              aria-label="Edit profile image"
+                              className="h-7 w-7 rounded-full bg-red-600 hover:bg-red-700 text-white flex items-center justify-center shadow-lg"
+                            >
+                              ✎
+                            </button>
+                          )}
+                          onUploadComplete={(file) => handleProfileInputChange('profileImageUrl', file.secureUrl)}
+                        />
+                      </div>
+                    )}
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-lg font-semibold truncate">{displayName}</div>
+                    <div className="text-white/60 text-sm truncate">{user.email}</div>
+                  </div>
+                </div>
 
                 <form onSubmit={handleProfileUpdate} className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <Input 
-                      label="First Name"
-                      icon={User2}
-                      type="text"
-                      placeholder="First name"
-                      value={profileData.firstName}
-                      onChange={(e) => handleProfileInputChange('firstName', e.target.value)}
-                    />
-                    <Input 
-                      label="Last Name"
-                      icon={User2}
-                      type="text"
-                      placeholder="Last name"
-                      value={profileData.lastName}
-                      onChange={(e) => handleProfileInputChange('lastName', e.target.value)}
-                    />
-                  </div>
+                  {isEditing ? (
+                    <div className="grid grid-cols-2 gap-4">
+                      <Input 
+                        label="First Name"
+                        icon={User2}
+                        type="text"
+                        placeholder="First name"
+                        value={profileData.firstName}
+                        onChange={(e) => handleProfileInputChange('firstName', e.target.value)}
+                      />
+                      <Input 
+                        label="Last Name"
+                        icon={User2}
+                        type="text"
+                        placeholder="Last name"
+                        value={profileData.lastName}
+                        onChange={(e) => handleProfileInputChange('lastName', e.target.value)}
+                      />
+                    </div>
+                  ) : null}
 
-                  <Input 
-                    label="Email"
-                    icon={Mail}
-                    type="email"
-                    value={user.email}
-                    disabled
-                    className="opacity-60 cursor-not-allowed"
-                  />
+                  {isEditing ? (
+                    <Input 
+                      label="Email"
+                      icon={Mail}
+                      type="email"
+                      value={user.email}
+                      disabled
+                      className="opacity-60 cursor-not-allowed"
+                    />
+                  ) : null}
 
                   <Input 
                     label="Phone Number"
@@ -283,6 +345,7 @@ export default function ProfileCompletionPage() {
                     type="tel"
                     placeholder="Phone number"
                     value={profileData.phone}
+                    disabled={!isEditing}
                     onChange={(e) => handleProfileInputChange('phone', e.target.value)}
                   />
 
@@ -293,6 +356,7 @@ export default function ProfileCompletionPage() {
                     type="text"
                     placeholder="Student ID (optional)"
                     value={profileData.studentId}
+                    disabled={!isEditing}
                     onChange={(e) => handleProfileInputChange('studentId', e.target.value)}
                   />
 
@@ -302,6 +366,7 @@ export default function ProfileCompletionPage() {
                         label="Department"
                         icon={Building}
                         value={profileData.department}
+                        disabled={!isEditing}
                         onChange={(e) => handleProfileInputChange('department', e.target.value)}
                       >
                         <option value="">Select Department</option>
@@ -314,6 +379,7 @@ export default function ProfileCompletionPage() {
                         label="Year of Study"
                         icon={Calendar}
                         value={profileData.yearOfStudy}
+                        disabled={!isEditing}
                         onChange={(e) => handleProfileInputChange('yearOfStudy', e.target.value)}
                       >
                         <option value="">Select Year</option>
@@ -329,27 +395,21 @@ export default function ProfileCompletionPage() {
                     <textarea
                       placeholder="Tell us about yourself..."
                       value={profileData.bio}
+                      disabled={!isEditing}
                       onChange={(e) => handleProfileInputChange('bio', e.target.value)}
-                      className="w-full pl-4 pr-4 py-3 rounded-xl bg-white/10 border border-white/15 focus:outline-none focus:ring-2 focus:ring-red-500/40 text-white placeholder-white/50 resize-none"
+                      className={`w-full pl-4 pr-4 py-3 rounded-xl bg-white/10 border border-white/15 focus:outline-none focus:ring-2 focus:ring-red-500/40 text-white placeholder-white/50 resize-none ${!isEditing ? "opacity-60 cursor-not-allowed" : ""}`}
                       rows={3}
                     />
                   </div>
-
-                  <Input
-                    label="Profile Image URL"
-                    type="url"
-                    placeholder="https://example.com/avatar.jpg"
-                    value={profileData.profileImageUrl}
-                    onChange={(e) => handleProfileInputChange('profileImageUrl', e.target.value)}
-                  />
 
                   <div>
                     <label className="block mb-2 text-sm text-white/80">Skills</label>
                     <input
                       type="text"
                       placeholder="Press Enter to add a skill"
-                      onKeyDown={handleSkillInput}
-                      className="w-full pl-4 pr-4 py-3 rounded-xl bg-white/10 border border-white/15 focus:outline-none focus:ring-2 focus:ring-red-500/40 text-white placeholder-white/50"
+                      onKeyDown={isEditing ? handleSkillInput : undefined}
+                      disabled={!isEditing}
+                      className={`w-full pl-4 pr-4 py-3 rounded-xl bg-white/10 border border-white/15 focus:outline-none focus:ring-2 focus:ring-red-500/40 text-white placeholder-white/50 ${!isEditing ? "opacity-60 cursor-not-allowed" : ""}`}
                     />
                     {profileData.skills.length > 0 && (
                       <div className="flex flex-wrap gap-2 mt-2">
@@ -359,13 +419,15 @@ export default function ProfileCompletionPage() {
                             className="inline-flex items-center gap-1 px-3 py-1 bg-red-500/20 text-red-300 rounded-full text-sm border border-red-500/30"
                           >
                             {skill}
-                            <button
-                              type="button"
-                              onClick={() => removeSkill(skill)}
-                              className="ml-1 hover:text-red-100 transition"
-                            >
-                              ×
-                            </button>
+                            {isEditing && (
+                              <button
+                                type="button"
+                                onClick={() => removeSkill(skill)}
+                                className="ml-1 hover:text-red-100 transition"
+                              >
+                                ×
+                              </button>
+                            )}
                           </span>
                         ))}
                       </div>
@@ -386,23 +448,34 @@ export default function ProfileCompletionPage() {
                     </div>
                   )}
 
-                  <button
-                    type="submit"
-                    disabled={isUpdatingProfile}
-                    className="w-full py-3 rounded-xl bg-red-600 hover:bg-red-700 disabled:bg-red-800 disabled:cursor-not-allowed transition font-semibold flex items-center justify-center gap-2"
-                  >
-                    {isUpdatingProfile ? (
-                      <>
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                        Updating...
-                      </>
-                    ) : (
-                      <>
-                        <Save className="w-4 h-4" />
-                        Update Profile
-                      </>
-                    )}
-                  </button>
+                  {isEditing && (
+                    <div className="flex gap-3">
+                      <button
+                        type="button"
+                        onClick={() => { setIsEditing(false); if (user) { setProfileData({ firstName: user.firstName || "", lastName: user.lastName || "", phone: user.phone || "", department: user.department || "", yearOfStudy: user.yearOfStudy || "", studentId: user.studentId || "", profileImageUrl: user.profileImageUrl || "", bio: user.bio || "", skills: user.skills || [] }); } }}
+                        className="flex-1 py-3 rounded-xl bg-white/10 hover:bg-white/15 transition font-semibold"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={isUpdatingProfile}
+                        className="flex-1 py-3 rounded-xl bg-red-600 hover:bg-red-700 disabled:bg-red-800 disabled:cursor-not-allowed transition font-semibold flex items-center justify-center gap-2"
+                      >
+                        {isUpdatingProfile ? (
+                          <>
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                            Saving...
+                          </>
+                        ) : (
+                          <>
+                            <Save className="w-4 h-4" />
+                            Save Changes
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  )}
                 </form>
               </motion.div>
 

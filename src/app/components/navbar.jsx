@@ -70,6 +70,7 @@ const Navbar = () => {
   const avatarLabel = user ? (user.firstName ? user.firstName.charAt(0).toUpperCase() : user.email.charAt(0).toUpperCase()) : "U";
   const displayName = user ? (user.firstName ? `${user.firstName} ${user.lastName}` : user.email) : "User";
   const userRole = user ? user.role : "Member";
+  const userAvatarUrl = user && user.profileImageUrl && /^https?:\/\//i.test(user.profileImageUrl) ? user.profileImageUrl : null;
 
   return (
     <nav
@@ -138,24 +139,36 @@ const Navbar = () => {
                 aria-haspopup="menu"
                 aria-expanded={showProfile}
               >
-                <span className="w-7 h-7 rounded-full bg-red-600 grid place-items-center text-sm font-bold">
-                  {avatarLabel}
-                </span>
+                {userAvatarUrl ? (
+                  <span className="w-7 h-7 rounded-full overflow-hidden border border-white/20 bg-white/10">
+                    <img src={userAvatarUrl} alt="Avatar" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                  </span>
+                ) : (
+                  <span className="w-7 h-7 rounded-full bg-red-600 grid place-items-center text-sm font-bold">
+                    {avatarLabel}
+                  </span>
+                )}
                 <span className="hidden lg:inline text-sm">Profile</span>
                 <FiChevronDown className={`hidden lg:inline transition-transform ${showProfile ? "rotate-180" : "rotate-0"}`} />
               </button>
 
               {/* Dropdown */}
               <div
-                className={`invisible opacity-0 translate-y-1 group-hover:visible group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200 absolute right-0 mt-3 w-64 rounded-2xl border border-white/10 bg-neutral-900/95 backdrop-blur-xl shadow-2xl ring-1 ring-white/10 ${showProfile ? "visible opacity-100 translate-y-0" : ""}`}
+                className={`invisible opacity-0 translate-y-1 group-hover:visible group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200 absolute right-0 mt-3 w-64 rounded-2xl border border-white/10 bg-black shadow-2xl ring-1 ring-white/10 ${showProfile ? "visible opacity-100 translate-y-0" : ""}`}
                 role="menu"
               >
                 {/* Arrow */}
-                <div className="absolute -top-2 right-6 w-3 h-3 rotate-45 bg-neutral-900/95 border-t border-l border-white/10"></div>
+                <div className="absolute -top-2 right-6 w-3 h-3 rotate-45 bg-neutral-900 border-t border-l border-white/10"></div>
 
                 <div className="px-4 py-3 border-b border-white/10">
                   <div className="flex items-center gap-3">
-                    <span className="w-9 h-9 rounded-full bg-red-600 grid place-items-center text-sm font-bold"><FiUser /></span>
+                    {userAvatarUrl ? (
+                      <span className="w-9 h-9 rounded-full overflow-hidden border border-white/20 bg-white/10">
+                        <img src={userAvatarUrl} alt="Avatar" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                      </span>
+                    ) : (
+                      <span className="w-9 h-9 rounded-full bg-red-600 grid place-items-center text-sm font-bold"><FiUser /></span>
+                    )}
                     <div className="text-sm">
                       <div className="text-white/90 font-medium truncate max-w-[12rem]">{displayName}</div>
                       <div className="text-white/50 capitalize">{userRole}</div>
@@ -184,6 +197,13 @@ const Navbar = () => {
                 )}
 
                 <div className="border-t border-white/10">
+                  <Link
+                    href="/my-activity"
+                    className="flex items-center gap-2 px-4 py-2 text-white/90 hover:bg-white/10"
+                    onClick={() => setShowProfile(false)}
+                  >
+                    <FiList /> My Activity
+                  </Link>
                   <Link
                     href="/ChatRoom"
                     className="flex items-center gap-2 px-4 py-2 text-white/90 hover:bg-white/10"
@@ -261,6 +281,7 @@ const Navbar = () => {
                 </>
               )}
               <Link href="/ProfileCompletion" className={getMobileActiveStyles("/ProfileCompletion")} onClick={() => setIsOpen(false)}>Profile Settings</Link>
+              <Link href="/my-activity" className={getMobileActiveStyles("/my-activity")} onClick={() => setIsOpen(false)}>My Activity</Link>
               <button
                 onClick={() => { handleLogout(); setIsOpen(false); }}
                 className="block w-[calc(100%-2rem)] mx-4 my-3 py-2 bg-white/10 text-white text-center rounded-lg hover:bg-white/20 transition border border-white/20"

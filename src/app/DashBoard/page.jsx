@@ -14,9 +14,10 @@ import RawGallery from "../components/RawGallery";
 import { useAuth } from "../../contexts/AuthContext";
 import UpcomingEvents from "../components/UpcomingEvents";
 import ImpactSection from "../components/ImpactSection";
+import { subscribeToNewsletter } from "../../lib/newsletter";
 
 const HomePage = () => {
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3005/api';
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
   const { user, isAuthenticated } = useAuth();
   const [roleNotice, setRoleNotice] = useState(null);
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -24,6 +25,15 @@ const HomePage = () => {
   const [showScrollIndicator, setShowScrollIndicator] = useState(true);
   const [researchAreas, setResearchAreas] = useState([]);
   const [loadingResearchAreas, setLoadingResearchAreas] = useState(false);
+  
+  // Newsletter subscription state
+  const [newsletterEmail, setNewsletterEmail] = useState("");
+  const [newsletterFirstName, setNewsletterFirstName] = useState("");
+  const [newsletterLastName, setNewsletterLastName] = useState("");
+  const [isNewsletterSubmitting, setIsNewsletterSubmitting] = useState(false);
+  const [newsletterMessage, setNewsletterMessage] = useState("");
+  const [newsletterMessageType, setNewsletterMessageType] = useState(""); // "success" or "error"
+  const [newsletterStep, setNewsletterStep] = useState(1); // 1: email, 2: name, 3: success
   const { scrollYProgress } = useScroll();
   const y = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
   
@@ -131,6 +141,67 @@ const HomePage = () => {
     if (target) {
       target.scrollIntoView({ behavior: "smooth", block: "start" });
     }
+  };
+
+  // Newsletter step handlers
+  const handleEmailContinue = (e) => {
+    e.preventDefault();
+    
+    if (!newsletterEmail.trim()) {
+      setNewsletterMessage("Please enter your email address");
+      setNewsletterMessageType("error");
+      return;
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(newsletterEmail.trim())) {
+      setNewsletterMessage("Please enter a valid email address");
+      setNewsletterMessageType("error");
+      return;
+    }
+
+    setNewsletterMessage("");
+    setNewsletterStep(2);
+  };
+
+  const handleNewsletterSubmit = async (e) => {
+    e.preventDefault();
+    
+    setIsNewsletterSubmitting(true);
+    setNewsletterMessage("");
+
+    try {
+      const subscriptionData = {
+        email: newsletterEmail.trim(),
+        ...(newsletterFirstName.trim() && { firstName: newsletterFirstName.trim() }),
+        ...(newsletterLastName.trim() && { lastName: newsletterLastName.trim() })
+      };
+
+      await subscribeToNewsletter(subscriptionData);
+      setNewsletterStep(3);
+      setNewsletterMessage("Successfully subscribed to our newsletter!");
+      setNewsletterMessageType("success");
+      
+      // Reset form after 3 seconds
+      setTimeout(() => {
+        setNewsletterEmail("");
+        setNewsletterFirstName("");
+        setNewsletterLastName("");
+        setNewsletterStep(1);
+        setNewsletterMessage("");
+      }, 3000);
+    } catch (error) {
+      setNewsletterMessage(error.message || "Failed to subscribe. Please try again.");
+      setNewsletterMessageType("error");
+    } finally {
+      setIsNewsletterSubmitting(false);
+    }
+  };
+
+  const handleBackToEmail = () => {
+    setNewsletterStep(1);
+    setNewsletterMessage("");
   };
 
   const beams = [
@@ -826,20 +897,114 @@ const HomePage = () => {
                 Join our newsletter to receive updates on breakthrough research,
                 upcoming events, and innovations in robotics. Be the first to know about our latest projects!
               </p>
-              <div className="flex flex-col sm:flex-row max-w-lg mx-auto gap-3 sm:gap-4 px-4">
-                <input
-                  type="email"
-                  placeholder="Enter your email address"
-                  className="flex-1 px-4 sm:px-6 py-3 sm:py-4 rounded-lg sm:rounded-xl bg-white/10 border border-white/20 focus:outline-none focus:ring-2 focus:ring-red-500/50 text-white placeholder-white/60 backdrop-blur-lg text-sm sm:text-base"
-                />
-                <motion.button
-                  whileHover={{ scale: 1.05, boxShadow: "0 20px 40px rgba(239, 68, 68, 0.3)" }}
-                  whileTap={{ scale: 0.95 }}
-                  className="px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg sm:rounded-xl font-semibold shadow-lg shadow-red-500/30 hover:shadow-red-500/50 transition-all flex items-center justify-center gap-2 group text-sm sm:text-base"
-                >
-                  Subscribe
-                  <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" />
-                </motion.button>
+              <div className="max-w-lg mx-auto px-4">
+                {/* Step 1: Email Input */}
+                {newsletterStep === 1 && (
+                  <form onSubmit={handleEmailContinue}>
+                    <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-4">
+                      <input
+                        type="email"
+                        placeholder="Enter your email address"
+                        value={newsletterEmail}
+                        onChange={(e) => setNewsletterEmail(e.target.value)}
+                        className="flex-1 px-4 sm:px-6 py-3 sm:py-4 rounded-lg sm:rounded-xl bg-white/10 border border-white/20 focus:outline-none focus:ring-2 focus:ring-red-500/50 text-white placeholder-white/60 backdrop-blur-lg text-sm sm:text-base"
+                        required
+                      />
+                      <motion.button
+                        type="submit"
+                        whileHover={{ scale: 1.05, boxShadow: "0 20px 40px rgba(239, 68, 68, 0.3)" }}
+                        whileTap={{ scale: 0.95 }}
+                        className="px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg sm:rounded-xl font-semibold shadow-lg shadow-red-500/30 hover:shadow-red-500/50 transition-all flex items-center justify-center gap-2 group text-sm sm:text-base"
+                      >
+                        Continue
+                        <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" />
+                      </motion.button>
+                    </div>
+                  </form>
+                )}
+
+                {/* Step 2: Name Fields */}
+                {newsletterStep === 2 && (
+                  <form onSubmit={handleNewsletterSubmit}>
+                    <div className="mb-4">
+                      <p className="text-white/70 text-sm mb-4">
+                        Great! We have your email: <span className="text-red-400 font-medium">{newsletterEmail}</span>
+                      </p>
+                      <p className="text-white/60 text-sm mb-4">
+                        Add your name (optional) to personalize your newsletter experience.
+                      </p>
+                      
+                      <div className="grid grid-cols-2 gap-3 mb-4">
+                        <input
+                          type="text"
+                          placeholder="First name (optional)"
+                          value={newsletterFirstName}
+                          onChange={(e) => setNewsletterFirstName(e.target.value)}
+                          className="px-4 py-3 rounded-lg bg-white/10 border border-white/20 focus:outline-none focus:ring-2 focus:ring-red-500/50 text-white placeholder-white/60 backdrop-blur-lg text-sm"
+                        />
+                        <input
+                          type="text"
+                          placeholder="Last name (optional)"
+                          value={newsletterLastName}
+                          onChange={(e) => setNewsletterLastName(e.target.value)}
+                          className="px-4 py-3 rounded-lg bg-white/10 border border-white/20 focus:outline-none focus:ring-2 focus:ring-red-500/50 text-white placeholder-white/60 backdrop-blur-lg text-sm"
+                        />
+                      </div>
+                      
+                      <div className="flex gap-3">
+                        <motion.button
+                          type="button"
+                          onClick={handleBackToEmail}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          className="px-6 py-3 bg-white/10 hover:bg-white/20 text-white rounded-lg font-medium transition-all flex items-center gap-2"
+                        >
+                          ← Back
+                        </motion.button>
+                        <motion.button
+                          type="submit"
+                          disabled={isNewsletterSubmitting}
+                          whileHover={!isNewsletterSubmitting ? { scale: 1.05, boxShadow: "0 20px 40px rgba(239, 68, 68, 0.3)" } : {}}
+                          whileTap={!isNewsletterSubmitting ? { scale: 0.95 } : {}}
+                          className="flex-1 px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 disabled:from-red-800 disabled:to-red-900 disabled:cursor-not-allowed text-white rounded-lg font-semibold shadow-lg shadow-red-500/30 hover:shadow-red-500/50 transition-all flex items-center justify-center gap-2 group"
+                        >
+                          {isNewsletterSubmitting ? (
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                          ) : (
+                            <>
+                              Subscribe
+                              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                            </>
+                          )}
+                        </motion.button>
+                      </div>
+                    </div>
+                  </form>
+                )}
+
+                {/* Step 3: Success Message */}
+                {newsletterStep === 3 && (
+                  <div className="text-center">
+                    <div className="mb-4">
+                      <div className="w-16 h-16 mx-auto mb-4 bg-green-500/20 rounded-full flex items-center justify-center">
+                        <svg className="w-8 h-8 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                      </div>
+                      <h3 className="text-xl font-semibold text-green-400 mb-2">Welcome to our newsletter!</h3>
+                      <p className="text-white/80">
+                        You're all set! We'll keep you updated with our latest projects and innovations.
+                      </p>
+                    </div>
+                  </div>
+                )}
+                
+                {/* Error Message */}
+                {newsletterMessage && newsletterMessageType === "error" && (
+                  <div className="mb-4 p-3 rounded-lg text-sm bg-red-900/50 text-red-300 border border-red-700/50">
+                    {newsletterMessage}
+                  </div>
+                )}
               </div>
               <p className="text-xs sm:text-sm text-white/60 mt-4">
                 🔒 We respect your privacy. Unsubscribe at any time.

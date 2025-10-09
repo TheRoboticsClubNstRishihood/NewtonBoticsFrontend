@@ -6,7 +6,7 @@ import { Rocket, Award, Users, Globe, Star, Calendar } from "lucide-react";
 const ImpactSection = () => {
   const [metrics, setMetrics] = useState(null);
   const [loadingMetrics, setLoadingMetrics] = useState(false);
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3005/api';
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
   const defaultAchievements = [
     { id: "researchProjects", number: "50+", label: "Research Projects", icon: <Rocket className="w-8 h-8" /> },
@@ -48,13 +48,22 @@ const ImpactSection = () => {
     if (!labels) return defaultAchievements;
     return defaultAchievements.map((item) => {
       if (item.id === "researchProjects") {
-        return { ...item, number: labels.researchProjects || item.number };
+        return { ...item, number: labels.projects || item.number };
       }
       if (item.id === "publications") {
         return { ...item, number: labels.publications || item.number };
       }
       if (item.id === "labMembers") {
         return { ...item, number: labels.labMembers || item.number };
+      }
+      if (item.id === "industryPartners") {
+        return { ...item, number: labels.industryPartners || item.number };
+      }
+      if (item.id === "awardsWon") {
+        return { ...item, number: labels.awardsWon || item.number };
+      }
+      if (item.id === "workshopsConducted") {
+        return { ...item, number: labels.workshopsConducted || item.number };
       }
       return item;
     });
@@ -77,7 +86,7 @@ const ImpactSection = () => {
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-6 lg:gap-8">
             {[...Array(6)].map((_, index) => (
               <div key={index} className="bg-white/5 backdrop-blur-lg rounded-2xl p-4 sm:p-6 lg:p-8 border border-white/10 animate-pulse">
-                <div className="bg-white/10 p-3 sm:p-4 rounded-xl w-fit mx-auto mb-3 sm:mb-4 h-16 w-16"></div>
+                <div className="bg-white/10 p-3 sm:p-4 rounded-xl w-16 h-16 mx-auto mb-3 sm:mb-4"></div>
                 <div className="h-8 bg-white/10 rounded mb-2"></div>
                 <div className="h-4 bg-white/10 rounded"></div>
               </div>

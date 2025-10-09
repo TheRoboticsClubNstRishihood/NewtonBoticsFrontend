@@ -45,7 +45,7 @@ export default function ResetPasswordClient() {
            /[A-Z]/.test(password) && 
            /[a-z]/.test(password) && 
            /[0-9]/.test(password) && 
-           /[!@#$%^&*(),.?":{}|<>]/.test(password);
+           /[!@#$%^&*()_\-.,?":{}|<>]/.test(password);
   };
 
   const onSubmit = async (e) => {

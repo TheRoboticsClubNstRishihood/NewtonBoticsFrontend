@@ -12,7 +12,7 @@ const Footer = () => {
         {/* Club Overview */}
         <div>
           <div className="flex items-center mb-4">
-            <h3 className="text-xl font-bold">Robotics Club</h3>
+            <h3 className="text-xl font-bold">NewtonBotics</h3>
           </div>
           <p className="text-gray-300 text-sm">
             Innovating at the intersection of technology and creativity, pushing
@@ -107,14 +107,13 @@ const Footer = () => {
             <div className="flex items-center">
               <MapPin className="h-5 w-5 mr-3 text-indigo-400" />
               <span className="text-gray-300">
-                {clubData?.labDetails?.location?.building || "Unknown Building"}
-                , {clubData?.labDetails?.location?.floor || "Unknown Floor"}
+                Academic Block, Room 407
               </span>
             </div>
             <div className="flex items-center">
               <Mail className="h-5 w-5 mr-3 text-indigo-400" />
               <span className="text-gray-300">
-                {clubData?.contactInfo?.email || "No Email Available"}
+                robotics.club@rishihood.edu.in
               </span>
             </div>
           </div>
@@ -125,11 +124,10 @@ const Footer = () => {
       <div className="bg-gray-800 py-4">
         <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center">
           <p className="text-gray-400 text-sm">
-            © {currentYear} Robotics Club. Founded by{" "}
-            {clubData?.clubFoundation?.foundedBy?.join(" & ") || "Unknown"}
+            © {currentYear} NewtonBotics. All rights reserved.
           </p>
           <p className="text-gray-400 text-sm">
-            Established in {clubData?.clubFoundation?.foundedYear || "N/A"}
+            Made with ❤️ by  <span onClick={() => window.open("https://monadnocks.in", "_blank")} className="text-red-400 cursor-pointer hover:text-red-300 hover:font-bold">Monadnocks</span>
           </p>
         </div>
       </div>

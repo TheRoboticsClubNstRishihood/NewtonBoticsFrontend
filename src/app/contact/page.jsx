@@ -254,13 +254,12 @@ const ContactPage = () => {
             <div className="flex items-center">
               <MapPin className="mr-3 text-red-500" />
               <span>
-                {clubData.labDetails.location.building},{" "}
-                {clubData.labDetails.location.floor}
+              Academic Block, Room 407,{" "}
               </span>
             </div>
             <div className="flex items-center">
               <Mail className="mr-3 text-red-500" />
-              <span>{clubData.contactInfo.email}</span>
+              <span>robotics.club@rishihood.edu.in</span>
             </div>
             <div className="mt-4">
               <h4 className="text-lg font-semibold text-white mb-2 font-display">

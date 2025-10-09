@@ -138,7 +138,7 @@ export default function ProfileCompletionPage() {
            /[A-Z]/.test(password) && 
            /[a-z]/.test(password) && 
            /[0-9]/.test(password) && 
-           /[!@#$%^&*(),.?":{}|<>]/.test(password);
+           /[!@#$%^&*()_\-.,?":{}|<>]/.test(password);
   };
 
   const handleProfileUpdate = async (e) => {

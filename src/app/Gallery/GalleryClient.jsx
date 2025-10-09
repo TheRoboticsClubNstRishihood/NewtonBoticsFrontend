@@ -27,6 +27,7 @@ export default function GalleryClient() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [active, setActive] = useState(null);
+  const [loadedVideos, setLoadedVideos] = useState(new Set());
   
   // Filter states
   const [searchQuery, setSearchQuery] = useState("");
@@ -108,6 +109,36 @@ export default function GalleryClient() {
   };
 
   const hasActiveFilters = searchQuery || selectedFileType !== "all" || selectedCategory !== "all" || selectedCollection !== "all" || showFeaturedOnly;
+
+  // Function to handle video loading
+  const handleVideoLoad = (itemId) => {
+    setLoadedVideos(prev => new Set([...prev, itemId]));
+  };
+
+  // Function to check if video is loaded
+  const isVideoLoaded = (itemId) => {
+    return loadedVideos.has(itemId);
+  };
+
+  // Function to handle media view tracking
+  const handleMediaView = async (item) => {
+    try {
+      // Increment view count when media is opened
+      await mediaService.incrementViewCount(item._id);
+      
+      // Update local state to reflect new view count
+      setMediaItems(prevItems => 
+        prevItems.map(mediaItem => 
+          mediaItem._id === item._id 
+            ? { ...mediaItem, viewCount: (mediaItem.viewCount || 0) + 1 }
+            : mediaItem
+        )
+      );
+    } catch (error) {
+      console.error('Error tracking media view:', error);
+      // Don't show error to user, just log it
+    }
+  };
 
   const getFileTypeIcon = (fileType) => {
     switch (fileType) {
@@ -286,12 +317,20 @@ export default function GalleryClient() {
           </div>
         ) : viewMode === "grid" ? (
           /* Grid View */
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 auto-rows-[200px]">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
             {mediaItems.map((item, index) => (
               <motion.button
                 key={item._id}
-                onClick={() => setActive(item)}
-                className="relative group bg-white/5 rounded-xl border border-white/10 overflow-hidden hover:border-white/20 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-red-500"
+                onClick={() => {
+                  setActive(item);
+                  handleMediaView(item);
+                }}
+                onMouseEnter={() => {
+                  if (item.fileType === "video" && !isVideoLoaded(item._id)) {
+                    handleVideoLoad(item._id);
+                  }
+                }}
+                className="relative group bg-white/5 rounded-xl border border-white/10 overflow-hidden hover:border-white/20 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-red-500 aspect-square"
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -303,26 +342,40 @@ export default function GalleryClient() {
                     <img
                       src={item.thumbnailUrl || item.fileUrl}
                       alt={item.title}
-                      width={100}
-                      height={100}
-                      className="object-cover"
+                      className="w-full h-full object-cover"
                       onError={(e) => {
                         e.target.src = "/next.svg"; // Fallback image
                       }}
                     />
                   ) : item.fileType === "video" ? (
-                    <div className="relative w-full h-full bg-gray-800 flex items-center justify-center">
-                      <video
-                        src={item.fileUrl}
+                    <div className="relative w-full h-full bg-gray-800 overflow-hidden">
+                      {/* Show thumbnail initially */}
+                      <img
+                        src={item.thumbnailUrl || item.fileUrl}
+                        alt={item.title}
                         className="w-full h-full object-cover"
-                        muted
-                        loop
-                        playsInline
-                        autoPlay
+                        onError={(e) => {
+                          e.target.src = "/next.svg"; // Fallback image
+                        }}
                       />
+                      
+                      {/* Video overlay with play button */}
                       <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
                         <Play className="w-8 h-8 text-white" />
                       </div>
+                      
+                      {/* Video element (hidden initially, loads on demand) */}
+                      {isVideoLoaded(item._id) && (
+                        <video
+                          src={item.fileUrl}
+                          className="absolute inset-0 w-full h-full object-cover"
+                          muted
+                          loop
+                          playsInline
+                          autoPlay
+                          onLoadedData={() => handleVideoLoad(item._id)}
+                        />
+                      )}
                     </div>
                   ) : (
                     <div className="w-full h-full bg-gray-800 flex items-center justify-center">
@@ -379,7 +432,10 @@ export default function GalleryClient() {
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.3, delay: index * 0.05 }}
-                onClick={() => setActive(item)}
+                onClick={() => {
+                  setActive(item);
+                  handleMediaView(item);
+                }}
               >
                 <div className="flex items-center gap-4">
                   {/* Thumbnail */}
@@ -388,13 +444,20 @@ export default function GalleryClient() {
                       <img
                         src={item.thumbnailUrl || item.fileUrl}
                         alt={item.title}
-                        width={100}
-                        height={100}
-                        className="object-cover"
+                        className="w-full h-full object-cover"
                       />
                     ) : item.fileType === "video" ? (
-                      <div className="relative w-full h-full flex items-center justify-center">
-                        <Play className="w-6 h-6 text-white" />
+                      <div className="relative w-full h-full">
+                        {/* Show thumbnail for videos */}
+                        <img
+                          src={item.thumbnailUrl || item.fileUrl}
+                          alt={item.title}
+                          className="w-full h-full object-cover"
+                        />
+                        {/* Play button overlay */}
+                        <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                          <Play className="w-6 h-6 text-white" />
+                        </div>
                       </div>
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
@@ -478,21 +541,25 @@ export default function GalleryClient() {
               
               <div className="relative w-full bg-black rounded-xl overflow-hidden border border-white/10">
                 {active.fileType === "image" ? (
-                  <div className="relative w-full aspect-video">
+                  <div className="relative w-full max-h-[80vh] flex items-center justify-center">
                       <img
                       src={active.fileUrl}
                       alt={active.title}
-                      width={100}
-                      height={100}
-                      sizes="100vw"
-                      className="object-contain"
+                      className="max-w-full max-h-full object-contain"
                     />
                   </div>
                 ) : active.fileType === "video" ? (
                   <div className="relative w-full aspect-video">
+                    {/* Show thumbnail initially */}
+                    <img
+                      src={active.thumbnailUrl || active.fileUrl}
+                      alt={active.title}
+                      className="w-full h-full object-cover"
+                    />
+                    {/* Video element */}
                     <video
                       src={active.fileUrl}
-                      className="w-full h-full object-contain"
+                      className="absolute inset-0 w-full h-full object-contain"
                       controls
                       autoPlay
                     />

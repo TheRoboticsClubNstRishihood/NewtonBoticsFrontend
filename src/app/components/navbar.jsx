@@ -85,7 +85,7 @@ const Navbar = () => {
             href="/DashBoard"
             className="text-2xl font-bold text-white hover:text-red-500 transition"
           >
-            Robotics Club
+            NewtonBotics
           </Link>
         </div>
 

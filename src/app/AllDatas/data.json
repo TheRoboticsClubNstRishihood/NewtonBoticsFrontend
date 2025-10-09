@@ -40,30 +40,30 @@
   ],
   "leadership": [
     {
-      "name": "Sachin Sir",
+      "name": "Tejas chavan",
       "role": "Club Mentor",
       "expertise": "Robotics and Embedded Systems",
-      "email": "sachin@gmail.com"
+      "email": "tejas.chavan@newtonschool.co"
     },
     {
-      "name": "Aman Kumar",
+      "name": "Ritesh Kumar",
       "role": "Club President",
       "responsibilities": [
         "Overall club management",
         "Strategic planning",
         "External communications"
       ],
-      "email": "aman@gmail.com"
+      "email": "ritesh.kumar2024@nst.rishihood.edu.in "
     },
     {
-      "name": "Manish Kumar",
-      "role": "Vice President",
+      "name": "Shreya Narayani",
+      "role": "Club Vice President",
       "responsibilities": [
         "Support club president",
         "Internal coordination",
         "Event planning"
       ],
-      "email": "manish@gmail.com"
+      "email": "shreya.narayani2024@nst.rishihood.edu.in "
     },
     {
       "name": "Monu Kumar",

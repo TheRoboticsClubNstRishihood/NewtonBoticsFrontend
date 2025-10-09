@@ -15,6 +15,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import newsService from "../../lib/news";
+import { subscribeToNewsletter } from "../../lib/newsletter";
 
 const NewsPage = () => {
   const [selectedCategory, setSelectedCategory] = useState("All");
@@ -25,6 +26,15 @@ const NewsPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const [showFeaturedOnly, setShowFeaturedOnly] = useState(false);
+  
+  // Newsletter subscription state
+  const [newsletterEmail, setNewsletterEmail] = useState("");
+  const [newsletterFirstName, setNewsletterFirstName] = useState("");
+  const [newsletterLastName, setNewsletterLastName] = useState("");
+  const [isNewsletterSubmitting, setIsNewsletterSubmitting] = useState(false);
+  const [newsletterMessage, setNewsletterMessage] = useState("");
+  const [newsletterMessageType, setNewsletterMessageType] = useState(""); // "success" or "error"
+  const [newsletterStep, setNewsletterStep] = useState(1); // 1: email, 2: name, 3: success
 
   // Initial fetch from public API
   useEffect(() => {
@@ -159,6 +169,67 @@ const NewsPage = () => {
   };
 
   const hasActiveFilters = selectedCategory !== "All" || searchQuery || showFeaturedOnly;
+
+  // Newsletter step handlers
+  const handleEmailContinue = (e) => {
+    e.preventDefault();
+    
+    if (!newsletterEmail.trim()) {
+      setNewsletterMessage("Please enter your email address");
+      setNewsletterMessageType("error");
+      return;
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(newsletterEmail.trim())) {
+      setNewsletterMessage("Please enter a valid email address");
+      setNewsletterMessageType("error");
+      return;
+    }
+
+    setNewsletterMessage("");
+    setNewsletterStep(2);
+  };
+
+  const handleNewsletterSubmit = async (e) => {
+    e.preventDefault();
+    
+    setIsNewsletterSubmitting(true);
+    setNewsletterMessage("");
+
+    try {
+      const subscriptionData = {
+        email: newsletterEmail.trim(),
+        ...(newsletterFirstName.trim() && { firstName: newsletterFirstName.trim() }),
+        ...(newsletterLastName.trim() && { lastName: newsletterLastName.trim() })
+      };
+
+      await subscribeToNewsletter(subscriptionData);
+      setNewsletterStep(3);
+      setNewsletterMessage("Successfully subscribed to our newsletter!");
+      setNewsletterMessageType("success");
+      
+      // Reset form after 3 seconds
+      setTimeout(() => {
+        setNewsletterEmail("");
+        setNewsletterFirstName("");
+        setNewsletterLastName("");
+        setNewsletterStep(1);
+        setNewsletterMessage("");
+      }, 3000);
+    } catch (error) {
+      setNewsletterMessage(error.message || "Failed to subscribe. Please try again.");
+      setNewsletterMessageType("error");
+    } finally {
+      setIsNewsletterSubmitting(false);
+    }
+  };
+
+  const handleBackToEmail = () => {
+    setNewsletterStep(1);
+    setNewsletterMessage("");
+  };
 
   if (isLoading) {
     return (
@@ -512,24 +583,164 @@ const NewsPage = () => {
         )}
       </motion.section>
 
-      {/* Newsletter Signup */}
+      {/* Enhanced Newsletter Section */}
       <motion.section
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, delay: 1 }}
         viewport={{ once: true }}
-        className="max-w-7xl mx-auto mt-16"
+        className="max-w-7xl mx-auto mt-16 relative overflow-hidden"
       >
-        <div className="bg-gradient-to-r from-red-900/30 to-red-800/30 rounded-3xl p-8 text-center backdrop-blur-xl border border-white/10 shadow-2xl shadow-red-500/20">
-          <h3 className="text-2xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-red-400 to-red-600">
-            Stay Updated
-          </h3>
-          <p className="text-white/80 mb-6">
-            Subscribe to our newsletter to receive the latest news and updates directly in your inbox.
-          </p>
-          <div className="flex flex-col sm:flex-row max-w-md mx-auto gap-4">
-            <NewsletterForm />
+        {/* Subtle Red Texture Background */}
+        <div className="absolute inset-0">
+          <motion.div
+            className="absolute top-1/2 right-1/4 w-48 h-48 sm:w-64 sm:h-64 md:w-80 md:h-80 bg-red-500/2 rounded-full blur-3xl"
+            animate={{
+              scale: [1, 1.3, 1],
+              opacity: [0.1, 0.3, 0.1],
+            }}
+            transition={{
+              duration: 20,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: 5,
+            }}
+          />
+        </div>
+        
+        <div className="relative z-20">
+          <motion.div
+            className="bg-white/5 rounded-2xl sm:rounded-3xl p-6 sm:p-8 lg:p-12 text-center backdrop-blur-xl border border-white/10 shadow-2xl shadow-white/10 relative overflow-hidden"
+          >
+            {/* Background decoration */}
+            <div className="absolute top-0 left-0 w-full h-full">
+              <div className="absolute top-4 sm:top-10 left-4 sm:left-10 w-16 h-16 sm:w-32 sm:h-32 bg-white/10 rounded-full blur-2xl"></div>
+              <div className="absolute bottom-4 sm:bottom-10 right-4 sm:right-10 w-20 h-20 sm:w-40 sm:h-40 bg-white/10 rounded-full blur-xl"></div>
+              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-16 h-16 sm:w-24 sm:h-24 bg-red-500/10 rounded-full blur-xl"></div>
+            </div>
+            
+            <div className="relative z-10">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold mb-4 sm:mb-6 bg-clip-text text-transparent bg-gradient-to-r from-white via-red-400 to-white">
+                Stay Connected
+              </h2>
+              <p className="text-base sm:text-lg md:text-xl text-white/80 mb-6 sm:mb-8 max-w-2xl mx-auto leading-relaxed px-4">
+                Join our newsletter to receive updates on breakthrough research,
+                upcoming events, and innovations in robotics. Be the first to know about our latest projects!
+              </p>
+              <div className="max-w-lg mx-auto px-4">
+                {/* Step 1: Email Input */}
+                {newsletterStep === 1 && (
+                  <form onSubmit={handleEmailContinue}>
+                    <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-4">
+                      <input
+                        type="email"
+                        placeholder="Enter your email address"
+                        value={newsletterEmail}
+                        onChange={(e) => setNewsletterEmail(e.target.value)}
+                        className="flex-1 px-4 sm:px-6 py-3 sm:py-4 rounded-lg sm:rounded-xl bg-white/10 border border-white/20 focus:outline-none focus:ring-2 focus:ring-red-500/50 text-white placeholder-white/60 backdrop-blur-lg text-sm sm:text-base"
+                        required
+                      />
+                      <motion.button
+                        type="submit"
+                        whileHover={{ scale: 1.05, boxShadow: "0 20px 40px rgba(239, 68, 68, 0.3)" }}
+                        whileTap={{ scale: 0.95 }}
+                        className="px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg sm:rounded-xl font-semibold shadow-lg shadow-red-500/30 hover:shadow-red-500/50 transition-all flex items-center justify-center gap-2 group text-sm sm:text-base"
+                      >
+                        Continue
+                        <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" />
+                      </motion.button>
+                    </div>
+                  </form>
+                )}
+
+                {/* Step 2: Name Fields */}
+                {newsletterStep === 2 && (
+                  <form onSubmit={handleNewsletterSubmit}>
+                    <div className="mb-4">
+                      <p className="text-white/70 text-sm mb-4">
+                        Great! We have your email: <span className="text-red-400 font-medium">{newsletterEmail}</span>
+                      </p>
+                      <p className="text-white/60 text-sm mb-4">
+                        Add your name (optional) to personalize your newsletter experience.
+                      </p>
+                      
+                      <div className="grid grid-cols-2 gap-3 mb-4">
+                        <input
+                          type="text"
+                          placeholder="First name (optional)"
+                          value={newsletterFirstName}
+                          onChange={(e) => setNewsletterFirstName(e.target.value)}
+                          className="px-4 py-3 rounded-lg bg-white/10 border border-white/20 focus:outline-none focus:ring-2 focus:ring-red-500/50 text-white placeholder-white/60 backdrop-blur-lg text-sm"
+                        />
+                        <input
+                          type="text"
+                          placeholder="Last name (optional)"
+                          value={newsletterLastName}
+                          onChange={(e) => setNewsletterLastName(e.target.value)}
+                          className="px-4 py-3 rounded-lg bg-white/10 border border-white/20 focus:outline-none focus:ring-2 focus:ring-red-500/50 text-white placeholder-white/60 backdrop-blur-lg text-sm"
+                        />
+                      </div>
+                      
+                      <div className="flex gap-3">
+                        <motion.button
+                          type="button"
+                          onClick={handleBackToEmail}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          className="px-6 py-3 bg-white/10 hover:bg-white/20 text-white rounded-lg font-medium transition-all flex items-center gap-2"
+                        >
+                          ← Back
+                        </motion.button>
+                        <motion.button
+                          type="submit"
+                          disabled={isNewsletterSubmitting}
+                          whileHover={!isNewsletterSubmitting ? { scale: 1.05, boxShadow: "0 20px 40px rgba(239, 68, 68, 0.3)" } : {}}
+                          whileTap={!isNewsletterSubmitting ? { scale: 0.95 } : {}}
+                          className="flex-1 px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 disabled:from-red-800 disabled:to-red-900 disabled:cursor-not-allowed text-white rounded-lg font-semibold shadow-lg shadow-red-500/30 hover:shadow-red-500/50 transition-all flex items-center justify-center gap-2 group"
+                        >
+                          {isNewsletterSubmitting ? (
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                          ) : (
+                            <>
+                              Subscribe
+                              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                            </>
+                          )}
+                        </motion.button>
+                      </div>
+                    </div>
+                  </form>
+                )}
+
+                {/* Step 3: Success Message */}
+                {newsletterStep === 3 && (
+                  <div className="text-center">
+                    <div className="mb-4">
+                      <div className="w-16 h-16 mx-auto mb-4 bg-green-500/20 rounded-full flex items-center justify-center">
+                        <svg className="w-8 h-8 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                      </div>
+                      <h3 className="text-xl font-semibold text-green-400 mb-2">Welcome to our newsletter!</h3>
+                      <p className="text-white/80">
+                        You're all set! We'll keep you updated with our latest projects and innovations.
+                      </p>
+                    </div>
+                  </div>
+                )}
+                
+                {/* Error Message */}
+                {newsletterMessage && newsletterMessageType === "error" && (
+                  <div className="mb-4 p-3 rounded-lg text-sm bg-red-900/50 text-red-300 border border-red-700/50">
+                    {newsletterMessage}
+                  </div>
+                )}
+              </div>
+              <p className="text-xs sm:text-sm text-white/60 mt-4">
+                🔒 We respect your privacy. Unsubscribe at any time.
+              </p>
           </div>
+          </motion.div>
         </div>
       </motion.section>
     </div>
@@ -537,54 +748,3 @@ const NewsPage = () => {
 };
 
 export default NewsPage; 
-
-// Newsletter form component
-function NewsletterForm() {
-  const [email, setEmail] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
-
-  const onSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
-    setMessage("");
-    if (!/[^\s@]+@[^\s@]+\.[^\s@]+/.test(email)) {
-      setError("Please enter a valid email.");
-      return;
-    }
-    setIsSubmitting(true);
-    try {
-      const res = await newsService.subscribeNewsletter({ email });
-      setMessage(res.message || "Subscribed successfully");
-      setEmail("");
-    } catch (e) {
-      setError(e.message || "Subscription failed");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  return (
-    <form onSubmit={onSubmit} className="flex flex-col sm:flex-row max-w-md mx-auto gap-4 w-full">
-      <input
-        type="email"
-        placeholder="Enter your email address"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        className="flex-1 px-4 py-3 rounded-lg bg-white/10 border border-white/20 focus:outline-none focus:ring-2 focus:ring-red-500 text-white placeholder-white/60 backdrop-blur-lg"
-      />
-      <motion.button
-        whileHover={{ scale: isSubmitting ? 1 : 1.05 }}
-        whileTap={{ scale: isSubmitting ? 1 : 0.95 }}
-        disabled={isSubmitting}
-        className="px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 rounded-lg font-semibold text-white shadow-lg shadow-red-500/30 hover:shadow-red-500/50 transition-all disabled:opacity-60"
-      >
-        {isSubmitting ? "Subscribing..." : "Subscribe"}
-      </motion.button>
-      {(message || error) && (
-        <div className={`w-full text-sm ${error ? 'text-red-400' : 'text-green-400'} sm:col-span-2`}>{error || message}</div>
-      )}
-    </form>
-  );
-}

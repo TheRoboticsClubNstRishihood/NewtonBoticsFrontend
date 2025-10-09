@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Mail, Lock, LogIn } from "lucide-react";
+import { Mail, Lock, LogIn, Eye, EyeOff } from "lucide-react";
 import { useAuth } from "../../../contexts/AuthContext";
 
 function Input({ icon: Icon, ...props }) {
@@ -14,6 +14,32 @@ function Input({ icon: Icon, ...props }) {
         {...props}
         className={`w-full ${Icon ? "pl-10" : "pl-4"} pr-4 py-3 rounded-xl bg-black/50 border border-white/25 focus:outline-none focus:ring-2 focus:ring-sky-500/40 text-white placeholder-white/60`}
       />
+    </div>
+  );
+}
+
+function PasswordInput({ icon: Icon = Lock, value, onChange, placeholder = "Password" }) {
+  const [show, setShow] = useState(false);
+  return (
+    <div className="relative">
+      {Icon && (
+        <Icon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/60" />
+      )}
+      <input
+        type={show ? "text" : "password"}
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+        className={`w-full ${Icon ? "pl-10" : "pl-4"} pr-10 py-3 rounded-xl bg-black/50 border border-white/25 focus:outline-none focus:ring-2 focus:ring-sky-500/40 text-white placeholder-white/60`}
+      />
+      <button
+        type="button"
+        onClick={() => setShow((s) => !s)}
+        className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 hover:text-white/80 transition"
+        aria-label={show ? "Hide password" : "Show password"}
+      >
+        {show ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+      </button>
     </div>
   );
 }
@@ -114,7 +140,7 @@ export default function SignInPage() {
 
             <form onSubmit={onSubmit} className="space-y-4">
               <Input icon={Mail} type="email" placeholder="Email address" value={email} onChange={(e) => setEmail(e.target.value)} />
-              <Input icon={Lock} type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
+              <PasswordInput value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" />
               <div className="text-right -mt-2">
                 <a href="/auth/forgot" className="text-sm text-white/70 hover:text-white hover:underline">Forgot password?</a>
               </div>

@@ -1,7 +1,7 @@
 // components/Navbar.js
 "use client";
 import { useState, useEffect, useRef } from "react";
-import { FiMenu, FiX, FiChevronDown, FiUser, FiPackage, FiList, FiLogOut, FiSettings, FiFileText } from "react-icons/fi";
+import { FiMenu, FiX, FiChevronDown, FiUser, FiPackage, FiList, FiLogOut, FiSettings, FiFileText, FiShield } from "react-icons/fi";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "../../contexts/AuthContext";
@@ -179,6 +179,15 @@ const Navbar = () => {
                 {isAdmin && (
                   <div className="py-1">
                     <div className="px-4 py-2 text-[11px] uppercase tracking-wider text-white/40">Admin Tools</div>
+                    <a
+                      href="https://newtonbotics-admin-pannel.vercel.app/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 px-4 py-2 text-white/90 hover:bg-white/10"
+                      onClick={() => setShowProfile(false)}
+                    >
+                      <FiShield /> Admin Panel
+                    </a>
                     <Link
                       href="/Inventory"
                       className="flex items-center gap-2 px-4 py-2 text-white/90 hover:bg-white/10"
@@ -204,13 +213,13 @@ const Navbar = () => {
                   >
                     <FiFileText /> Project Request
                   </Link>
-                  <Link
+                  {/* <Link
                     href="/ChatRoom"
                     className="flex items-center gap-2 px-4 py-2 text-white/90 hover:bg-white/10"
                     onClick={() => setShowProfile(false)}
                   >
                     <FiList /> Chat Room
-                  </Link>
+                  </Link> */}
                   <Link
                     href="/ProfileCompletion"
                     className="flex items-center gap-2 px-4 py-2 text-white/90 hover:bg-white/10"
@@ -275,9 +284,20 @@ const Navbar = () => {
               </div>
               <Link href="/my-activity" className={getMobileActiveStyles("/my-activity")} onClick={() => setIsOpen(false)}>My Activity</Link>
               <Link href="/projectRequest" className={getMobileActiveStyles("/projectRequest")} onClick={() => setIsOpen(false)}>Project Request</Link>
-              <Link href="/ChatRoom" className={getMobileActiveStyles("/ChatRoom")} onClick={() => setIsOpen(false)}>Chat Room</Link>
+              {/* <Link href="/ChatRoom" className={getMobileActiveStyles("/ChatRoom")} onClick={() => setIsOpen(false)}>Chat Room</Link> */}
               {isAdmin && (
-                <Link href="/Inventory" className={getMobileActiveStyles("/Inventory")} onClick={() => setIsOpen(false)}>Inventory</Link>
+                <>
+                  <a
+                    href="https://newtonbotics-admin-pannel.vercel.app/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block py-2 px-4 text-white hover:bg-red-900 transition"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    Admin Panel
+                  </a>
+                  <Link href="/Inventory" className={getMobileActiveStyles("/Inventory")} onClick={() => setIsOpen(false)}>Inventory</Link>
+                </>
               )}
               <Link href="/ProfileCompletion" className={getMobileActiveStyles("/ProfileCompletion")} onClick={() => setIsOpen(false)}>Profile Settings</Link>
               <button

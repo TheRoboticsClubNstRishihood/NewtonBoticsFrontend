@@ -2,7 +2,6 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ExternalLink, Info } from "lucide-react";
-import newsService from "../../lib/news";
 import { useRouter } from "next/navigation";
 
 const NewsTicker = () => {
@@ -12,75 +11,26 @@ const NewsTicker = () => {
   const [selectedNews, setSelectedNews] = useState(null);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
   const textRef = useRef(null);
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3005/api';
 
-  const defaultAnnouncements = [
-    {
-      id: 1,
-      text: "# Freshers First Workshop: Introduction to CAD Designing",
-      details: "Join us for an introductory workshop on CAD designing. Learn the basics of Computer-Aided Design and create your first 3D models. This workshop is perfect for beginners who want to explore the world of 3D modeling and design.",
-      date: "2024-12-20",
-      category: "Workshop"
-    },
-    {
-      id: 2,
-      text: "# Bus Tracker Launching Soon !!",
-      details: "Our innovative bus tracking system is almost ready for launch. Stay tuned for real-time bus location updates. This system will help students track bus locations in real-time and plan their commute better.",
-      date: "2024-12-25",
-      category: "Technology"
-    },
-    {
-      id: 3,
-      text: "# Robotics Club Wins hearts at Open House'24 ❤️",
-      details: "Our robotics club showcased amazing projects at the Open House 2024 and won the hearts of visitors with our innovative demonstrations. The event was a huge success with over 500 visitors.",
-      date: "2024-12-15",
-      category: "Achievement"
-    },
-    {
-      id: 4,
-      text: "# Robocon Hackathon Registration Open",
-      details: "Registration is now open for the annual Robocon Hackathon. Compete with the best robotics teams and win exciting prizes. This year's theme focuses on sustainable robotics solutions.",
-      date: "2025-01-10",
-      category: "Competition"
-    },
-    {
-      id: 5,
-      text: "# New AI Workshop Series Starting Next Month",
-      details: "Get ready for our comprehensive AI workshop series covering machine learning, computer vision, and robotics integration. Learn from industry experts and work on real-world projects.",
-      date: "2025-01-15",
-      category: "Workshop"
-    },
-    {
-      id: 6,
-      text: "# Drone Technology Workshop Success",
-      details: "Our drone technology workshop was a huge success with over 50 students participating and building their own drones. Students learned about autonomous flight systems and aerial robotics.",
-      date: "2024-12-10",
-      category: "Workshop"
-    },
-    {
-      id: 7,
-      text: "# Industry Partnership with TechCorp Robotics",
-      details: "Exciting new partnership announced with TechCorp Robotics for collaborative research and internship opportunities. This partnership will provide students with industry exposure and real-world experience.",
-      date: "2024-12-05",
-      category: "Partnership"
-    },
-    {
-      id: 8,
-      text: "# Research Paper Published in IEEE Robotics Journal",
-      details: "Congratulations to our team for having their research paper on 'Swarm Robotics for Disaster Management' published in IEEE Robotics Journal. This represents a significant contribution to the field.",
-      date: "2024-11-28",
-      category: "Publication"
-    }
-  ];
-
-  const [announcements, setAnnouncements] = useState(defaultAnnouncements);
+  const [announcements, setAnnouncements] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
   // Create a continuous string of announcements with clickable spans
   const createContinuousText = () => {
+    if (announcements.length === 0) {
+      return (
+        <span className="inline-block px-2 py-1">
+          # No announcements at the moment
+        </span>
+      );
+    }
+    
     return announcements.map((announcement, index) => (
       <span key={`${announcement.id}-${index}`}>
         <span
-          className={`inline-block px-2 py-1 rounded-lg transition-all duration-300 cursor-pointer hover:bg-white/10 hover:shadow-md hover:scale-105 relative ${
+          className={`inline-block px-2 py-1 mr-8 rounded-lg transition-all duration-300 cursor-pointer hover:bg-white/10 hover:shadow-md hover:scale-105 relative ${
             hoveredNews === announcement.id ? 'bg-white/10 shadow-md scale-105' : ''
           }`}
           onMouseEnter={(e) => {
@@ -99,9 +49,6 @@ const NewsTicker = () => {
         >
           {announcement.text}
         </span>
-        {index < announcements.length - 1 && (
-          <span className="inline-block mx-4 text-white/40">•</span>
-        )}
       </span>
     ));
   };
@@ -109,7 +56,7 @@ const NewsTicker = () => {
   useEffect(() => {
     const updateTextWidth = () => {
       if (textRef.current) {
-        const width = textRef.current.scrollWidth / 2; // Divide by 2 since we duplicate the text
+        const width = textRef.current.scrollWidth / 6; // Divide by 6 since we repeat the text 6 times
         setTextWidth(Math.max(width, 100)); // Minimum width to prevent issues
       }
     };
@@ -120,30 +67,52 @@ const NewsTicker = () => {
     return () => window.removeEventListener('resize', updateTextWidth);
   }, [announcements]);
 
-  // Load latest news from public API for ticker
+  // Load latest news and events from navigation API for ticker
   useEffect(() => {
     let isMounted = true;
     const load = async () => {
       try {
-        const { items } = await newsService.listNews({ isPublished: true, isFeatured: true, limit: 10, skip: 0 });
+        setIsLoading(true);
+        const res = await fetch(`${API_BASE_URL}/events/navigation`, { 
+          cache: 'no-store' 
+        });
+        
+        if (!res.ok) {
+          console.error('Failed to fetch navigation items');
+          if (isMounted) setIsLoading(false);
+          return;
+        }
+        
+        const data = await res.json();
+        
         if (!isMounted) return;
-        if (Array.isArray(items) && items.length > 0) {
-          const mapped = items.map((n, idx) => ({
-            id: n._id || idx,
-            text: `# ${n.title}`,
-            details: n.excerpt || '',
-            date: n.publishedAt || n.createdAt || new Date().toISOString(),
-            category: n.categoryId || 'News',
+        
+        if (data?.success && Array.isArray(data?.data?.items) && data.data.items.length > 0) {
+          const mapped = data.data.items.map((item) => ({
+            id: item.id,
+            type: item.type, // 'news' or 'event'
+            text: `# ${item.title}`,
+            details: item.type === 'news' 
+              ? (item.excerpt || item.content || 'Click to read more...') 
+              : (item.description || 'Click to view event details...'),
+            date: item.type === 'news' 
+              ? (item.publishedAt || item.createdAt) 
+              : (item.startDate || item.createdAt),
+            category: item.type === 'news' 
+              ? (item.category?.name || 'News') 
+              : (item.eventType || item.category || 'Event'),
           }));
           setAnnouncements(mapped);
         }
-      } catch (_) {
-        // Keep default announcements on failure
+      } catch (error) {
+        console.error('Error fetching navigation items:', error);
+      } finally {
+        if (isMounted) setIsLoading(false);
       }
     };
     load();
     return () => { isMounted = false; };
-  }, []);
+  }, [API_BASE_URL]);
 
   const handleTickerClick = () => {
     setIsPaused(!isPaused);
@@ -173,14 +142,20 @@ const NewsTicker = () => {
             {/* News indicator */}
             <div className="flex items-center gap-2 mr-4 md:mr-6 flex-shrink-0">
               <div className={`w-2 h-2 rounded-full ${isPaused ? 'bg-white' : 'bg-white animate-pulse'}`}></div>
-              <span className="text-xs font-bold text-white uppercase tracking-wide hidden sm:inline">Latest News</span>
-              <span className="text-xs font-bold text-white uppercase tracking-wide sm:hidden">News</span>
+              <span className="text-xs font-bold text-white uppercase tracking-wide hidden sm:inline">
+                {isLoading ? 'Loading...' : 'Latest News'}
+              </span>
+              <span className="text-xs font-bold text-white uppercase tracking-wide sm:hidden">
+                {isLoading ? 'Loading' : 'News'}
+              </span>
             </div>
             
             {/* Continuous scrolling announcements */}
             <div 
               className="flex-1 overflow-hidden relative min-h-[20px] flex items-center cursor-pointer hover:bg-white/5 rounded-lg transition-colors duration-200"
               onClick={handleTickerClick}
+              onMouseEnter={() => setIsPaused(true)}
+              onMouseLeave={() => setIsPaused(false)}
             >
               <motion.div
                 ref={textRef}
@@ -194,12 +169,12 @@ const NewsTicker = () => {
                   }
                 }}
               >
-                <span className="inline-block">
-                  {createContinuousText()}
-                </span>
-                <span className="inline-block ml-16">
-                  {createContinuousText()}
-                </span>
+                {/* Repeat announcements multiple times for seamless infinite scroll */}
+                {[...Array(6)].map((_, repeatIndex) => (
+                  <span key={`repeat-${repeatIndex}`} className="inline-block">
+                    {createContinuousText()}
+                  </span>
+                ))}
               </motion.div>
             </div>
             
@@ -292,14 +267,17 @@ const NewsTicker = () => {
                   </button>
                   <button
                     onClick={() => {
-                      if (selectedNews?.id) {
-                        router.push(`/News/${selectedNews.id}`);
+                      if (selectedNews?.id && selectedNews?.type) {
+                        const routePath = selectedNews.type === 'event' 
+                          ? `/Events/${selectedNews.id}` 
+                          : `/News/${selectedNews.id}`;
+                        router.push(routePath);
                         setSelectedNews(null);
                       }
                     }}
                     className="flex-1 px-4 py-2 bg-white text-black rounded-lg hover:bg-white/90 transition-all flex items-center justify-center gap-2"
                   >
-                    Read More
+                    {selectedNews?.type === 'event' ? 'View Event' : 'Read More'}
                     <ExternalLink className="w-4 h-4" />
                   </button>
                 </div>

@@ -498,30 +498,6 @@ const ProjectDetail = () => {
               </motion.div>
             )}
 
-            {/* Tags */}
-            {project.tags && project.tags.length > 0 && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.7, duration: 0.8 }}
-                className="bg-white/5 backdrop-blur-lg rounded-2xl p-6 border border-white/10"
-              >
-                <h2 className="text-2xl font-bold mb-6 text-white">Technologies & Skills</h2>
-                <div className="flex flex-wrap gap-2">
-                  {project.tags.map((tag, index) => (
-                    <motion.span
-                      key={index}
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: index * 0.05, duration: 0.5 }}
-                      className="px-3 py-2 bg-red-500/20 text-red-300 border border-red-500/30 rounded-lg text-sm font-medium"
-                    >
-                      {tag}
-                    </motion.span>
-                  ))}
-                </div>
-              </motion.div>
-            )}
           </div>
 
           {/* Sidebar */}
@@ -553,12 +529,6 @@ const ProjectDetail = () => {
                     {project.teamMembers?.length || 0} members
                   </span>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-white/60">Milestones</span>
-                  <span className="text-white font-medium">
-                    {project.milestones?.length || 0} total
-                  </span>
-                </div>
                 {project.isFeatured && (
                   <div className="flex items-center justify-between">
                     <span className="text-white/60">Featured</span>
@@ -567,6 +537,31 @@ const ProjectDetail = () => {
                 )}
               </div>
             </motion.div>
+
+            {/* Technologies & Skills */}
+            {project.tags && project.tags.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.4, duration: 0.8 }}
+                className="bg-white/5 backdrop-blur-lg rounded-2xl p-6 border border-white/10"
+              >
+                <h3 className="text-xl font-bold mb-4 text-white">Technologies & Skills</h3>
+                <div className="flex flex-wrap gap-2">
+                  {project.tags.map((tag, index) => (
+                    <motion.span
+                      key={index}
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: index * 0.05, duration: 0.5 }}
+                      className="px-3 py-2 bg-red-500/20 text-red-300 border border-red-500/30 rounded-lg text-sm font-medium"
+                    >
+                      {tag}
+                    </motion.span>
+                  ))}
+                </div>
+              </motion.div>
+            )}
 
             {/* Share Project */}
             <motion.div

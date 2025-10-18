@@ -85,7 +85,7 @@ NewtonBoticsFrontend/
    Create a `.env.local` file in the root directory:
    ```bash
    # API Configuration
-   NEXT_PUBLIC_API_URL=http://localhost:3000/api
+   NEXT_PUBLIC_API_URL=http://localhost:3005/api
    
    # Authentication Configuration
    NEXT_PUBLIC_AUTH_ENABLED=true

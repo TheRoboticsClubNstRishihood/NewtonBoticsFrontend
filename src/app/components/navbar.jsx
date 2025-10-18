@@ -186,13 +186,6 @@ const Navbar = () => {
                     >
                       <FiPackage /> Inventory
                     </Link>
-                    <Link
-                      href="/ProjectRequests"
-                      className="flex items-center gap-2 px-4 py-2 text-white/90 hover:bg-white/10"
-                      onClick={() => setShowProfile(false)}
-                    >
-                      <FiList /> Project Requests
-                    </Link>
                   </div>
                 )}
 
@@ -275,10 +268,7 @@ const Navbar = () => {
               </div>
               <Link href="/ChatRoom" className={getMobileActiveStyles("/ChatRoom")} onClick={() => setIsOpen(false)}>Chat Room</Link>
               {isAdmin && (
-                <>
-                  <Link href="/Inventory" className={getMobileActiveStyles("/Inventory")} onClick={() => setIsOpen(false)}>Inventory</Link>
-                  <Link href="/ProjectRequests" className={getMobileActiveStyles("/ProjectRequests")} onClick={() => setIsOpen(false)}>Project Requests</Link>
-                </>
+                <Link href="/Inventory" className={getMobileActiveStyles("/Inventory")} onClick={() => setIsOpen(false)}>Inventory</Link>
               )}
               <Link href="/ProfileCompletion" className={getMobileActiveStyles("/ProfileCompletion")} onClick={() => setIsOpen(false)}>Profile Settings</Link>
               <Link href="/my-activity" className={getMobileActiveStyles("/my-activity")} onClick={() => setIsOpen(false)}>My Activity</Link>

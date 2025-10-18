@@ -1,5 +1,5 @@
 // Public News and Newsletter API client
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3005/api';
 
 async function safeParseJson(response) {
   const contentType = response.headers.get('content-type') || '';

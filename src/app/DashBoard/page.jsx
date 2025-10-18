@@ -17,7 +17,7 @@ import ImpactSection from "../components/ImpactSection";
 import { subscribeToNewsletter } from "../../lib/newsletter";
 
 const HomePage = () => {
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3005/api';
   const { user, isAuthenticated } = useAuth();
   const [roleNotice, setRoleNotice] = useState(null);
   const [currentSlide, setCurrentSlide] = useState(0);

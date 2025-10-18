@@ -91,7 +91,7 @@ const ProjectsPage = () => {
     hasMore: false
   });
   
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3005/api';
 
   // Project statuses from API specification
   const projectStatuses = ['upcoming', 'ongoing', 'completed', 'on_hold'];

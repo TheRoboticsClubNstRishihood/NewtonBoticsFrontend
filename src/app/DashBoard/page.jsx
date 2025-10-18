@@ -216,16 +216,30 @@ const HomePage = () => {
 
         {/* Hero Section with Enhanced Animations */}
         <div className="relative min-h-screen lg:h-screen">
-        <div className="absolute inset-0 bg-gradient-to-br from-black via-gray-900 to-black"></div>
+        {/* Mobile Video Background */}
+        <div className="absolute inset-0 lg:hidden overflow-hidden">
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="w-full h-full object-cover opacity-30"
+          >
+            <source src="/robotanimation.mp4" type="video/mp4" />
+          </video>
+          <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/60 to-black"></div>
+        </div>
+        
+        <div className="absolute inset-0 bg-gradient-to-br from-black via-gray-900 to-black hidden lg:block"></div>
         <Spotlight
           className="-top-40 left-0 md:left-60 md:-top-20"
           fill="white"
         />
         
-        {/* Animated Background Elements */}
+        {/* Animated Background Elements - Reduced opacity on mobile for video visibility */}
         <div className="absolute inset-0 overflow-hidden">
           <motion.div
-            className="absolute top-20 left-4 sm:left-20 w-48 h-48 sm:w-72 sm:h-72 bg-white/10 rounded-full blur-3xl"
+            className="absolute top-20 left-4 sm:left-20 w-48 h-48 sm:w-72 sm:h-72 bg-white/10 rounded-full blur-3xl lg:opacity-100 opacity-50"
             animate={{
               scale: [1, 1.2, 1],
               opacity: [0.3, 0.6, 0.3],
@@ -237,7 +251,7 @@ const HomePage = () => {
             }}
           />
           <motion.div
-            className="absolute bottom-20 right-4 sm:right-20 w-64 h-64 sm:w-96 sm:h-96 bg-white/10 rounded-full blur-3xl"
+            className="absolute bottom-20 right-4 sm:right-20 w-64 h-64 sm:w-96 sm:h-96 bg-white/10 rounded-full blur-3xl lg:opacity-100 opacity-50"
             animate={{
               scale: [1.2, 1, 1.2],
               opacity: [0.4, 0.7, 0.4],
@@ -250,7 +264,7 @@ const HomePage = () => {
           />
           {/* Subtle Red Texture Elements */}
           <motion.div
-            className="absolute top-40 right-4 sm:right-40 w-32 h-32 sm:w-48 sm:h-48 bg-red-500/5 rounded-full blur-2xl"
+            className="absolute top-40 right-4 sm:right-40 w-32 h-32 sm:w-48 sm:h-48 bg-red-500/5 rounded-full blur-2xl lg:opacity-100 opacity-40"
             animate={{
               scale: [1, 1.3, 1],
               opacity: [0.2, 0.4, 0.2],
@@ -263,7 +277,7 @@ const HomePage = () => {
             }}
           />
           <motion.div
-            className="absolute bottom-40 left-4 sm:left-40 w-24 h-24 sm:w-32 sm:h-32 bg-red-500/8 rounded-full blur-xl"
+            className="absolute bottom-40 left-4 sm:left-40 w-24 h-24 sm:w-32 sm:h-32 bg-red-500/8 rounded-full blur-xl lg:opacity-100 opacity-40"
             animate={{
               scale: [1.2, 1, 1.2],
               opacity: [0.3, 0.5, 0.3],

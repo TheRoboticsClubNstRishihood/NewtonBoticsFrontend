@@ -36,6 +36,29 @@ const Navbar = () => {
     return () => document.removeEventListener("mousedown", onClickAway);
   }, []);
 
+  // Close mobile menu on scroll
+  useEffect(() => {
+    const handleScrollClose = () => {
+      if (isOpen) {
+        setIsOpen(false);
+      }
+    };
+    window.addEventListener("scroll", handleScrollClose);
+    return () => window.removeEventListener("scroll", handleScrollClose);
+  }, [isOpen]);
+
+  // Prevent body scroll when mobile menu is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [isOpen]);
+
   const isLoggedIn = isAuthenticated && user;
   // Treat 'admin' role as full admin; keep legacy mentor/researcher and permission fallback
   const isAdmin = isLoggedIn && (hasRole('admin') || hasRole('mentor') || hasRole('researcher') || hasPermission('admin:access'));
@@ -251,12 +274,16 @@ const Navbar = () => {
 
       {/* Mobile Menu */}
       <div
-        className={`md:hidden absolute w-full transition-all duration-300 ease-in-out bg-black/95 backdrop-blur-lg overflow-hidden ${
-          isOpen ? "max-h-[28rem]" : "max-h-0"
+        className={`md:hidden absolute w-full transition-all duration-300 ease-in-out bg-black/95 backdrop-blur-lg shadow-2xl mobile-menu-scroll ${
+          isOpen ? "max-h-[calc(100vh-5rem)] overflow-y-auto" : "max-h-0 overflow-hidden"
         }`}
-        style={{ zIndex: 90 }}
+        style={{ 
+          zIndex: 90,
+          scrollbarWidth: 'thin',
+          scrollbarColor: '#ef4444 transparent'
+        }}
       >
-        <div className="py-2">
+        <div className="py-2 min-h-0">
           <Link href="/DashBoard" className={getMobileActiveStyles("/DashBoard")} onClick={() => setIsOpen(false)}>Home</Link>
           <Link href="/aboutus" className={getMobileActiveStyles("/aboutus")} onClick={() => setIsOpen(false)}>About Us</Link>
           <Link href="/Projects" className={getMobileActiveStyles("/Projects")} onClick={() => setIsOpen(false)}>Projects</Link>
@@ -277,34 +304,82 @@ const Navbar = () => {
               Sign in
             </Link>
           ) : (
-            <div className="mx-2 my-2 rounded-lg border border-white/10">
-              <div className="px-4 py-2 text-white/80 text-sm border-b border-white/10">
-                <div className="font-medium">{displayName}</div>
-                <div className="text-white/60 capitalize">{userRole}</div>
+            <div className="mx-2 my-2 rounded-lg border border-white/10 bg-black/40">
+              <div className="px-4 py-3 text-white/80 text-sm border-b border-white/10 bg-white/5">
+                <div className="flex items-center gap-3">
+                  {userAvatarUrl ? (
+                    <span className="w-10 h-10 rounded-full overflow-hidden border border-white/20 bg-white/10 flex-shrink-0">
+                      <img src={userAvatarUrl} alt="Avatar" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                    </span>
+                  ) : (
+                    <span className="w-10 h-10 rounded-full bg-red-600 grid place-items-center text-sm font-bold flex-shrink-0">
+                      {avatarLabel}
+                    </span>
+                  )}
+                  <div>
+                    <div className="font-medium text-white">{displayName}</div>
+                    <div className="text-white/60 capitalize text-xs">{userRole}</div>
+                  </div>
+                </div>
               </div>
-              <Link href="/my-activity" className={getMobileActiveStyles("/my-activity")} onClick={() => setIsOpen(false)}>My Activity</Link>
-              <Link href="/projectRequest" className={getMobileActiveStyles("/projectRequest")} onClick={() => setIsOpen(false)}>Project Request</Link>
-              {/* <Link href="/ChatRoom" className={getMobileActiveStyles("/ChatRoom")} onClick={() => setIsOpen(false)}>Chat Room</Link> */}
+              
               {isAdmin && (
                 <>
+                  <div className="px-4 py-2 text-[10px] uppercase tracking-wider text-white/40 bg-white/5">Admin Tools</div>
                   <a
                     href="https://newtonbotics-admin-pannel.vercel.app/"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="block py-2 px-4 text-white hover:bg-red-900 transition"
+                    className="flex items-center gap-3 py-2 px-4 text-white hover:bg-red-900 transition"
                     onClick={() => setIsOpen(false)}
                   >
-                    Admin Panel
+                    <FiShield className="w-4 h-4" />
+                    <span>Admin Panel</span>
                   </a>
-                  <Link href="/Inventory" className={getMobileActiveStyles("/Inventory")} onClick={() => setIsOpen(false)}>Inventory</Link>
+                  <Link 
+                    href="/Inventory" 
+                    className="flex items-center gap-3 py-2 px-4 text-white hover:bg-red-900 transition" 
+                    onClick={() => setIsOpen(false)}
+                  >
+                    <FiPackage className="w-4 h-4" />
+                    <span>Inventory</span>
+                  </Link>
                 </>
               )}
-              <Link href="/ProfileCompletion" className={getMobileActiveStyles("/ProfileCompletion")} onClick={() => setIsOpen(false)}>Profile Settings</Link>
+              
+              <div className="border-t border-white/10">
+                <Link 
+                  href="/my-activity" 
+                  className="flex items-center gap-3 py-2 px-4 text-white hover:bg-red-900 transition" 
+                  onClick={() => setIsOpen(false)}
+                >
+                  <FiList className="w-4 h-4" />
+                  <span>My Activity</span>
+                </Link>
+                <Link 
+                  href="/projectRequest" 
+                  className="flex items-center gap-3 py-2 px-4 text-white hover:bg-red-900 transition" 
+                  onClick={() => setIsOpen(false)}
+                >
+                  <FiFileText className="w-4 h-4" />
+                  <span>Project Request</span>
+                </Link>
+                <Link 
+                  href="/ProfileCompletion" 
+                  className="flex items-center gap-3 py-2 px-4 text-white hover:bg-red-900 transition" 
+                  onClick={() => setIsOpen(false)}
+                >
+                  <FiSettings className="w-4 h-4" />
+                  <span>Profile Settings</span>
+                </Link>
+              </div>
+              
               <button
                 onClick={() => { handleLogout(); setIsOpen(false); }}
-                className="block w-[calc(100%-2rem)] mx-4 my-3 py-2 bg-white/10 text-white text-center rounded-lg hover:bg-white/20 transition border border-white/20"
+                className="flex items-center justify-center gap-2 w-[calc(100%-2rem)] mx-4 my-3 py-2 bg-white/10 text-white text-center rounded-lg hover:bg-white/20 transition border border-white/20"
               >
-                Logout
+                <FiLogOut className="w-4 h-4" />
+                <span>Logout</span>
               </button>
             </div>
           )}

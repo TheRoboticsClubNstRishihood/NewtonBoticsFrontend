@@ -210,3 +210,28 @@
 .animate-wobble {
   animation: wobble 2s ease-in-out infinite;
 }
+
+/* Custom Scrollbar Styles for Mobile Menu */
+/* For Webkit browsers (Chrome, Safari, Edge) */
+.md\:hidden.absolute.w-full::-webkit-scrollbar {
+  width: 6px;
+}
+
+.md\:hidden.absolute.w-full::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.md\:hidden.absolute.w-full::-webkit-scrollbar-thumb {
+  background: rgba(239, 68, 68, 0.5);
+  border-radius: 3px;
+}
+
+.md\:hidden.absolute.w-full::-webkit-scrollbar-thumb:hover {
+  background: rgba(239, 68, 68, 0.7);
+}
+
+/* Smooth scrolling for mobile menu */
+.mobile-menu-scroll {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}

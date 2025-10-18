@@ -3,6 +3,7 @@ import "./globals.css";
 import Navbar from "./components/navbar";
 import Footer from "./components/footer";
 import NewsTicker from "./components/NewsTicker";
+import DiwaliCelebration from "./components/DiwaliCelebration";
 import { AuthProvider } from "../contexts/AuthContext";
 
 const geistSans = Geist({
@@ -27,6 +28,7 @@ export default function RootLayout({ children }) {
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
         <AuthProvider>
+          <DiwaliCelebration/>
           <Navbar/>
           <NewsTicker/>
           {children}

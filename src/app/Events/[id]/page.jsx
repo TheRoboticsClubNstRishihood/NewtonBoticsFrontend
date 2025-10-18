@@ -27,7 +27,7 @@ const EventDetail = () => {
   const [error, setError] = useState(null);
   const [isRegistering, setIsRegistering] = useState(false);
   
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3005/api';
 
   useEffect(() => {
     const fetchEvent = async () => {

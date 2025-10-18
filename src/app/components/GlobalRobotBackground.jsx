@@ -1,7 +1,6 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { SplineScene } from "@/components/components/ui/splite.tsx";
 
 export default function GlobalRobotBackground() {
   const pathname = usePathname();
@@ -13,10 +12,16 @@ export default function GlobalRobotBackground() {
   return (
     <div className="fixed inset-0 z-0 pointer-events-none">
       <div className="absolute inset-0 opacity-20">
-        <SplineScene
-          scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
-          className="w-full h-full"
-        />
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="w-full h-full object-cover"
+        >
+          <source src="/robotanimation.mov" type="video/quicktime" />
+          Your browser does not support the video tag.
+        </video>
       </div>
       <div className="absolute inset-0 bg-gradient-radial from-black/40 via-transparent to-black/60" />
     </div>

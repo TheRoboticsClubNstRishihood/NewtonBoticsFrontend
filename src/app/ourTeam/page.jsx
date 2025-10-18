@@ -45,7 +45,7 @@ const TeamPage = () => {
   const [researchers, setResearchers] = useState([]);
   const [departments, setDepartments] = useState([]);
   
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3005/api';
 
   useEffect(() => {
     fetchAllTeamData();

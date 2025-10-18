@@ -298,7 +298,7 @@ const ContactDemoPage = () => {
         <div className="mt-8 p-4 bg-white/5 rounded-lg">
           <h3 className="text-lg font-semibold text-white mb-3">API Endpoint Information</h3>
           <div className="text-sm text-white/70 space-y-2">
-            <p><strong>Endpoint:</strong> POST {process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api'}/contact/submit</p>
+            <p><strong>Endpoint:</strong> POST {process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3005/api'}/contact/submit</p>
             <p><strong>Required Fields:</strong> name, email, subject, message</p>
             <p><strong>Optional Fields:</strong> phone, category</p>
             <p><strong>Response:</strong> Check browser console for API response details</p>

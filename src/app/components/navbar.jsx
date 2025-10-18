@@ -1,7 +1,7 @@
 // components/Navbar.js
 "use client";
 import { useState, useEffect, useRef } from "react";
-import { FiMenu, FiX, FiChevronDown, FiUser, FiPackage, FiList, FiLogOut, FiSettings } from "react-icons/fi";
+import { FiMenu, FiX, FiChevronDown, FiUser, FiPackage, FiList, FiLogOut, FiSettings, FiFileText } from "react-icons/fi";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "../../contexts/AuthContext";
@@ -198,6 +198,13 @@ const Navbar = () => {
                     <FiList /> My Activity
                   </Link>
                   <Link
+                    href="/projectRequest"
+                    className="flex items-center gap-2 px-4 py-2 text-white/90 hover:bg-white/10"
+                    onClick={() => setShowProfile(false)}
+                  >
+                    <FiFileText /> Project Request
+                  </Link>
+                  <Link
                     href="/ChatRoom"
                     className="flex items-center gap-2 px-4 py-2 text-white/90 hover:bg-white/10"
                     onClick={() => setShowProfile(false)}
@@ -266,12 +273,13 @@ const Navbar = () => {
                 <div className="font-medium">{displayName}</div>
                 <div className="text-white/60 capitalize">{userRole}</div>
               </div>
+              <Link href="/my-activity" className={getMobileActiveStyles("/my-activity")} onClick={() => setIsOpen(false)}>My Activity</Link>
+              <Link href="/projectRequest" className={getMobileActiveStyles("/projectRequest")} onClick={() => setIsOpen(false)}>Project Request</Link>
               <Link href="/ChatRoom" className={getMobileActiveStyles("/ChatRoom")} onClick={() => setIsOpen(false)}>Chat Room</Link>
               {isAdmin && (
                 <Link href="/Inventory" className={getMobileActiveStyles("/Inventory")} onClick={() => setIsOpen(false)}>Inventory</Link>
               )}
               <Link href="/ProfileCompletion" className={getMobileActiveStyles("/ProfileCompletion")} onClick={() => setIsOpen(false)}>Profile Settings</Link>
-              <Link href="/my-activity" className={getMobileActiveStyles("/my-activity")} onClick={() => setIsOpen(false)}>My Activity</Link>
               <button
                 onClick={() => { handleLogout(); setIsOpen(false); }}
                 className="block w-[calc(100%-2rem)] mx-4 my-3 py-2 bg-white/10 text-white text-center rounded-lg hover:bg-white/20 transition border border-white/20"

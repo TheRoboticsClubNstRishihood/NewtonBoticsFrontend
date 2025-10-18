@@ -65,6 +65,24 @@ const nextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'tihan.iith.ac.in',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.boxfishrobotics.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'd2pn8kiwq2w21t.cloudfront.net',
+        port: '',
+        pathname: '/**',
+      },
     ],
   },
 };

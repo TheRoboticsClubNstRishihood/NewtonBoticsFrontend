@@ -31,9 +31,7 @@ const Footer = () => {
               <Instagram />
             </a>
             <a
-              href={`https://linkedin.com/company/${clubData?.contactInfo?.socialMedia?.linkedin
-                ?.replace(/\s+/g, "-")
-                .toLowerCase()}`}
+              href={`https://linkedin.com/company/${clubData?.contactInfo?.socialMedia?.linkedin}`}
               target="_blank"
               rel="noopener noreferrer"
               className="text-blue-400 hover:text-blue-300"

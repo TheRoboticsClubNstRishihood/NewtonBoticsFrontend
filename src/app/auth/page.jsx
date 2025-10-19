@@ -126,6 +126,21 @@ export default function AuthPage() {
            /[!@#$%^&*()_\-.,?":{}|<>]/.test(password);
   }, [formData.password]);
 
+  const isValidPhone = useMemo(() => {
+    const phone = formData.phone.trim();
+    if (!phone) return true; // Phone is optional
+    
+    // Remove all non-digit characters except + for validation
+    const cleanPhone = phone.replace(/[^\d+]/g, '');
+    
+    // Check if phone starts with 0, +91, or 91 and has appropriate length
+    return (
+      (cleanPhone.startsWith('0') && cleanPhone.length === 11) || // 0XXXXXXXXXX (10 digits after 0)
+      (cleanPhone.startsWith('+91') && cleanPhone.length === 13) || // +91XXXXXXXXXX (10 digits after +91)
+      (cleanPhone.startsWith('91') && cleanPhone.length === 12) // 91XXXXXXXXXX (10 digits after 91)
+    );
+  }, [formData.phone]);
+
   const handleInputChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     setError("");
@@ -148,7 +163,7 @@ export default function AuthPage() {
     }
 
     if (!isValidPassword) {
-      setError("Password must be at least 8 characters with uppercase, lowercase, number, and special character");
+      setError("Password must be at least 8 characters with uppercase, lowercase, number, and special character (!@#$%^&*()_.,?\":{}|<>-)");
       return false;
     }
 
@@ -169,6 +184,11 @@ export default function AuthPage() {
 
     if (formData.role === "student" && !formData.yearOfStudy) {
       setError("Year of study is required for students");
+      return false;
+    }
+
+    if (!isValidPhone) {
+      setError("Please enter a valid Indian phone number (starting with 0, +91, or 91)");
       return false;
     }
 
@@ -437,7 +457,7 @@ export default function AuthPage() {
                         onChange={(e) => handleInputChange('yearOfStudy', e.target.value)}
                       >
                         <option value="">Select Year</option>
-                        {[1, 2, 3, 4, 5, 6, 7, 8].map(year => (
+                        {[1, 2, 3, 4, 5].map(year => (
                           <option key={year} value={year}>Year {year}</option>
                         ))}
                       </Select>

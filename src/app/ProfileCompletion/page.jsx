@@ -383,7 +383,7 @@ export default function ProfileCompletionPage() {
                         onChange={(e) => handleProfileInputChange('yearOfStudy', e.target.value)}
                       >
                         <option value="">Select Year</option>
-                        {[1, 2, 3, 4, 5, 6, 7, 8].map(year => (
+                        {[1, 2, 3, 4, 5].map(year => (
                           <option key={year} value={year}>Year {year}</option>
                         ))}
                       </Select>

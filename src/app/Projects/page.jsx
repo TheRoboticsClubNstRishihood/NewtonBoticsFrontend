@@ -505,7 +505,7 @@ const ProjectCard = ({ project, index }) => {
           {/* Project Header */}
           <div className="flex items-start justify-between mb-4">
             <div className="flex gap-2 flex-wrap">
-              <span className={`px-2 py-1 rounded text-xs font-medium border ${getProjectStatusColor(project.status)}`}>
+              <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium border ${getProjectStatusColor(project.status)}`}>
                 {getProjectStatusIcon(project.status)}
                 {project.status.charAt(0).toUpperCase() + project.status.slice(1).replace('_', ' ')}
               </span>

@@ -204,6 +204,14 @@ const ProjectDetail = () => {
     return fallbackImages[index % fallbackImages.length];
   };
 
+  const leaderUserId = project?.teamLeaderId?.id || project?.teamLeaderId?._id;
+  const teamMembersExcludingLeader = Array.isArray(project?.teamMembers)
+    ? project.teamMembers.filter(m => {
+        const memberId = m?.userId?.id || m?.userId?._id || m?.id || m?._id;
+        return leaderUserId ? memberId !== leaderUserId : true;
+      })
+    : [];
+
   return (
     <div className="min-h-screen bg-black text-white">
       {/* Header */}
@@ -230,7 +238,7 @@ const ProjectDetail = () => {
           >
             {/* Project Status */}
             <div className="flex items-center gap-3 flex-wrap">
-              <span className={`px-3 py-1 rounded-full text-sm font-medium border ${getProjectStatusColor(project.status)}`}>
+              <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium border ${getProjectStatusColor(project.status)}`}>
                 {getProjectStatusIcon(project.status)}
                 {project.status.charAt(0).toUpperCase() + project.status.slice(1).replace('_', ' ')}
               </span>
@@ -331,6 +339,33 @@ const ProjectDetail = () => {
                       </div>
                     </div>
                   )}
+                  {project.priority && (
+                    <div className="flex items-start gap-3">
+                      <Target className="w-5 h-5 text-red-400 mt-1 flex-shrink-0" />
+                      <div>
+                        <div className="font-medium text-white">Priority</div>
+                        <div className="text-white/80">{project.priority}</div>
+                      </div>
+                    </div>
+                  )}
+                  {project.difficulty && (
+                    <div className="flex items-start gap-3">
+                      <TrendingUp className="w-5 h-5 text-red-400 mt-1 flex-shrink-0" />
+                      <div>
+                        <div className="font-medium text-white">Difficulty</div>
+                        <div className="text-white/80">{project.difficulty}</div>
+                      </div>
+                    </div>
+                  )}
+                  {(project.duration || project.duration === 0) && (
+                    <div className="flex items-start gap-3">
+                      <Clock className="w-5 h-5 text-red-400 mt-1 flex-shrink-0" />
+                      <div>
+                        <div className="font-medium text-white">Duration</div>
+                        <div className="text-white/80">{project.duration} days</div>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Team Info */}
@@ -352,7 +387,10 @@ const ProjectDetail = () => {
                       <User className="w-5 h-5 text-red-400 mt-1 flex-shrink-0" />
                       <div>
                         <div className="font-medium text-white">Mentor</div>
-                        <div className="text-white/80">Project Mentor</div>
+                        <div className="text-white/80">{project.mentorId.fullName || project.mentorId.displayName || 'Project Mentor'}</div>
+                        {project.mentorId.email && (
+                          <div className="text-white/50 text-sm">{project.mentorId.email}</div>
+                        )}
                       </div>
                     </div>
                   )}
@@ -362,7 +400,21 @@ const ProjectDetail = () => {
                       <User className="w-5 h-5 text-red-400 mt-1 flex-shrink-0" />
                       <div>
                         <div className="font-medium text-white">Team Leader</div>
-                        <div className="text-white/80">Project Lead</div>
+                        <div className="text-white/80">{project.teamLeaderId.fullName || project.teamLeaderId.displayName || 'Project Lead'}</div>
+                        {project.teamLeaderId.email && (
+                          <div className="text-white/50 text-sm">{project.teamLeaderId.email}</div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  {project.documentationUrl && (
+                    <div className="flex items-start gap-3">
+                      <ExternalLink className="w-5 h-5 text-red-400 mt-1 flex-shrink-0" />
+                      <div>
+                        <div className="font-medium text-white">Documentation</div>
+                        <a href={project.documentationUrl} target="_blank" rel="noreferrer" className="text-red-300 hover:text-red-200 underline break-all">
+                          {project.documentationUrl}
+                        </a>
                       </div>
                     </div>
                   )}
@@ -427,7 +479,8 @@ const ProjectDetail = () => {
               </motion.div>
             )}
 
-            {/* Team Members */}
+            {/* Team Members */
+            }
             {project.teamMembers && project.teamMembers.length > 0 && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -437,7 +490,7 @@ const ProjectDetail = () => {
               >
                 <h2 className="text-2xl font-bold mb-6 text-white">Team Members</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {project.teamMembers.map((member, index) => (
+                  {teamMembersExcludingLeader.map((member, index) => (
                     <motion.div
                       key={index}
                       initial={{ opacity: 0, y: 20 }}
@@ -446,12 +499,32 @@ const ProjectDetail = () => {
                       className="p-4 bg-white/5 rounded-lg border border-white/10"
                     >
                       <div className="flex items-center gap-3 mb-2">
-                        <div className="w-10 h-10 bg-red-500/20 rounded-full flex items-center justify-center">
-                          <User className="w-5 h-5 text-red-400" />
-                        </div>
+                        { (member?.userId?.profileImageUrl || member?.profileImageUrl) ? (
+                          <Image
+                            src={member.userId?.profileImageUrl || member.profileImageUrl}
+                            alt={(member.userId?.fullName || member.userName || 'Team Member') + ' avatar'}
+                            width={40}
+                            height={40}
+                            className="w-10 h-10 rounded-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-10 h-10 bg-red-500/20 rounded-full flex items-center justify-center">
+                            <User className="w-5 h-5 text-red-400" />
+                          </div>
+                        )}
                         <div>
-                          <div className="font-semibold text-white">Team Member</div>
-                          <div className="text-white/60 text-sm">{member.role}</div>
+                          <div className="font-semibold text-white">{member.userId?.fullName || member.userId?.displayName || member.userName || 'Team Member'}</div>
+                          {member.role && (
+                            <div className="text-white/60 text-sm">{member.role}</div>
+                          )}
+                          {(member.userId?.email || member.email) && (
+                            <a
+                              href={`mailto:${member.userId?.email || member.email}`}
+                              className="text-white/60 text-xs hover:text-white/80 break-all"
+                            >
+                              {member.userId?.email || member.email}
+                            </a>
+                          )}
                         </div>
                       </div>
                       {member.skills && member.skills.length > 0 && (
@@ -462,6 +535,21 @@ const ProjectDetail = () => {
                             </span>
                           ))}
                         </div>
+                      )}
+                      {member.responsibilities && member.responsibilities.length > 0 && (
+                        <div className="mt-3">
+                          <div className="text-white/60 text-xs mb-1">Responsibilities</div>
+                          <div className="flex flex-wrap gap-2">
+                            {member.responsibilities.map((resp, rIndex) => (
+                              <span key={rIndex} className="px-2 py-1 bg-white/10 rounded text-xs text-white/80">
+                                {resp}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      {member.joinedAt && (
+                        <div className="text-white/40 text-xs mt-3">Joined {formatDate(member.joinedAt)}</div>
                       )}
                     </motion.div>
                   ))}
@@ -498,6 +586,29 @@ const ProjectDetail = () => {
               </motion.div>
             )}
 
+            {/* Removed separate All Team Members section as requested */}
+
+            {project.comments && project.comments.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.7, duration: 0.8 }}
+                className="bg-white/5 backdrop-blur-lg rounded-2xl p-6 border border-white/10"
+              >
+                <h2 className="text-2xl font-bold mb-6 text-white">Comments</h2>
+                <div className="space-y-4">
+                  {project.comments.map((cmt, idx) => (
+                    <div key={idx} className="p-4 bg-white/5 rounded-lg border border-white/10">
+                      <div className="text-white/80">{cmt.text || String(cmt)}</div>
+                      {cmt.createdAt && (
+                        <div className="text-white/40 text-xs mt-2">{formatDate(cmt.createdAt)} {formatTime(cmt.createdAt)}</div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+
           </div>
 
           {/* Sidebar */}
@@ -513,7 +624,8 @@ const ProjectDetail = () => {
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <span className="text-white/60">Status</span>
-                  <span className={`px-2 py-1 rounded text-xs font-medium ${getProjectStatusColor(project.status)}`}>
+                  <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium ${getProjectStatusColor(project.status)}`}>
+                    {getProjectStatusIcon(project.status)}
                     {project.status.charAt(0).toUpperCase() + project.status.slice(1).replace('_', ' ')}
                   </span>
                 </div>
@@ -526,7 +638,7 @@ const ProjectDetail = () => {
                 <div className="flex items-center justify-between">
                   <span className="text-white/60">Team Size</span>
                   <span className="text-white font-medium">
-                    {project.teamMembers?.length || 0} members
+                    {project.teamSize || project.teamMembers?.length || 0} members
                   </span>
                 </div>
                 {project.isFeatured && (
@@ -535,10 +647,62 @@ const ProjectDetail = () => {
                     <span className="text-yellow-400">⭐ Yes</span>
                   </div>
                 )}
+                {typeof project.isPublic === 'boolean' && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-white/60">Visibility</span>
+                    <span className="text-white font-medium">{project.isPublic ? 'Public' : 'Private'}</span>
+                  </div>
+                )}
+                {typeof project.isOverdue === 'boolean' && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-white/60">Overdue</span>
+                    <span className={project.isOverdue ? 'text-red-300' : 'text-white/70'}>{project.isOverdue ? 'Yes' : 'No'}</span>
+                  </div>
+                )}
+                {typeof project.viewCount === 'number' && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-white/60">Views</span>
+                    <span className="text-white font-medium">{project.viewCount}</span>
+                  </div>
+                )}
+                {(typeof project.completedMilestonesCount === 'number' || typeof project.totalMilestonesCount === 'number') && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-white/60">Milestones</span>
+                    <span className="text-white font-medium">{project.completedMilestonesCount || 0} / {project.totalMilestonesCount || (project.milestones?.length || 0)}</span>
+                  </div>
+                )}
+                {project.progress !== undefined && (
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-white/60">Progress</span>
+                      <span className="text-red-300 font-medium">{project.progress}%</span>
+                    </div>
+                    <div className="w-full bg-white/20 rounded-full h-2">
+                      <div className="bg-red-500 h-2 rounded-full" style={{ width: `${project.progress}%` }} />
+                    </div>
+                  </div>
+                )}
+                {project.rating && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-white/60">Rating</span>
+                    <span className="text-white font-medium flex items-center gap-2">
+                      <span>{project.rating.average || 0}/5</span>
+                      <span className="text-white/50 text-xs">({project.rating.count || 0})</span>
+                    </span>
+                  </div>
+                )}
+                {project.tags && project.tags.length > 0 && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-white/60">Tags</span>
+                    <span className="text-white/70 text-right truncate">
+                      {project.tags.join(', ')}
+                    </span>
+                  </div>
+                )}
               </div>
             </motion.div>
 
-            {/* Technologies & Skills */}
+            {/* Tags */}
             {project.tags && project.tags.length > 0 && (
               <motion.div
                 initial={{ opacity: 0, x: 20 }}
@@ -546,7 +710,7 @@ const ProjectDetail = () => {
                 transition={{ delay: 0.4, duration: 0.8 }}
                 className="bg-white/5 backdrop-blur-lg rounded-2xl p-6 border border-white/10"
               >
-                <h3 className="text-xl font-bold mb-4 text-white">Technologies & Skills</h3>
+                <h3 className="text-xl font-bold mb-4 text-white">Tag List</h3>
                 <div className="flex flex-wrap gap-2">
                   {project.tags.map((tag, index) => (
                     <motion.span

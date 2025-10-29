@@ -16,7 +16,10 @@ import {
   Globe,
   MapPin,
   Clock,
-  Zap
+  Zap,
+  Mail,
+  X,
+  Building2
 } from "lucide-react";
 
 // Fallback images array for team members
@@ -45,11 +48,35 @@ const TeamPage = () => {
   const [researchers, setResearchers] = useState([]);
   const [departments, setDepartments] = useState([]);
   
+  // Image modal state
+  const [selectedImage, setSelectedImage] = useState(null);
+  
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3005/api';
 
   useEffect(() => {
     fetchAllTeamData();
   }, []);
+
+  // Close modal on Escape key press
+  useEffect(() => {
+    const handleEscape = (e) => {
+      if (e.key === 'Escape' && selectedImage) {
+        setSelectedImage(null);
+      }
+    };
+    window.addEventListener('keydown', handleEscape);
+    return () => window.removeEventListener('keydown', handleEscape);
+  }, [selectedImage]);
+
+  // Handler to open image modal
+  const handleImageClick = (imageUrl) => {
+    setSelectedImage(imageUrl);
+  };
+
+  // Handler to close image modal
+  const handleCloseModal = () => {
+    setSelectedImage(null);
+  };
 
   const fetchAllTeamData = async () => {
     try {
@@ -103,6 +130,35 @@ const TeamPage = () => {
       
       const uniqueDepartments = [...new Set(allPeople.map(person => person.department).filter(Boolean))];
       setDepartments(uniqueDepartments);
+
+      // Console log all fetched team data
+      console.log('=== Team Page Data Loaded ===');
+      console.log('Leadership Team:', leadershipData.success ? leadershipData.data.items : []);
+      console.log('Team Members:', teamData.success ? teamData.data.items : []);
+      console.log('Mentors:', mentorsData.success ? mentorsData.data.items : []);
+      console.log('Researchers:', researchersData.success ? researchersData.data.items : []);
+      
+      // Check email availability
+      const membersWithEmail = allPeople.filter(p => p.email);
+      const membersWithoutEmail = allPeople.filter(p => !p.email);
+      
+      console.log('Summary:', {
+        leadershipCount: leadershipData.success ? leadershipData.data.items.length : 0,
+        teamMembersCount: teamData.success ? teamData.data.items.length : 0,
+        mentorsCount: mentorsData.success ? mentorsData.data.items.length : 0,
+        researchersCount: researchersData.success ? researchersData.data.items.length : 0,
+        departments: uniqueDepartments,
+        totalMembers: allPeople.length,
+        membersWithEmail: membersWithEmail.length,
+        membersWithoutEmail: membersWithoutEmail.length
+      });
+      
+      if (membersWithEmail.length > 0) {
+        console.log('📧 Members with email:', membersWithEmail.map(m => ({ name: m.fullName, email: m.email })));
+      }
+      if (membersWithoutEmail.length > 0) {
+        console.log('⚠️ Members without email:', membersWithoutEmail.map(m => ({ name: m.fullName, id: m.id || m._id })));
+      }
 
     } catch (err) {
       console.error('Error fetching team data:', err);
@@ -179,7 +235,7 @@ const TeamPage = () => {
         </h1>
         <p className="text-lg text-white/80">Innovators, creators, and problem solvers powering NewtonBotics.</p>
         <div className="mt-4 text-white/60">
-          <span className="text-2xl font-bold text-red-500">{totalMembers}</span> team members
+          <span className="text-2xl font-bold text-red-500">{teamMembers.length}</span> team members
         </div>
       </motion.div>
 
@@ -273,7 +329,7 @@ const TeamPage = () => {
 
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredLeadership.map((leader, index) => (
-                <PersonCard key={leader.id} person={leader} index={index} />
+                <PersonCard key={leader.id} person={leader} index={index} onImageClick={handleImageClick} />
               ))}
             </div>
           </div>
@@ -299,7 +355,7 @@ const TeamPage = () => {
 
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredResearchers.map((researcher, index) => (
-                <PersonCard key={researcher.id} person={researcher} index={index} />
+                <PersonCard key={researcher.id} person={researcher} index={index} onImageClick={handleImageClick} />
               ))}
             </div>
           </div>
@@ -325,7 +381,7 @@ const TeamPage = () => {
 
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredMentors.map((mentor, index) => (
-                <PersonCard key={mentor.id} person={mentor} index={index} />
+                <PersonCard key={mentor.id} person={mentor} index={index} onImageClick={handleImageClick} />
               ))}
             </div>
           </div>
@@ -349,7 +405,7 @@ const TeamPage = () => {
 
             <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {filteredTeamMembers.map((member, index) => (
-                <PersonCard key={member.id} person={member} index={index} compact />
+                <PersonCard key={member.id} person={member} index={index} compact onImageClick={handleImageClick} />
               ))}
             </div>
           </div>
@@ -417,12 +473,47 @@ const TeamPage = () => {
           </div>
         </div>
       </section>
+
+      {/* Image Modal */}
+      {selectedImage && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm"
+          onClick={handleCloseModal}
+        >
+          <button
+            onClick={handleCloseModal}
+            className="absolute top-4 right-4 text-white hover:text-red-500 transition-colors z-10"
+            aria-label="Close modal"
+          >
+            <X className="w-8 h-8" />
+          </button>
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.8, opacity: 0 }}
+            className="relative max-w-2xl max-h-[80vh] mx-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Image
+              src={selectedImage}
+              alt="Team member profile"
+              width={600}
+              height={600}
+              className="w-full h-auto rounded-lg object-contain max-h-[80vh]"
+              unoptimized
+            />
+          </motion.div>
+        </motion.div>
+      )}
     </div>
   );
 };
 
 // Person Card Component
-const PersonCard = ({ person, index, compact = false }) => {
+const PersonCard = ({ person, index, compact = false, onImageClick }) => {
   const [imageError, setImageError] = useState(false);
   
   const getRoleColor = (role) => {
@@ -500,9 +591,16 @@ const PersonCard = ({ person, index, compact = false }) => {
       }`}
     >
       {/* Profile Image */}
-      <div className={`mx-auto mb-4 rounded-full overflow-hidden ${
-        compact ? 'w-24 h-24' : 'w-32 h-32'
-      }`}>
+      <div 
+        className={`mx-auto mb-4 rounded-full overflow-hidden cursor-pointer transition-transform hover:scale-105 ${
+          compact ? 'w-24 h-24' : 'w-32 h-32'
+        }`}
+        onClick={() => {
+          if (onImageClick && !imageError && person.profileImageUrl) {
+            onImageClick(person.profileImageUrl);
+          }
+        }}
+      >
         {imageError || !person.profileImageUrl ? (
           // Fallback avatar with initials
           <div className={`w-full h-full bg-gradient-to-br ${getAvatarColor()} flex items-center justify-center text-white font-bold ${
@@ -544,10 +642,29 @@ const PersonCard = ({ person, index, compact = false }) => {
           </p>
         )}
 
-        {person.department && (
-          <div className="flex items-center gap-2 mt-2 text-white/60 text-sm">
-            <MapPin className="w-4 h-4" />
-            <span>{person.department}</span>
+        {/* Department and Email row */}
+        {(person.department || person.email) && (
+          <div className="flex items-center justify-between mt-3">
+            {/* Department on the left */}
+            {person.department ? (
+              <div className="flex items-center gap-2 text-white/60 text-sm">
+                <Building2 className="w-4 h-4" />
+                <span>{person.department}</span>
+              </div>
+            ) : (
+              <div></div>
+            )}
+            
+            {/* Email icon on the right */}
+            {person.email && (
+              <a 
+                href={`mailto:${person.email}`}
+                className="flex items-center justify-center w-8 h-8 rounded-full hover:bg-white/10 transition-colors text-red-400 hover:text-red-300"
+                title={`Email ${person.fullName}: ${person.email}`}
+              >
+                <Mail className="w-5 h-5" />
+              </a>
+            )}
           </div>
         )}
 

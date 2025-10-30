@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Search, 
@@ -49,6 +50,9 @@ const VideoPlayer = ({ src, isPlaying, itemId }) => {
 };
 
 export default function GalleryClient() {
+  const searchParams = useSearchParams();
+  const initialCategoryFromUrl = searchParams?.get('categoryId') || 'all';
+  const router = useRouter();
   const [mediaItems, setMediaItems] = useState([]);
   const [categories, setCategories] = useState([]);
   const [collections, setCollections] = useState([]);
@@ -61,10 +65,11 @@ export default function GalleryClient() {
   // Filter states
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFileType, setSelectedFileType] = useState("all");
-  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [selectedCategory, setSelectedCategory] = useState(initialCategoryFromUrl);
   const [selectedCollection, setSelectedCollection] = useState("all");
   const [showFeaturedOnly, setShowFeaturedOnly] = useState(false);
   const [viewMode, setViewMode] = useState("grid"); // grid or list
+  const [isClearing, setIsClearing] = useState(false);
   
   // Pagination
   const [pagination, setPagination] = useState({
@@ -78,6 +83,15 @@ export default function GalleryClient() {
   useEffect(() => {
     fetchMediaData();
   }, []);
+
+  // If URL query changes later (client nav), update category filter
+  useEffect(() => {
+    if (isClearing) return; // ignore URL sync while clearing
+    const categoryIdFromUrl = searchParams?.get('categoryId');
+    if (categoryIdFromUrl && categoryIdFromUrl !== selectedCategory) {
+      setSelectedCategory(categoryIdFromUrl);
+    }
+  }, [searchParams, selectedCategory, isClearing]);
 
   // Fetch filtered media when filters change
   useEffect(() => {
@@ -126,8 +140,44 @@ export default function GalleryClient() {
       console.log('[Gallery] listMedia params', params);
       const result = await mediaService.listMedia(params);
       console.log('[Gallery] listMedia result', result);
-      setMediaItems(result.items || []);
-      setPagination(result.pagination || {});
+      let items = result.items || [];
+      // Safety: enforce filters client-side in case backend ignores them
+      if (selectedCategory !== 'all') {
+        const selectedCatName = (categories.find(c => String(c._id) === String(selectedCategory))?.name || '').toLowerCase();
+        items = items.filter(it => {
+          const raw = it.categoryId ?? it.category ?? it.category_id;
+          const cid = (raw && (raw._id || raw.id)) || (typeof raw === 'string' ? raw : null);
+          const cname = (it.categoryName || it.category_label || it.category?.name || '').toLowerCase();
+          if (cid) {
+            return String(cid) === String(selectedCategory);
+          }
+          if (selectedCatName && cname) {
+            return cname === selectedCatName;
+          }
+          return false;
+        });
+      }
+      if (selectedFileType !== 'all') {
+        items = items.filter(it => (it.fileType || '').toLowerCase() === selectedFileType.toLowerCase());
+      }
+      if (searchQuery) {
+        const q = searchQuery.toLowerCase();
+        items = items.filter(it => {
+          const title = (it.title || '').toLowerCase();
+          const desc = (it.description || '').toLowerCase();
+          const tags = Array.isArray(it.tags) ? it.tags.map(t => String(t).toLowerCase()) : [];
+          return title.includes(q) || desc.includes(q) || tags.some(t => t.includes(q));
+        });
+      }
+      if (showFeaturedOnly) {
+        items = items.filter(it => it.isFeatured === true);
+      }
+      setMediaItems(items);
+      const serverPagination = result.pagination || {};
+      const effectiveTotal = (showFeaturedOnly || selectedCategory !== 'all' || selectedFileType !== 'all' || searchQuery)
+        ? items.length
+        : (serverPagination.total ?? items.length);
+      setPagination({ ...serverPagination, total: effectiveTotal });
     } catch (err) {
       console.error('Error fetching filtered media:', err);
       setError(err.message);
@@ -135,11 +185,18 @@ export default function GalleryClient() {
   };
 
   const clearFilters = () => {
+    setIsClearing(true);
     setSearchQuery("");
     setSelectedFileType("all");
     setSelectedCategory("all");
     setSelectedCollection("all");
     setShowFeaturedOnly(false);
+    // Clear query params in URL so effect doesn't re-apply categoryId
+    try {
+      router.replace('/Gallery', { scroll: false });
+    } catch {}
+    // allow state update cycle to complete, then re-enable URL sync
+    setTimeout(() => setIsClearing(false), 0);
   };
 
   const hasActiveFilters = searchQuery || selectedFileType !== "all" || selectedCategory !== "all" || selectedCollection !== "all" || showFeaturedOnly;
@@ -397,7 +454,7 @@ export default function GalleryClient() {
           </div>
 
           {/* Clear Filters */}
-          {hasActiveFilters && (
+          {hasActiveFilters ? (
             <div className="flex justify-between items-center">
               <button
                 onClick={clearFilters}
@@ -405,6 +462,12 @@ export default function GalleryClient() {
               >
                 Clear All Filters
               </button>
+              <span className="text-white/60 text-sm">
+                Showing {mediaItems.length} items
+              </span>
+            </div>
+          ) : (
+            <div className="flex justify-end items-center">
               <span className="text-white/60 text-sm">
                 Showing {mediaItems.length} of {pagination.total} items
               </span>

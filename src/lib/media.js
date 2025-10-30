@@ -128,23 +128,33 @@ export const mediaService = {
   } = {}) {
     try {
       const query = toQuery({ fileType, categoryId, q, limit, skip, isFeatured });
-      const res = await fetch(`${API_BASE_URL}/media${query}`, { cache: 'no-store' });
+      const url = `${API_BASE_URL}/media${query}`;
+      console.log('[mediaService.listMedia] GET', url);
+      const res = await fetch(url, { cache: 'no-store' });
       
       if (!res.ok) {
         throw new Error(`HTTP ${res.status}: ${res.statusText}`);
       }
       
       const data = await safeParseJson(res);
+      console.log('[mediaService.listMedia] response', data);
       if (data?.success === false) {
         const msg = data?.error?.message || data?.message || 'Failed to load media';
         throw new Error(msg);
       }
-      
-      return data?.data || { items: [], pagination: { total: 0, limit, skip, hasMore: false } };
+      // If API returns successfully but with no items, fall back to mock data
+      const apiPayload = data?.data || { items: [], pagination: { total: 0, limit, skip, hasMore: false } };
+      const apiItems = Array.isArray(apiPayload.items) ? apiPayload.items : [];
+      if (apiItems.length === 0) {
+        return this.getMockMedia({ fileType, categoryId, q, limit, skip, isFeatured });
+      }
+      return apiPayload;
     } catch (error) {
       console.error('Error fetching media:', error);
       // Fallback to mock data
-      return this.getMockMedia({ fileType, categoryId, q, limit, skip, isFeatured });
+      const mock = this.getMockMedia({ fileType, categoryId, q, limit, skip, isFeatured });
+      console.log('[mediaService.listMedia] using mock data', mock);
+      return mock;
     }
   },
 
@@ -193,22 +203,26 @@ export const mediaService = {
   // GET /api/media/categories - List media categories
   async listCategories() {
     try {
-      const res = await fetch(`${API_BASE_URL}/media/categories`, { cache: 'no-store' });
+      const url = `${API_BASE_URL}/media/categories`;
+      console.log('[mediaService.listCategories] GET', url);
+      const res = await fetch(url, { cache: 'no-store' });
       
       if (!res.ok) {
         throw new Error(`HTTP ${res.status}: ${res.statusText}`);
       }
       
       const data = await safeParseJson(res);
+      console.log('[mediaService.listCategories] response', data);
       if (data?.success === false) {
         const msg = data?.error?.message || data?.message || 'Failed to load categories';
         throw new Error(msg);
       }
-      
-      return data?.data?.items || [];
+      const items = data?.data?.items || [];
+      return items.length === 0 ? mockCategories : items;
     } catch (error) {
       console.error('Error fetching media categories:', error);
       // Fallback to mock data
+      console.log('[mediaService.listCategories] using mock categories', mockCategories);
       return mockCategories;
     }
   },
@@ -216,22 +230,26 @@ export const mediaService = {
   // GET /api/media/collections - List media collections
   async listCollections() {
     try {
-      const res = await fetch(`${API_BASE_URL}/media/collections`, { cache: 'no-store' });
+      const url = `${API_BASE_URL}/media/collections`;
+      console.log('[mediaService.listCollections] GET', url);
+      const res = await fetch(url, { cache: 'no-store' });
       
       if (!res.ok) {
         throw new Error(`HTTP ${res.status}: ${res.statusText}`);
       }
       
       const data = await safeParseJson(res);
+      console.log('[mediaService.listCollections] response', data);
       if (data?.success === false) {
         const msg = data?.error?.message || data?.message || 'Failed to load collections';
         throw new Error(msg);
       }
-      
-      return data?.data?.items || [];
+      const items = data?.data?.items || [];
+      return items.length === 0 ? mockCollections : items;
     } catch (error) {
       console.error('Error fetching media collections:', error);
       // Fallback to mock data
+      console.log('[mediaService.listCollections] using mock collections', mockCollections);
       return mockCollections;
     }
   },

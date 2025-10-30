@@ -1,7 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Search, 
@@ -20,7 +21,38 @@ import {
 } from "lucide-react";
 import mediaService from "../../lib/media";
 
+// Video Player Component that handles play/pause based on hover
+const VideoPlayer = ({ src, isPlaying, itemId }) => {
+  const videoRef = useRef(null);
+
+  useEffect(() => {
+    if (videoRef.current) {
+      if (isPlaying) {
+        videoRef.current.play().catch(err => console.log('Video play error:', err));
+      } else {
+        videoRef.current.pause();
+      }
+    }
+  }, [isPlaying]);
+
+  return (
+    <video
+      ref={videoRef}
+      src={src}
+      className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${
+        isPlaying ? 'opacity-100 z-10' : 'opacity-0 z-0'
+      }`}
+      muted
+      loop
+      playsInline
+    />
+  );
+};
+
 export default function GalleryClient() {
+  const searchParams = useSearchParams();
+  const initialCategoryFromUrl = searchParams?.get('categoryId') || 'all';
+  const router = useRouter();
   const [mediaItems, setMediaItems] = useState([]);
   const [categories, setCategories] = useState([]);
   const [collections, setCollections] = useState([]);
@@ -28,14 +60,16 @@ export default function GalleryClient() {
   const [error, setError] = useState(null);
   const [active, setActive] = useState(null);
   const [loadedVideos, setLoadedVideos] = useState(new Set());
+  const [playingVideos, setPlayingVideos] = useState(new Set());
   
   // Filter states
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFileType, setSelectedFileType] = useState("all");
-  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [selectedCategory, setSelectedCategory] = useState(initialCategoryFromUrl);
   const [selectedCollection, setSelectedCollection] = useState("all");
   const [showFeaturedOnly, setShowFeaturedOnly] = useState(false);
   const [viewMode, setViewMode] = useState("grid"); // grid or list
+  const [isClearing, setIsClearing] = useState(false);
   
   // Pagination
   const [pagination, setPagination] = useState({
@@ -49,6 +83,15 @@ export default function GalleryClient() {
   useEffect(() => {
     fetchMediaData();
   }, []);
+
+  // If URL query changes later (client nav), update category filter
+  useEffect(() => {
+    if (isClearing) return; // ignore URL sync while clearing
+    const categoryIdFromUrl = searchParams?.get('categoryId');
+    if (categoryIdFromUrl && categoryIdFromUrl !== selectedCategory) {
+      setSelectedCategory(categoryIdFromUrl);
+    }
+  }, [searchParams, selectedCategory, isClearing]);
 
   // Fetch filtered media when filters change
   useEffect(() => {
@@ -65,6 +108,9 @@ export default function GalleryClient() {
         mediaService.listCategories(),
         mediaService.listCollections()
       ]);
+
+      console.log('[Gallery] categories', categoriesData);
+      console.log('[Gallery] collections', collectionsData);
 
       setCategories(categoriesData);
       setCollections(collectionsData);
@@ -91,9 +137,47 @@ export default function GalleryClient() {
       if (selectedCategory !== "all") params.categoryId = selectedCategory;
       if (showFeaturedOnly) params.isFeatured = true;
 
+      console.log('[Gallery] listMedia params', params);
       const result = await mediaService.listMedia(params);
-      setMediaItems(result.items || []);
-      setPagination(result.pagination || {});
+      console.log('[Gallery] listMedia result', result);
+      let items = result.items || [];
+      // Safety: enforce filters client-side in case backend ignores them
+      if (selectedCategory !== 'all') {
+        const selectedCatName = (categories.find(c => String(c._id) === String(selectedCategory))?.name || '').toLowerCase();
+        items = items.filter(it => {
+          const raw = it.categoryId ?? it.category ?? it.category_id;
+          const cid = (raw && (raw._id || raw.id)) || (typeof raw === 'string' ? raw : null);
+          const cname = (it.categoryName || it.category_label || it.category?.name || '').toLowerCase();
+          if (cid) {
+            return String(cid) === String(selectedCategory);
+          }
+          if (selectedCatName && cname) {
+            return cname === selectedCatName;
+          }
+          return false;
+        });
+      }
+      if (selectedFileType !== 'all') {
+        items = items.filter(it => (it.fileType || '').toLowerCase() === selectedFileType.toLowerCase());
+      }
+      if (searchQuery) {
+        const q = searchQuery.toLowerCase();
+        items = items.filter(it => {
+          const title = (it.title || '').toLowerCase();
+          const desc = (it.description || '').toLowerCase();
+          const tags = Array.isArray(it.tags) ? it.tags.map(t => String(t).toLowerCase()) : [];
+          return title.includes(q) || desc.includes(q) || tags.some(t => t.includes(q));
+        });
+      }
+      if (showFeaturedOnly) {
+        items = items.filter(it => it.isFeatured === true);
+      }
+      setMediaItems(items);
+      const serverPagination = result.pagination || {};
+      const effectiveTotal = (showFeaturedOnly || selectedCategory !== 'all' || selectedFileType !== 'all' || searchQuery)
+        ? items.length
+        : (serverPagination.total ?? items.length);
+      setPagination({ ...serverPagination, total: effectiveTotal });
     } catch (err) {
       console.error('Error fetching filtered media:', err);
       setError(err.message);
@@ -101,11 +185,18 @@ export default function GalleryClient() {
   };
 
   const clearFilters = () => {
+    setIsClearing(true);
     setSearchQuery("");
     setSelectedFileType("all");
     setSelectedCategory("all");
     setSelectedCollection("all");
     setShowFeaturedOnly(false);
+    // Clear query params in URL so effect doesn't re-apply categoryId
+    try {
+      router.replace('/Gallery', { scroll: false });
+    } catch {}
+    // allow state update cycle to complete, then re-enable URL sync
+    setTimeout(() => setIsClearing(false), 0);
   };
 
   const hasActiveFilters = searchQuery || selectedFileType !== "all" || selectedCategory !== "all" || selectedCollection !== "all" || showFeaturedOnly;
@@ -118,6 +209,28 @@ export default function GalleryClient() {
   // Function to check if video is loaded
   const isVideoLoaded = (itemId) => {
     return loadedVideos.has(itemId);
+  };
+
+  // Function to handle video hover (start playing)
+  const handleVideoHover = (itemId) => {
+    setPlayingVideos(prev => new Set([...prev, itemId]));
+    if (!isVideoLoaded(itemId)) {
+      handleVideoLoad(itemId);
+    }
+  };
+
+  // Function to handle video unhover (pause playing)
+  const handleVideoUnhover = (itemId) => {
+    setPlayingVideos(prev => {
+      const newSet = new Set(prev);
+      newSet.delete(itemId);
+      return newSet;
+    });
+  };
+
+  // Function to check if video is playing
+  const isVideoPlaying = (itemId) => {
+    return playingVideos.has(itemId);
   };
 
   // Function to handle media view tracking
@@ -148,6 +261,61 @@ export default function GalleryClient() {
       case 'document': return <FileText className="w-4 h-4" />;
       default: return <FileText className="w-4 h-4" />;
     }
+  };
+
+  // Fallback images like on the Project page
+  const fallbackImages = [
+    "/servilancerobot.jpeg",
+    "/humanoidRobotHealthcare.webp",
+    "/bgImageforroboticslab.jpg"
+  ];
+  const getFallbackImage = (index = 0) => fallbackImages[index % fallbackImages.length];
+
+  // Normalize remote image URLs (e.g., Cloudinary) to web-friendly formats
+  const isCloudinaryUrl = (url) => typeof url === 'string' && /https?:\/\/res\.cloudinary\.com\//.test(url);
+
+  const sanitizeCloudinaryExtension = (url) => {
+    if (!url) return url;
+    // Replace problematic TIFF extension with jpg to ensure browser display
+    return url.replace(/\.(tif|tiff)(\?|#|$)/i, '.jpg$2');
+  };
+
+  const transformCloudinaryUrl = (url, { width, height, crop = 'fill', quality = 'auto', format = 'auto' } = {}) => {
+    if (!isCloudinaryUrl(url)) return url;
+    const safeUrl = sanitizeCloudinaryExtension(url);
+    const transforms = [
+      `f_${format}`,
+      `q_${quality}`,
+      (width || height) ? `c_${crop}` : null,
+      width ? `w_${width}` : null,
+      height ? `h_${height}` : null,
+    ].filter(Boolean).join(',');
+    // Inject transforms right after /image/upload/
+    return safeUrl.replace('/image/upload/', `/image/upload/${transforms}/`);
+  };
+
+  // Robust URL resolution to support different backend shapes (Cloudinary, etc.)
+  const getPrimaryUrl = (item) => {
+    const url = (
+      item?.fileUrl ||
+      item?.secure_url ||
+      item?.url ||
+      item?.sourceUrl ||
+      ''
+    );
+    const normalized = transformCloudinaryUrl(url, {});
+    return normalized || getFallbackImage(0);
+  };
+
+  const getThumbnailUrl = (item) => {
+    const url = (
+      item?.thumbnailUrl ||
+      item?.thumbnail ||
+      item?.previewUrl ||
+      getPrimaryUrl(item)
+    );
+    const normalized = transformCloudinaryUrl(url, { width: 600, height: 600, crop: 'fill' });
+    return normalized || getFallbackImage(1);
   };
 
   const getFileTypeColor = (fileType) => {
@@ -286,7 +454,7 @@ export default function GalleryClient() {
           </div>
 
           {/* Clear Filters */}
-          {hasActiveFilters && (
+          {hasActiveFilters ? (
             <div className="flex justify-between items-center">
               <button
                 onClick={clearFilters}
@@ -294,6 +462,12 @@ export default function GalleryClient() {
               >
                 Clear All Filters
               </button>
+              <span className="text-white/60 text-sm">
+                Showing {mediaItems.length} items
+              </span>
+            </div>
+          ) : (
+            <div className="flex justify-end items-center">
               <span className="text-white/60 text-sm">
                 Showing {mediaItems.length} of {pagination.total} items
               </span>
@@ -326,8 +500,13 @@ export default function GalleryClient() {
                   handleMediaView(item);
                 }}
                 onMouseEnter={() => {
-                  if (item.fileType === "video" && !isVideoLoaded(item._id)) {
-                    handleVideoLoad(item._id);
+                  if (item.fileType === "video") {
+                    handleVideoHover(item._id);
+                  }
+                }}
+                onMouseLeave={() => {
+                  if (item.fileType === "video") {
+                    handleVideoUnhover(item._id);
                   }
                 }}
                 className="relative group bg-white/5 rounded-xl border border-white/10 overflow-hidden hover:border-white/20 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-red-500 aspect-square"
@@ -340,40 +519,40 @@ export default function GalleryClient() {
                 <div className="relative w-full h-full">
                   {item.fileType === "image" ? (
                     <img
-                      src={item.thumbnailUrl || item.fileUrl}
+                      src={getThumbnailUrl(item)}
                       alt={item.title}
                       className="w-full h-full object-cover"
                       onError={(e) => {
-                        e.target.src = "/next.svg"; // Fallback image
+                        e.target.src = getFallbackImage(0);
                       }}
                     />
                   ) : item.fileType === "video" ? (
                     <div className="relative w-full h-full bg-gray-800 overflow-hidden">
-                      {/* Show thumbnail initially */}
+                      {/* Thumbnail - shown when video is not playing */}
                       <img
-                        src={item.thumbnailUrl || item.fileUrl}
+                        src={getThumbnailUrl(item)}
                         alt={item.title}
-                        className="w-full h-full object-cover"
+                        className={`w-full h-full object-cover transition-opacity duration-300 ${
+                          isVideoPlaying(item._id) ? 'opacity-0' : 'opacity-100'
+                        }`}
                         onError={(e) => {
-                          e.target.src = "/next.svg"; // Fallback image
+                          e.target.src = getFallbackImage(1);
                         }}
                       />
                       
-                      {/* Video overlay with play button */}
-                      <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
-                        <Play className="w-8 h-8 text-white" />
-                      </div>
+                      {/* Video overlay with play button - shown when not playing */}
+                      {!isVideoPlaying(item._id) && (
+                        <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                          <Play className="w-8 h-8 text-white" />
+                        </div>
+                      )}
                       
-                      {/* Video element (hidden initially, loads on demand) */}
+                      {/* Video element - shown when loaded and playing */}
                       {isVideoLoaded(item._id) && (
-                        <video
-                          src={item.fileUrl}
-                          className="absolute inset-0 w-full h-full object-cover"
-                          muted
-                          loop
-                          playsInline
-                          autoPlay
-                          onLoadedData={() => handleVideoLoad(item._id)}
+                        <VideoPlayer
+                          src={getPrimaryUrl(item)}
+                          isPlaying={isVideoPlaying(item._id)}
+                          itemId={item._id}
                         />
                       )}
                     </div>
@@ -442,7 +621,7 @@ export default function GalleryClient() {
                   <div className="relative w-20 h-20 rounded-lg overflow-hidden bg-gray-800 flex-shrink-0">
                     {item.fileType === "image" ? (
                       <img
-                        src={item.thumbnailUrl || item.fileUrl}
+                      src={getThumbnailUrl(item)}
                         alt={item.title}
                         className="w-full h-full object-cover"
                       />
@@ -450,7 +629,7 @@ export default function GalleryClient() {
                       <div className="relative w-full h-full">
                         {/* Show thumbnail for videos */}
                         <img
-                          src={item.thumbnailUrl || item.fileUrl}
+                          src={getThumbnailUrl(item)}
                           alt={item.title}
                           className="w-full h-full object-cover"
                         />
@@ -543,7 +722,7 @@ export default function GalleryClient() {
                 {active.fileType === "image" ? (
                   <div className="relative w-full max-h-[80vh] flex items-center justify-center">
                       <img
-                      src={active.fileUrl}
+                      src={getPrimaryUrl(active)}
                       alt={active.title}
                       className="max-w-full max-h-full object-contain"
                     />
@@ -552,13 +731,13 @@ export default function GalleryClient() {
                   <div className="relative w-full aspect-video">
                     {/* Show thumbnail initially */}
                     <img
-                      src={active.thumbnailUrl || active.fileUrl}
+                      src={getThumbnailUrl(active)}
                       alt={active.title}
                       className="w-full h-full object-cover"
                     />
                     {/* Video element */}
                     <video
-                      src={active.fileUrl}
+                      src={getPrimaryUrl(active)}
                       className="absolute inset-0 w-full h-full object-contain"
                       controls
                       autoPlay

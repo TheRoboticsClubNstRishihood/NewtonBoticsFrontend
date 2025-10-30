@@ -23,6 +23,8 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRef } from "react";
+import { mediaService } from "@/lib/media";
 
 const ProjectDetail = () => {
   const params = useParams();
@@ -30,6 +32,12 @@ const ProjectDetail = () => {
   const [project, setProject] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [galleryItems, setGalleryItems] = useState([]);
+  const [galleryLoading, setGalleryLoading] = useState(false);
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [galleryCategoryId, setGalleryCategoryId] = useState(null);
+  const videoRef = useRef(null);
+  const [linkCopied, setLinkCopied] = useState(false);
   
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3005/api';
 
@@ -66,6 +74,77 @@ const ProjectDetail = () => {
       fetchProject();
     }
   }, [params.id, API_BASE_URL]);
+
+  // Load project-related gallery items (images only)
+  useEffect(() => {
+    const loadGallery = async () => {
+      if (!project) return;
+      try {
+        setGalleryLoading(true);
+        let categoryId = project.galleryCategoryId || project.mediaCategoryId || project.categoryId || undefined;
+
+        // If categoryId is not present on project, try to resolve it by matching media categories
+        if (!categoryId) {
+          try {
+            const categories = await mediaService.listCategories();
+            const title = (project.title || '').toLowerCase();
+            const projCategory = (project.category || '').toLowerCase();
+            const match = categories.find(c => {
+              const name = (c.name || '').toLowerCase();
+              return name === title || name === projCategory || name.includes(title) || name.includes(projCategory);
+            });
+            if (match?._id) {
+              categoryId = match._id;
+            }
+          } catch (e) {
+            console.log('[ProjectDetail] Failed to resolve media category by name:', e);
+          }
+        }
+
+        // Prefer filtering by categoryId when available
+        const params = categoryId ? { categoryId, limit: 50, skip: 0 } : { q: project.title || undefined, limit: 50, skip: 0 };
+        console.log('[ProjectDetail] Loading gallery with params:', params);
+        const { items } = await mediaService.listMedia(params);
+        console.log('[ProjectDetail] Gallery items returned:', items?.length || 0, items);
+        const supported = Array.isArray(items)
+          ? items.filter(it => {
+              const t = (it.fileType || '').toLowerCase();
+              return t === 'image' || t === 'video';
+            })
+          : [];
+        setGalleryItems(supported);
+        setGalleryCategoryId(categoryId || null);
+        setCurrentSlide(0);
+      } catch (e) {
+        console.error('Error loading gallery for project:', e);
+        setGalleryItems([]);
+      } finally {
+        setGalleryLoading(false);
+      }
+    };
+    loadGallery();
+  }, [project]);
+
+  // Auto-advance slideshow: 3s for images, 5s for videos
+  useEffect(() => {
+    if (!galleryItems || galleryItems.length <= 1) return;
+    const current = galleryItems[currentSlide] || {};
+    const type = (current.fileType || '').toLowerCase();
+    const delay = type === 'video' ? 5000 : 3000;
+    const timerId = setTimeout(() => {
+      setCurrentSlide(prev => (prev + 1) % galleryItems.length);
+    }, delay);
+    return () => clearTimeout(timerId);
+  }, [galleryItems, currentSlide]);
+
+  // Ensure video starts playing when slide is a video
+  useEffect(() => {
+    const current = galleryItems[currentSlide];
+    if (current && (current.fileType || '').toLowerCase() === 'video' && videoRef.current) {
+      // attempt play; some browsers require muted (already set)
+      videoRef.current.play().catch(() => {});
+    }
+  }, [currentSlide, galleryItems]);
 
   const formatDate = (dateString) => {
     if (!dateString) return 'TBD';
@@ -204,6 +283,11 @@ const ProjectDetail = () => {
     return fallbackImages[index % fallbackImages.length];
   };
 
+  // Show all team members as returned by the API, including the leader if present
+  const displayedTeamMembers = Array.isArray(project?.teamMembers)
+    ? project.teamMembers
+    : [];
+
   return (
     <div className="min-h-screen bg-black text-white">
       {/* Header */}
@@ -230,7 +314,7 @@ const ProjectDetail = () => {
           >
             {/* Project Status */}
             <div className="flex items-center gap-3 flex-wrap">
-              <span className={`px-3 py-1 rounded-full text-sm font-medium border ${getProjectStatusColor(project.status)}`}>
+              <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium border ${getProjectStatusColor(project.status)}`}>
                 {getProjectStatusIcon(project.status)}
                 {project.status.charAt(0).toUpperCase() + project.status.slice(1).replace('_', ' ')}
               </span>
@@ -331,6 +415,33 @@ const ProjectDetail = () => {
                       </div>
                     </div>
                   )}
+                  {project.priority && (
+                    <div className="flex items-start gap-3">
+                      <Target className="w-5 h-5 text-red-400 mt-1 flex-shrink-0" />
+                      <div>
+                        <div className="font-medium text-white">Priority</div>
+                        <div className="text-white/80">{project.priority}</div>
+                      </div>
+                    </div>
+                  )}
+                  {project.difficulty && (
+                    <div className="flex items-start gap-3">
+                      <TrendingUp className="w-5 h-5 text-red-400 mt-1 flex-shrink-0" />
+                      <div>
+                        <div className="font-medium text-white">Difficulty</div>
+                        <div className="text-white/80">{project.difficulty}</div>
+                      </div>
+                    </div>
+                  )}
+                  {(project.duration || project.duration === 0) && (
+                    <div className="flex items-start gap-3">
+                      <Clock className="w-5 h-5 text-red-400 mt-1 flex-shrink-0" />
+                      <div>
+                        <div className="font-medium text-white">Duration</div>
+                        <div className="text-white/80">{project.duration} days</div>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Team Info */}
@@ -352,7 +463,10 @@ const ProjectDetail = () => {
                       <User className="w-5 h-5 text-red-400 mt-1 flex-shrink-0" />
                       <div>
                         <div className="font-medium text-white">Mentor</div>
-                        <div className="text-white/80">Project Mentor</div>
+                        <div className="text-white/80">{project.mentorId.fullName || project.mentorId.displayName || 'Project Mentor'}</div>
+                        {project.mentorId.email && (
+                          <div className="text-white/50 text-sm">{project.mentorId.email}</div>
+                        )}
                       </div>
                     </div>
                   )}
@@ -362,7 +476,21 @@ const ProjectDetail = () => {
                       <User className="w-5 h-5 text-red-400 mt-1 flex-shrink-0" />
                       <div>
                         <div className="font-medium text-white">Team Leader</div>
-                        <div className="text-white/80">Project Lead</div>
+                        <div className="text-white/80">{project.teamLeaderId.fullName || project.teamLeaderId.displayName || 'Project Lead'}</div>
+                        {project.teamLeaderId.email && (
+                          <div className="text-white/50 text-sm">{project.teamLeaderId.email}</div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  {project.documentationUrl && (
+                    <div className="flex items-start gap-3">
+                      <ExternalLink className="w-5 h-5 text-red-400 mt-1 flex-shrink-0" />
+                      <div>
+                        <div className="font-medium text-white">Documentation</div>
+                        <a href={project.documentationUrl} target="_blank" rel="noreferrer" className="text-red-300 hover:text-red-200 underline break-all">
+                          {project.documentationUrl}
+                        </a>
                       </div>
                     </div>
                   )}
@@ -427,7 +555,8 @@ const ProjectDetail = () => {
               </motion.div>
             )}
 
-            {/* Team Members */}
+            {/* Team Members */
+            }
             {project.teamMembers && project.teamMembers.length > 0 && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -437,7 +566,7 @@ const ProjectDetail = () => {
               >
                 <h2 className="text-2xl font-bold mb-6 text-white">Team Members</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {project.teamMembers.map((member, index) => (
+                  {displayedTeamMembers.map((member, index) => (
                     <motion.div
                       key={index}
                       initial={{ opacity: 0, y: 20 }}
@@ -446,12 +575,32 @@ const ProjectDetail = () => {
                       className="p-4 bg-white/5 rounded-lg border border-white/10"
                     >
                       <div className="flex items-center gap-3 mb-2">
-                        <div className="w-10 h-10 bg-red-500/20 rounded-full flex items-center justify-center">
-                          <User className="w-5 h-5 text-red-400" />
-                        </div>
+                        { (member?.userId?.profileImageUrl || member?.profileImageUrl) ? (
+                          <Image
+                            src={member.userId?.profileImageUrl || member.profileImageUrl}
+                            alt={(member.userId?.fullName || member.userName || 'Team Member') + ' avatar'}
+                            width={40}
+                            height={40}
+                            className="w-10 h-10 rounded-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-10 h-10 bg-red-500/20 rounded-full flex items-center justify-center">
+                            <User className="w-5 h-5 text-red-400" />
+                          </div>
+                        )}
                         <div>
-                          <div className="font-semibold text-white">Team Member</div>
-                          <div className="text-white/60 text-sm">{member.role}</div>
+                          <div className="font-semibold text-white">{member.userId?.fullName || member.userId?.displayName || member.userName || 'Team Member'}</div>
+                          {member.role && (
+                            <div className="text-white/60 text-sm">{member.role}</div>
+                          )}
+                          {(member.userId?.email || member.email) && (
+                            <a
+                              href={`mailto:${member.userId?.email || member.email}`}
+                              className="text-white/60 text-xs hover:text-white/80 break-all"
+                            >
+                              {member.userId?.email || member.email}
+                            </a>
+                          )}
                         </div>
                       </div>
                       {member.skills && member.skills.length > 0 && (
@@ -462,6 +611,21 @@ const ProjectDetail = () => {
                             </span>
                           ))}
                         </div>
+                      )}
+                      {member.responsibilities && member.responsibilities.length > 0 && (
+                        <div className="mt-3">
+                          <div className="text-white/60 text-xs mb-1">Responsibilities</div>
+                          <div className="flex flex-wrap gap-2">
+                            {member.responsibilities.map((resp, rIndex) => (
+                              <span key={rIndex} className="px-2 py-1 bg-white/10 rounded text-xs text-white/80">
+                                {resp}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      {member.joinedAt && (
+                        <div className="text-white/40 text-xs mt-3">Joined {formatDate(member.joinedAt)}</div>
                       )}
                     </motion.div>
                   ))}
@@ -498,6 +662,29 @@ const ProjectDetail = () => {
               </motion.div>
             )}
 
+            {/* Removed separate All Team Members section as requested */}
+
+            {project.comments && project.comments.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.7, duration: 0.8 }}
+                className="bg-white/5 backdrop-blur-lg rounded-2xl p-6 border border-white/10"
+              >
+                <h2 className="text-2xl font-bold mb-6 text-white">Comments</h2>
+                <div className="space-y-4">
+                  {project.comments.map((cmt, idx) => (
+                    <div key={idx} className="p-4 bg-white/5 rounded-lg border border-white/10">
+                      <div className="text-white/80">{cmt.text || String(cmt)}</div>
+                      {cmt.createdAt && (
+                        <div className="text-white/40 text-xs mt-2">{formatDate(cmt.createdAt)} {formatTime(cmt.createdAt)}</div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+
           </div>
 
           {/* Sidebar */}
@@ -513,7 +700,8 @@ const ProjectDetail = () => {
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <span className="text-white/60">Status</span>
-                  <span className={`px-2 py-1 rounded text-xs font-medium ${getProjectStatusColor(project.status)}`}>
+                  <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium ${getProjectStatusColor(project.status)}`}>
+                    {getProjectStatusIcon(project.status)}
                     {project.status.charAt(0).toUpperCase() + project.status.slice(1).replace('_', ' ')}
                   </span>
                 </div>
@@ -526,7 +714,7 @@ const ProjectDetail = () => {
                 <div className="flex items-center justify-between">
                   <span className="text-white/60">Team Size</span>
                   <span className="text-white font-medium">
-                    {project.teamMembers?.length || 0} members
+                    {project.teamSize || project.teamMembers?.length || 0} members
                   </span>
                 </div>
                 {project.isFeatured && (
@@ -535,10 +723,54 @@ const ProjectDetail = () => {
                     <span className="text-yellow-400">⭐ Yes</span>
                   </div>
                 )}
+                {typeof project.isPublic === 'boolean' && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-white/60">Visibility</span>
+                    <span className="text-white font-medium">{project.isPublic ? 'Public' : 'Private'}</span>
+                  </div>
+                )}
+                {typeof project.isOverdue === 'boolean' && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-white/60">Overdue</span>
+                    <span className={project.isOverdue ? 'text-red-300' : 'text-white/70'}>{project.isOverdue ? 'Yes' : 'No'}</span>
+                  </div>
+                )}
+                {typeof project.viewCount === 'number' && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-white/60">Views</span>
+                    <span className="text-white font-medium">{project.viewCount}</span>
+                  </div>
+                )}
+                {(typeof project.completedMilestonesCount === 'number' || typeof project.totalMilestonesCount === 'number') && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-white/60">Milestones</span>
+                    <span className="text-white font-medium">{project.completedMilestonesCount || 0} / {project.totalMilestonesCount || (project.milestones?.length || 0)}</span>
+                  </div>
+                )}
+                {project.progress !== undefined && (
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-white/60">Progress</span>
+                      <span className="text-red-300 font-medium">{project.progress}%</span>
+                    </div>
+                    <div className="w-full bg-white/20 rounded-full h-2">
+                      <div className="bg-red-500 h-2 rounded-full" style={{ width: `${project.progress}%` }} />
+                    </div>
+                  </div>
+                )}
+                {/* Rating hidden as requested */}
+                {project.tags && project.tags.length > 0 && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-white/60">Tags</span>
+                    <span className="text-white/70 text-right truncate">
+                      {project.tags.join(', ')}
+                    </span>
+                  </div>
+                )}
               </div>
             </motion.div>
 
-            {/* Technologies & Skills */}
+            {/* Tags */}
             {project.tags && project.tags.length > 0 && (
               <motion.div
                 initial={{ opacity: 0, x: 20 }}
@@ -546,7 +778,7 @@ const ProjectDetail = () => {
                 transition={{ delay: 0.4, duration: 0.8 }}
                 className="bg-white/5 backdrop-blur-lg rounded-2xl p-6 border border-white/10"
               >
-                <h3 className="text-xl font-bold mb-4 text-white">Technologies & Skills</h3>
+                <h3 className="text-xl font-bold mb-4 text-white">Tag List</h3>
                 <div className="flex flex-wrap gap-2">
                   {project.tags.map((tag, index) => (
                     <motion.span
@@ -563,11 +795,92 @@ const ProjectDetail = () => {
               </motion.div>
             )}
 
+            
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.6, duration: 0.8 }}
+              className="bg-white/5 backdrop-blur-lg rounded-2xl p-6 border border-white/10"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xl font-bold text-white">Project Gallery</h3>
+                <Link
+                  href={galleryCategoryId ? `/Gallery?categoryId=${galleryCategoryId}` : `/Gallery`}
+                  className="text-sm px-3 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors"
+                >
+                  View All
+                </Link>
+              </div>
+              {galleryLoading && (
+                <div className="h-48 flex items-center justify-center text-white/60">Loading images...</div>
+              )}
+              {!galleryLoading && galleryItems.length === 0 && (
+                <div className="text-white/60">No images found for this project.</div>
+              )}
+              {!galleryLoading && galleryItems.length > 0 && (
+                <div className="relative">
+                  <div className="relative w-full h-64 rounded-lg overflow-hidden bg-white/10">
+                    {(() => {
+                      const current = galleryItems[currentSlide];
+                      const t = (current?.fileType || '').toLowerCase();
+                      if (t === 'video') {
+                        return (
+                          <video
+                            src={current?.fileUrl}
+                            poster={current?.thumbnailUrl}
+                            className="w-full h-full object-cover"
+                            controls
+                            playsInline
+                            preload="metadata"
+                            muted
+                            autoPlay
+                            ref={videoRef}
+                            key={current?.fileUrl}
+                          />
+                        );
+                      }
+                      return (
+                        <Image
+                          src={current?.fileUrl || current?.thumbnailUrl}
+                          alt={current?.title || 'Project media'}
+                          fill
+                          className="object-cover"
+                        />
+                      );
+                    })()}
+                    {galleryItems[currentSlide]?.title && (
+                      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-3">
+                        <div className="text-white/90 text-sm font-medium truncate">
+                          {galleryItems[currentSlide]?.title}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex items-center justify-between mt-3">
+                    <button
+                      onClick={() => setCurrentSlide((prev) => (prev - 1 + galleryItems.length) % galleryItems.length)}
+                      className="px-3 py-1 bg-white/10 hover:bg-white/20 text-white rounded"
+                    >
+                      Prev
+                    </button>
+                    <div className="text-white/60 text-sm">
+                      {currentSlide + 1} / {galleryItems.length}
+                    </div>
+                    <button
+                      onClick={() => setCurrentSlide((prev) => (prev + 1) % galleryItems.length)}
+                      className="px-3 py-1 bg-white/10 hover:bg-white/20 text-white rounded"
+                    >
+                      Next
+                    </button>
+                  </div>
+                </div>
+              )}
+            </motion.div>
             {/* Share Project */}
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.5, duration: 0.8 }}
+              transition={{ delay: 0.7, duration: 0.8 }}
               className="bg-white/5 backdrop-blur-lg rounded-2xl p-6 border border-white/10"
             >
               <h3 className="text-xl font-bold mb-4 text-white">Share Project</h3>
@@ -584,11 +897,22 @@ const ProjectDetail = () => {
                   Share Project
                 </button>
                 <button
-                  onClick={() => navigator.clipboard.writeText(window.location.href)}
+                  onClick={async () => {
+                    try {
+                      await navigator.clipboard.writeText(window.location.href);
+                      setLinkCopied(true);
+                      setTimeout(() => setLinkCopied(false), 2000);
+                    } catch (e) {
+                      setLinkCopied(false);
+                    }
+                  }}
                   className="w-full bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg font-medium transition-colors"
                 >
                   Copy Link
                 </button>
+                <div aria-live="polite" className="h-5 text-sm text-green-300 mt-1">
+                  {linkCopied ? 'Link copied' : ''}
+                </div>
               </div>
             </motion.div>
           </div>

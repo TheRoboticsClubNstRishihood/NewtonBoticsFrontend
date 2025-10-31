@@ -26,6 +26,9 @@ const EventDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isRegistering, setIsRegistering] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(null);
+  const [linkCopied, setLinkCopied] = useState(false);
+  const [isImageOpen, setIsImageOpen] = useState(false);
   
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3005/api';
 
@@ -33,11 +36,14 @@ const EventDetail = () => {
     const fetchEvent = async () => {
       try {
         setLoading(true);
+        console.log('Fetching event details...', { id: params.id, url: `${API_BASE_URL}/events/${params.id}` });
         const res = await fetch(`${API_BASE_URL}/events/${params.id}`, { cache: 'no-store' });
         if (!res.ok) throw new Error('Failed to fetch event');
         const data = await res.json();
+        console.log('Fetched event details response:', data);
         if (data.success) {
           setEvent(data.data.item);
+          console.log('Event details set in state:', data.data.item);
         } else {
           throw new Error(data.message || 'Failed to fetch event');
         }
@@ -53,6 +59,38 @@ const EventDetail = () => {
       fetchEvent();
     }
   }, [params.id, API_BASE_URL]);
+
+  useEffect(() => {
+    if (!event) return;
+    const targetDateString = event.registrationDeadline || event.startDate;
+    if (!targetDateString) return;
+
+    const calculateTimeLeft = () => {
+      const now = new Date().getTime();
+      const target = new Date(targetDateString).getTime();
+      const diff = Math.max(0, target - now);
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+      return { diff, days, hours, minutes, seconds };
+    };
+
+    setTimeLeft(calculateTimeLeft());
+    const interval = setInterval(() => {
+      setTimeLeft(calculateTimeLeft());
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [event]);
+
+  useEffect(() => {
+    const onKeyDown = (e) => {
+      if (e.key === 'Escape') setIsImageOpen(false);
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, []);
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -95,6 +133,8 @@ const EventDetail = () => {
         return 'bg-gray-500/20 text-gray-300 border-gray-500/30';
       case 'cancelled':
         return 'bg-red-500/20 text-red-300 border-red-500/30';
+      case 'closed':
+        return 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30';
       default:
         return 'bg-white/10 text-white/80 border-white/20';
     }
@@ -110,6 +150,8 @@ const EventDetail = () => {
         return <CheckCircle className="w-4 h-4" />;
       case 'cancelled':
         return <XCircle className="w-4 h-4" />;
+      case 'closed':
+        return <AlertCircle className="w-4 h-4" />;
       default:
         return <AlertCircle className="w-4 h-4" />;
     }
@@ -130,6 +172,53 @@ const EventDetail = () => {
     return typeColors[type] || 'bg-white/10 text-white/80 border-white/20';
   };
 
+  // Image URL helpers (align with Gallery handling)
+  const isCloudinaryUrl = (url) => typeof url === 'string' && /https?:\/\/res\.cloudinary\.com\//.test(url);
+  const sanitizeCloudinaryExtension = (url) => {
+    if (!url) return url;
+    return url.replace(/\.(tif|tiff)(\?|#|$)/i, '.jpg$2');
+  };
+  const transformCloudinaryUrl = (url, { width, height, crop = 'fill', quality = 'auto', format = 'auto' } = {}) => {
+    if (!isCloudinaryUrl(url)) return url;
+    const safeUrl = sanitizeCloudinaryExtension(url);
+    const transforms = [
+      `f_${format}`,
+      `q_${quality}`,
+      (width || height) ? `c_${crop}` : null,
+      width ? `w_${width}` : null,
+      height ? `h_${height}` : null,
+    ].filter(Boolean).join(',');
+    return safeUrl.replace('/image/upload/', `/image/upload/${transforms}/`);
+  };
+  const getEventImageUrl = (url, opts = {}) => {
+    if (!url) return '/bgImageforroboticslab.jpg';
+    const transformed = transformCloudinaryUrl(url, opts);
+    return transformed || '/bgImageforroboticslab.jpg';
+  };
+
+  const computeDerivedStatus = () => {
+    if (!event) return 'unknown';
+    if (event.status === 'cancelled') return 'cancelled';
+    const now = new Date();
+    const start = event.startDate ? new Date(event.startDate) : null;
+    const end = event.endDate ? new Date(event.endDate) : null;
+    if (start && now < start) return 'upcoming';
+    if (start && end && now >= start && now <= end) return 'ongoing';
+    if (end && now > end) return 'completed';
+    // Fallbacks if dates missing
+    if (start && !end && now >= start) return 'ongoing';
+    return 'unknown';
+  };
+
+  const getEffectiveStatus = () => {
+    const derived = computeDerivedStatus();
+    if (derived === 'upcoming' && event?.registrationDeadline) {
+      const deadline = new Date(event.registrationDeadline);
+      if (deadline <= new Date()) return 'closed';
+    }
+    return derived;
+  };
+
   const isRegistrationOpen = () => {
     if (!event) return false;
     if (event.status === 'cancelled' || event.status === 'completed') return false;
@@ -146,8 +235,9 @@ const EventDetail = () => {
 
   const getRegistrationStatus = () => {
     if (!event) return 'unknown';
-    if (event.status === 'cancelled') return 'cancelled';
-    if (event.status === 'completed') return 'completed';
+    const effective = getEffectiveStatus();
+    if (effective === 'cancelled') return 'cancelled';
+    if (effective === 'completed') return 'completed';
     if (isEventFull()) return 'full';
     if (!isRegistrationOpen()) return 'closed';
     return 'open';
@@ -186,10 +276,11 @@ const EventDetail = () => {
   }
 
   return (
+    <>
     <div className="min-h-screen bg-black text-white">
       {/* Header */}
       <div className="bg-gradient-to-b from-gray-900 to-black border-b border-white/10">
-        <div className="container mx-auto px-4 py-6">
+        <div className="container mx-auto px-4 py-6 relative">
           <div className="flex items-center gap-4 mb-6">
             <Link href="/Events">
               <motion.button
@@ -202,6 +293,42 @@ const EventDetail = () => {
               </motion.button>
             </Link>
           </div>
+
+          {/* Top-right Countdown */}
+          {(event.registrationDeadline || event.startDate) && timeLeft && timeLeft.diff > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: -4 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="absolute top-6 right-4"
+            >
+              <div className="flex items-center gap-3 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-2 backdrop-blur">
+                <span className="text-red-200 text-xs md:text-sm">{event.registrationDeadline ? 'Registration closes in' : 'Starts in'}</span>
+                <div className="flex items-center gap-2">
+                  {[
+                    { label: 'd', value: timeLeft.days },
+                    { label: 'h', value: timeLeft.hours },
+                    { label: 'm', value: timeLeft.minutes },
+                    { label: 's', value: timeLeft.seconds },
+                  ].map((unit, idx) => (
+                    <div key={unit.label} className="flex items-end gap-1">
+                      <motion.span
+                        key={`${unit.label}-${unit.value}`}
+                        initial={{ opacity: 0.4, scale: 0.95, y: -2 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                        className="text-red-300 font-semibold text-base md:text-lg tabular-nums"
+                      >
+                        {String(unit.value).padStart(2, '0')}
+                      </motion.span>
+                      <span className="text-red-200/80 text-[10px] md:text-xs uppercase">{unit.label}</span>
+                      {idx < 3 && <span className="text-red-200/40 ml-1">:</span>}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          )}
           
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -214,9 +341,9 @@ const EventDetail = () => {
               <span className={`px-3 py-1 rounded-full text-sm font-medium border ${getEventTypeColor(event.type)}`}>
                 {event.type.charAt(0).toUpperCase() + event.type.slice(1)}
               </span>
-              <span className={`px-3 py-1 rounded-full text-sm font-medium border flex items-center gap-2 ${getEventStatusColor(event.status)}`}>
-                {getEventStatusIcon(event.status)}
-                {event.status.charAt(0).toUpperCase() + event.status.slice(1)}
+              <span className={`px-3 py-1 rounded-full text-sm font-medium border flex items-center gap-2 ${getEventStatusColor(getEffectiveStatus())}`}>
+                {getEventStatusIcon(getEffectiveStatus())}
+                {getEffectiveStatus().charAt(0).toUpperCase() + getEffectiveStatus().slice(1)}
               </span>
               {event.isFeatured && (
                 <span className="px-3 py-1 rounded-full text-sm font-medium bg-yellow-500/20 text-yellow-300 border border-yellow-500/30 flex items-center gap-2">
@@ -233,6 +360,8 @@ const EventDetail = () => {
             <p className="text-xl text-white/80 max-w-4xl">
               {event.description}
             </p>
+
+            {/* Countdown moved to top-right */}
           </motion.div>
         </div>
       </div>
@@ -297,7 +426,7 @@ const EventDetail = () => {
                     <div>
                       <div className="font-medium text-white">Capacity</div>
                       <div className="text-white/80">
-                        {event.currentRegistrations || 0} / {event.maxCapacity || '∞'} registered
+                        {event.maxCapacity || '∞'}
                       </div>
                     </div>
                   </div>
@@ -358,7 +487,7 @@ const EventDetail = () => {
                   </div>
                   
                   <div className="text-sm text-white/60">
-                    {event.currentRegistrations || 0} / {event.maxCapacity || '∞'} spots filled
+                    Available slots: {event.maxCapacity || '∞'}
                   </div>
                 </div>
 
@@ -368,6 +497,14 @@ const EventDetail = () => {
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     disabled={isRegistering}
+                    onClick={() => {
+                      if (event?.registrationFormLink) {
+                        console.log('Opening registration form in new tab:', event.registrationFormLink);
+                        window.open(event.registrationFormLink, '_blank', 'noopener,noreferrer');
+                      } else {
+                        console.warn('No registration form link available for this event');
+                      }
+                    }}
                     className="w-full bg-gradient-to-r from-red-500 to-red-600 text-white px-6 py-4 rounded-lg font-semibold shadow-lg shadow-red-500/30 hover:shadow-red-500/50 transition-all text-lg disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {isRegistering ? 'Processing...' : 'Register for Event'}
@@ -408,6 +545,29 @@ const EventDetail = () => {
 
           {/* Sidebar */}
           <div className="space-y-6">
+            {/* Event Cover Image (Sidebar) */}
+            {event.imageUrl && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8 }}
+                className="overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-lg"
+              >
+                <button
+                  type="button"
+                  onClick={() => setIsImageOpen(true)}
+                  className="block w-full cursor-zoom-in"
+                >
+                  <img
+                    src={getEventImageUrl(event.imageUrl, { width: 1200 })}
+                    alt={event.title || 'Event image'}
+                    className="w-full h-56 object-cover"
+                    onError={(e) => { e.currentTarget.src = '/bgImageforroboticslab.jpg'; }}
+                  />
+                </button>
+              </motion.div>
+            )}
+
             {/* Quick Stats */}
             <motion.div
               initial={{ opacity: 0, x: 20 }}
@@ -419,8 +579,8 @@ const EventDetail = () => {
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <span className="text-white/60">Status</span>
-                  <span className={`px-2 py-1 rounded text-xs font-medium ${getEventStatusColor(event.status)}`}>
-                    {event.status.charAt(0).toUpperCase() + event.status.slice(1)}
+                  <span className={`px-2 py-1 rounded text-xs font-medium ${getEventStatusColor(getEffectiveStatus())}`}>
+                    {getEffectiveStatus().charAt(0).toUpperCase() + getEffectiveStatus().slice(1)}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
@@ -433,12 +593,6 @@ const EventDetail = () => {
                   <span className="text-white/60">Capacity</span>
                   <span className="text-white font-medium">
                     {event.maxCapacity || '∞'}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-white/60">Registered</span>
-                  <span className="text-white font-medium">
-                    {event.currentRegistrations || 0}
                   </span>
                 </div>
                 {event.isFeatured && (
@@ -471,17 +625,70 @@ const EventDetail = () => {
                   Share Event
                 </button>
                 <button
-                  onClick={() => navigator.clipboard.writeText(window.location.href)}
+                  onClick={async () => {
+                    try {
+                      await navigator.clipboard.writeText(window.location.href);
+                      setLinkCopied(true);
+                      setTimeout(() => setLinkCopied(false), 2000);
+                    } catch (e) {
+                      console.error('Failed to copy link:', e);
+                    }
+                  }}
                   className="w-full bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg font-medium transition-colors"
                 >
                   Copy Link
                 </button>
+                {linkCopied && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -4 }}
+                    transition={{ duration: 0.2 }}
+                    className="text-green-300 text-sm bg-green-500/10 border border-green-500/20 rounded-lg px-3 py-2 inline-block"
+                  >
+                    Link copied
+                  </motion.div>
+                )}
               </div>
             </motion.div>
           </div>
         </div>
       </div>
     </div>
+    {isImageOpen && event?.imageUrl && (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4"
+        onClick={() => setIsImageOpen(false)}
+      >
+        <motion.div
+          initial={{ scale: 0.98, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ type: 'spring', stiffness: 260, damping: 20 }}
+          className="relative"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <button
+            type="button"
+            onClick={() => setIsImageOpen(false)}
+            className="absolute -top-3 -right-3 bg-white/10 hover:bg-white/20 border border-white/20 text-white rounded-full w-8 h-8 flex items-center justify-center"
+            aria-label="Close image"
+          >
+            ×
+          </button>
+          <img
+            src={getEventImageUrl(event.imageUrl)}
+            alt={event.title || 'Event image full size'}
+            className="max-h-[75vh] max-w-[80vw] object-contain rounded-lg shadow-2xl cursor-zoom-out"
+            onClick={() => setIsImageOpen(false)}
+            onError={(e) => { e.currentTarget.src = '/bgImageforroboticslab.jpg'; }}
+          />
+        </motion.div>
+      </motion.div>
+    )}
+    </>
   );
 };
 

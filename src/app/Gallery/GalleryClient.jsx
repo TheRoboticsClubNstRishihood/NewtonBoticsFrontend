@@ -697,7 +697,7 @@ export default function GalleryClient() {
       <AnimatePresence>
         {active && (
           <motion.div
-            className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm flex items-center justify-center p-4"
+            className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm flex items-start justify-center p-4 pt-16 md:pt-20 overflow-y-auto overscroll-contain"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -720,11 +720,11 @@ export default function GalleryClient() {
               
               <div className="relative w-full bg-black rounded-xl overflow-hidden border border-white/10">
                 {active.fileType === "image" ? (
-                  <div className="relative w-full max-h-[80vh] flex items-center justify-center">
-                      <img
+                  <div className="relative w-full flex items-center justify-center">
+                    <img
                       src={getPrimaryUrl(active)}
                       alt={active.title}
-                      className="max-w-full max-h-full object-contain"
+                      className="w-auto h-auto max-w-[95vw] md:max-w-[92vw] max-h-[calc(100vh-7rem)] md:max-h-[calc(100vh-9rem)] object-contain"
                     />
                   </div>
                 ) : active.fileType === "video" ? (

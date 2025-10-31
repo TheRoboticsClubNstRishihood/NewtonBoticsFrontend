@@ -124,6 +124,33 @@ const EventsPage = () => {
     return typeColors[type] || 'bg-white/10 text-white/80 border-white/20';
   };
 
+  // Determine status from dates when possible so UI stays consistent
+  const getDerivedStatus = (event) => {
+    if (!event) return 'upcoming';
+    if (event.status === 'cancelled') return 'cancelled';
+    const now = new Date();
+    const start = event.startDate ? new Date(event.startDate) : null;
+    const end = event.endDate ? new Date(event.endDate) : null;
+    if (start && end) {
+      if (now < start) return 'upcoming';
+      if (now >= start && now <= end) return 'ongoing';
+      if (now > end) return 'completed';
+    }
+    if (start) {
+      return now < start ? 'upcoming' : 'ongoing';
+    }
+    return event.status || 'upcoming';
+  };
+
+  // Compute available seats text
+  const getAvailabilityText = (event) => {
+    const max = typeof event?.maxCapacity === 'number' ? event.maxCapacity : null;
+    const current = typeof event?.currentRegistrations === 'number' ? event.currentRegistrations : 0;
+    if (max === null) return null; // no cap → omit
+    const available = Math.max(0, max - current);
+    return available === 0 ? 'Sold out' : `${available} available`;
+  };
+
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', { 
@@ -352,8 +379,8 @@ const EventsPage = () => {
                           <span className={`px-2 py-1 rounded text-xs font-medium border ${getEventTypeColor(event.type)}`}>
                             {event.type.charAt(0).toUpperCase() + event.type.slice(1)}
                           </span>
-                          <span className={`px-2 py-1 rounded text-xs font-medium border ${getEventStatusColor(event.status)}`}>
-                            {event.status.charAt(0).toUpperCase() + event.status.slice(1)}
+                          <span className={`px-2 py-1 rounded text-xs font-medium border ${getEventStatusColor(getDerivedStatus(event))}`}>
+                            {getDerivedStatus(event).charAt(0).toUpperCase() + getDerivedStatus(event).slice(1)}
                           </span>
                           {event.isFeatured && (
                             <span className="px-2 py-1 rounded text-xs font-medium bg-yellow-500/20 text-yellow-300 border border-yellow-500/30">
@@ -389,10 +416,12 @@ const EventsPage = () => {
                             <span>{event.location}</span>
                           </div>
                         )}
-                        <div className="flex items-center gap-2 text-white/60 text-sm">
-                          <Users className="w-4 h-4" />
-                          <span>{event.currentRegistrations || 0} / {event.maxCapacity || '∞'} registered</span>
-                        </div>
+                        {getAvailabilityText(event) && (
+                          <div className="flex items-center gap-2 text-white/60 text-sm">
+                            <Users className="w-4 h-4" />
+                            <span>{getAvailabilityText(event)}</span>
+                          </div>
+                        )}
                       </div>
 
                       {/* View Details Button */}

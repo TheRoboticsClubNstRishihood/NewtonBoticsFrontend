@@ -15,7 +15,8 @@ import {
   Star,
   User,
   CalendarDays,
-  Tag
+  Tag,
+  Link2
 } from "lucide-react";
 import Link from "next/link";
 
@@ -485,6 +486,41 @@ const EventDetail = () => {
                 </div>
               </div>
             </motion.div>
+
+            {/* External Support Links (Main section before Registration) */}
+            {Array.isArray(event.sampleLinks) && event.sampleLinks.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3, duration: 0.8 }}
+                className="bg-white/5 backdrop-blur-lg rounded-2xl p-6 border border-white/10"
+              >
+                <h2 className="text-2xl font-bold mb-6 text-white">External Support Links</h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {event.sampleLinks.map((link, idx) => {
+                    const href = typeof link?.url === 'string' && /^(https?:)?\/\//i.test(link.url)
+                      ? link.url
+                      : `https://${link?.url || ''}`;
+                    const label = link?.label || `Link ${idx + 1}`;
+                    return (
+                      <a
+                        key={`${label}-${idx}`}
+                        href={href}
+                        target="_blank"
+                        rel="noopener noreferrer nofollow"
+                        className="flex items-center justify-between w-full bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg font-medium transition-colors group"
+                      >
+                        <span className="truncate mr-3 flex items-center gap-2">
+                          <Link2 className="w-4 h-4 opacity-80 text-blue-400 group-hover:text-blue-300 group-hover:opacity-100" />
+                          <span className="truncate">{label}</span>
+                        </span>
+                        <ExternalLink className="w-4 h-4 opacity-80 text-blue-400 group-hover:text-blue-300 group-hover:opacity-100" />
+                      </a>
+                    );
+                  })}
+                </div>
+              </motion.div>
+            )}
 
             {/* Registration Section */}
             <motion.div

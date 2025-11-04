@@ -14,7 +14,7 @@ const Navbar = () => {
   const pathname = usePathname();
   const router = useRouter();
   
-  const { user, isAuthenticated, logout, hasRole, hasPermission } = useAuth();
+  const { user, isAuthenticated, logout, hasRole, hasPermission, hasSubrole } = useAuth();
 
   const toggleMenu = () => setIsOpen((s) => !s);
 
@@ -93,6 +93,8 @@ const Navbar = () => {
   const avatarLabel = user ? (user.firstName ? user.firstName.charAt(0).toUpperCase() : user.email.charAt(0).toUpperCase()) : "U";
   const displayName = user ? (user.firstName ? `${user.firstName} ${user.lastName}` : user.email) : "User";
   const userRole = user ? user.role : "Member";
+  const userSubroles = user?.subroles || [];
+  const userRoleDisplay = userRole?.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Member';
   const userAvatarUrl = user && user.profileImageUrl && /^https?:\/\//i.test(user.profileImageUrl) ? user.profileImageUrl : null;
 
   return (
@@ -194,7 +196,20 @@ const Navbar = () => {
                     )}
                     <div className="text-sm">
                       <div className="text-white/90 font-medium truncate max-w-[12rem]">{displayName}</div>
-                      <div className="text-white/50 capitalize">{userRole}</div>
+                      <div className="text-white/50 text-xs">
+                        <span className="capitalize">{userRoleDisplay}</span>
+                        {userSubroles.length > 0 && (
+                          <>
+                            <span className="text-white/30 mx-1">•</span>
+                            <span className="text-white/40">
+                              {userSubroles.slice(0, 1).map(subrole => 
+                                subrole.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+                              ).join(', ')}
+                              {userSubroles.length > 1 && ` +${userSubroles.length - 1}`}
+                            </span>
+                          </>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -211,6 +226,12 @@ const Navbar = () => {
                     >
                       <FiShield /> Admin Panel
                     </a>
+                  </div>
+                )}
+
+                {(isAdmin || hasRole('team_member') || hasSubrole('inventory_manager') || hasSubrole('inventory_management')) && (
+                  <div className="py-1">
+                    <div className="px-4 py-2 text-[11px] uppercase tracking-wider text-white/40">Tools</div>
                     <Link
                       href="/Inventory"
                       className="flex items-center gap-2 px-4 py-2 text-white/90 hover:bg-white/10"
@@ -318,7 +339,20 @@ const Navbar = () => {
                   )}
                   <div>
                     <div className="font-medium text-white">{displayName}</div>
-                    <div className="text-white/60 capitalize text-xs">{userRole}</div>
+                    <div className="text-white/60 text-xs">
+                      <span className="capitalize">{userRoleDisplay}</span>
+                      {userSubroles.length > 0 && (
+                        <>
+                          <span className="text-white/40 mx-1">•</span>
+                          <span className="text-white/50">
+                            {userSubroles.slice(0, 1).map(subrole => 
+                              subrole.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+                            ).join(', ')}
+                            {userSubroles.length > 1 && ` +${userSubroles.length - 1}`}
+                          </span>
+                        </>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -336,6 +370,12 @@ const Navbar = () => {
                     <FiShield className="w-4 h-4" />
                     <span>Admin Panel</span>
                   </a>
+                </>
+              )}
+
+              {(isAdmin || hasRole('team_member') || hasSubrole('inventory_manager') || hasSubrole('inventory_management')) && (
+                <>
+                  <div className="px-4 py-2 text-[10px] uppercase tracking-wider text-white/40 bg-white/5">Tools</div>
                   <Link 
                     href="/Inventory" 
                     className="flex items-center gap-3 py-2 px-4 text-white hover:bg-red-900 transition" 

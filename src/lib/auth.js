@@ -388,20 +388,32 @@ class AuthService {
   // Get Current User Profile
   async getCurrentUserProfile() {
     try {
+      console.log('[AuthService] Calling /me endpoint...');
       const response = await this.makeAuthenticatedRequest(`${this.baseURL}/me`);
       const data = await this.parseJsonResponse(response);
+
+      console.log('[AuthService] /me response status:', response.status);
+      console.log('[AuthService] /me response data:', data);
 
       if (!response.ok) {
         throw new Error(data.message || 'Failed to fetch user profile');
       }
 
       if (data.success) {
+        console.log('[AuthService] User data from API:', data.data.user);
+        console.log('[AuthService] User subroles from API:', data.data.user?.subroles);
         this.user = data.data.user;
         localStorage.setItem('nb_user', JSON.stringify(data.data.user));
+        
+        // Verify what was stored
+        const stored = JSON.parse(localStorage.getItem('nb_user') || 'null');
+        console.log('[AuthService] Stored user in localStorage:', stored);
+        console.log('[AuthService] Stored subroles:', stored?.subroles);
       }
 
       return data;
     } catch (error) {
+      console.error('[AuthService] Error in getCurrentUserProfile:', error);
       throw error;
     }
   }

@@ -111,12 +111,24 @@ export const inventoryService = {
   },
 
   // POST /api/inventory/equipment/:id/checkout (auth: team_member+)
-  async checkoutEquipment(id, { quantity = 1, expectedReturnDate } = {}) {
+  async checkoutEquipment(id, { 
+    quantity = 1, 
+    userId, 
+    expectedReturnDate, 
+    projectId, 
+    checkoutNotes 
+  } = {}) {
     try {
       await authService.ensureValidToken();
+      const payload = { quantity };
+      if (userId) payload.userId = userId;
+      if (expectedReturnDate) payload.expectedReturnDate = expectedReturnDate;
+      if (projectId) payload.projectId = projectId;
+      if (checkoutNotes) payload.checkoutNotes = checkoutNotes;
+      
       const res = await authService.makeAuthenticatedRequest(`${API_BASE_URL}/inventory/equipment/${id}/checkout`, {
         method: 'POST',
-        body: JSON.stringify({ quantity, expectedReturnDate }),
+        body: JSON.stringify(payload),
       });
       const data = await safeParseJson(res);
       if (!res.ok || data?.success === false) {
@@ -130,12 +142,17 @@ export const inventoryService = {
   },
 
   // PUT /api/inventory/equipment/:id/return (auth: team_member+)
-  async returnEquipment(id, { checkoutId } = {}) {
+  async returnEquipment(id, { checkoutId, quantity, returnNotes } = {}) {
     try {
       await authService.ensureValidToken();
+      const payload = {};
+      if (checkoutId) payload.checkoutId = checkoutId;
+      if (quantity !== undefined) payload.quantity = quantity;
+      if (returnNotes) payload.returnNotes = returnNotes;
+      
       const res = await authService.makeAuthenticatedRequest(`${API_BASE_URL}/inventory/equipment/${id}/return`, {
         method: 'PUT',
-        body: JSON.stringify({ checkoutId }),
+        body: JSON.stringify(payload),
       });
       const data = await safeParseJson(res);
       if (!res.ok || data?.success === false) {
@@ -143,6 +160,99 @@ export const inventoryService = {
         throw new Error(msg);
       }
       return data?.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // GET /api/inventory/checkouts (auth: team_member+)
+  async listCheckouts({ equipmentId, userId, projectId, status, limit = 20, skip = 0 } = {}) {
+    try {
+      await authService.ensureValidToken();
+      const query = toQuery({ equipmentId, userId, projectId, status, limit, skip });
+      const res = await authService.makeAuthenticatedRequest(`${API_BASE_URL}/inventory/checkouts${query}`, {
+        method: 'GET',
+      });
+      const data = await safeParseJson(res);
+      if (!res.ok || data?.success === false) {
+        const msg = data?.error?.message || data?.message || 'Failed to load checkouts';
+        throw new Error(msg);
+      }
+      return data?.data || { items: [], pagination: { total: 0, limit, skip, hasMore: false } };
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // GET /api/inventory/checkouts/my (auth: team_member+)
+  async getMyCheckouts({ status, limit = 20, skip = 0 } = {}) {
+    try {
+      await authService.ensureValidToken();
+      const query = toQuery({ status, limit, skip });
+      const res = await authService.makeAuthenticatedRequest(`${API_BASE_URL}/inventory/checkouts/my${query}`, {
+        method: 'GET',
+      });
+      const data = await safeParseJson(res);
+      if (!res.ok || data?.success === false) {
+        const msg = data?.error?.message || data?.message || 'Failed to load your checkouts';
+        throw new Error(msg);
+      }
+      return data?.data || { items: [], pagination: { total: 0, limit, skip, hasMore: false } };
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // GET /api/inventory/equipment/:id/checkouts (auth: team_member+)
+  async getEquipmentCheckouts(id, { status, limit = 20, skip = 0 } = {}) {
+    try {
+      await authService.ensureValidToken();
+      const query = toQuery({ status, limit, skip });
+      const res = await authService.makeAuthenticatedRequest(`${API_BASE_URL}/inventory/equipment/${id}/checkouts${query}`, {
+        method: 'GET',
+      });
+      const data = await safeParseJson(res);
+      if (!res.ok || data?.success === false) {
+        const msg = data?.error?.message || data?.message || 'Failed to load equipment checkouts';
+        throw new Error(msg);
+      }
+      return data?.data || { equipment: {}, items: [], pagination: { total: 0, limit, skip, hasMore: false } };
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // GET /api/inventory/equipment/:id/checkouts/active (auth: team_member+)
+  async getActiveCheckouts(id) {
+    try {
+      await authService.ensureValidToken();
+      const res = await authService.makeAuthenticatedRequest(`${API_BASE_URL}/inventory/equipment/${id}/checkouts/active`, {
+        method: 'GET',
+      });
+      const data = await safeParseJson(res);
+      if (!res.ok || data?.success === false) {
+        const msg = data?.error?.message || data?.message || 'Failed to load active checkouts';
+        throw new Error(msg);
+      }
+      return data?.data || { equipment: {}, activeCheckouts: [], count: 0 };
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // GET /api/inventory/checkouts/:checkoutId (auth: team_member+)
+  async getCheckoutDetails(checkoutId) {
+    try {
+      await authService.ensureValidToken();
+      const res = await authService.makeAuthenticatedRequest(`${API_BASE_URL}/inventory/checkouts/${checkoutId}`, {
+        method: 'GET',
+      });
+      const data = await safeParseJson(res);
+      if (!res.ok || data?.success === false) {
+        const msg = data?.error?.message || data?.message || 'Failed to load checkout details';
+        throw new Error(msg);
+      }
+      return data?.data?.checkout;
     } catch (error) {
       throw error;
     }

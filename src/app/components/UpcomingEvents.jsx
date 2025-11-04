@@ -16,17 +16,13 @@ const UpcomingEvents = () => {
         setLoading(true);
         setError(null);
         
-        // Fetch only upcoming and ongoing events for homepage
-        const res = await fetch(`${API_BASE_URL}/events?status=upcoming&limit=3&isFeatured=true`, { cache: 'no-store' });
+        // Fetch featured events for homepage; status will be derived client-side
+        const res = await fetch(`${API_BASE_URL}/events?limit=3&isFeatured=true`, { cache: 'no-store' });
         if (!res.ok) throw new Error('Failed to fetch upcoming events');
         
         const data = await res.json();
         if (data.success) {
-          // Filter to only show upcoming and ongoing events
-          const upcomingAndOngoing = data.data.items.filter(event => 
-            event.status === 'upcoming' || event.status === 'ongoing'
-          );
-          setEvents(upcomingAndOngoing.slice(0, 3)); // Limit to 3 for homepage
+          setEvents((data.data.items || []).slice(0, 3)); // Limit to 3 for homepage
         } else {
           throw new Error(data.message || 'Failed to fetch upcoming events');
         }
@@ -50,13 +46,57 @@ const UpcomingEvents = () => {
     });
   };
 
-  const formatTime = (dateString) => {
+  // Helper to combine date and time
+  const combineDateTime = (dateString, timeString) => {
+    if (!dateString) return null;
     const date = new Date(dateString);
+    if (timeString) {
+      const [hours, minutes] = timeString.split(':');
+      date.setHours(parseInt(hours, 10), parseInt(minutes || 0, 10), 0, 0);
+    }
+    return date;
+  };
+
+  const formatTime = (dateString, timeString = null) => {
+    let date;
+    if (timeString && dateString) {
+      date = combineDateTime(dateString, timeString);
+    } else {
+      date = new Date(dateString);
+    }
     return date.toLocaleTimeString('en-US', { 
       hour: 'numeric', 
       minute: '2-digit',
       hour12: true 
     });
+  };
+
+  // Determine status from dates when possible so UI stays consistent (exact same logic as Events page)
+  const getDerivedStatus = (event) => {
+    if (!event) return 'upcoming';
+    if (event.status === 'cancelled') return 'cancelled';
+    const now = new Date();
+    // Combine date and time for accurate comparison
+    const start = event.startDate ? combineDateTime(event.startDate, event.startTime) : null;
+    const end = event.endDate ? combineDateTime(event.endDate, event.endTime) : null;
+    if (start && end) {
+      if (now < start) return 'upcoming';
+      if (now >= start && now <= end) return 'ongoing';
+      if (now > end) return 'completed';
+    }
+    if (start) {
+      return now < start ? 'upcoming' : 'ongoing';
+    }
+    return event.status || 'upcoming';
+  };
+
+  // Compute available seats text (exact same logic as Events page)
+  const getAvailabilityText = (event) => {
+    const max = typeof event?.maxCapacity === 'number' ? event.maxCapacity : null;
+    const current = typeof event?.currentRegistrations === 'number' ? event.currentRegistrations : 0;
+    if (max === null) return null; // no cap → omit
+    const available = Math.max(0, max - current);
+    return available === 0 ? 'Sold out' : `${available} available`;
   };
 
   const getEventStatusColor = (status) => {
@@ -65,6 +105,10 @@ const UpcomingEvents = () => {
         return 'bg-blue-500/20 text-blue-300 border-blue-500/30';
       case 'ongoing':
         return 'bg-green-500/20 text-green-300 border-green-500/30';
+      case 'completed':
+        return 'bg-gray-500/20 text-gray-300 border-gray-500/30';
+      case 'cancelled':
+        return 'bg-red-500/20 text-red-300 border-red-500/30';
       default:
         return 'bg-white/10 text-white/80 border-white/20';
     }
@@ -209,8 +253,8 @@ const UpcomingEvents = () => {
                           <span className={`px-2 py-1 rounded text-xs font-medium border ${getEventTypeColor(event.type)}`}>
                             {event.type.charAt(0).toUpperCase() + event.type.slice(1)}
                           </span>
-                          <span className={`px-2 py-1 rounded text-xs font-medium border ${getEventStatusColor(event.status)}`}>
-                            {event.status.charAt(0).toUpperCase() + event.status.slice(1)}
+                          <span className={`px-2 py-1 rounded text-xs font-medium border ${getEventStatusColor(getDerivedStatus(event))}`}>
+                            {getDerivedStatus(event).charAt(0).toUpperCase() + getDerivedStatus(event).slice(1)}
                           </span>
                           {event.isFeatured && (
                             <span className="px-2 py-1 rounded text-xs font-medium bg-yellow-500/20 text-yellow-300 border border-yellow-500/30">
@@ -238,7 +282,7 @@ const UpcomingEvents = () => {
                         </div>
                         <div className="flex items-center gap-2 text-white/60 text-sm">
                           <Clock className="w-4 h-4" />
-                          <span>{formatTime(event.startDate)} - {formatTime(event.endDate)}</span>
+                          <span>{formatTime(event.startDate, event.startTime)} - {formatTime(event.endDate, event.endTime)}</span>
                         </div>
                         {event.location && (
                           <div className="flex items-center gap-2 text-white/60 text-sm">
@@ -246,10 +290,12 @@ const UpcomingEvents = () => {
                             <span>{event.location}</span>
                           </div>
                         )}
-                        <div className="flex items-center gap-2 text-white/60 text-sm">
-                          <Users className="w-4 h-4" />
-                          <span>{event.currentRegistrations || 0} / {event.maxCapacity || '∞'} registered</span>
-                        </div>
+                        {getAvailabilityText(event) && (
+                          <div className="flex items-center gap-2 text-white/60 text-sm">
+                            <Users className="w-4 h-4" />
+                            <span>{getAvailabilityText(event)}</span>
+                          </div>
+                        )}
                       </div>
 
                       {/* View Details Button */}

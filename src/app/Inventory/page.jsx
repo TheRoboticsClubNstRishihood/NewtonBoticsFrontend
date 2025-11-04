@@ -139,11 +139,13 @@ const InventoryPage = () => {
     { value: "retired", label: "Retired" },
   ]), []);
 
+  const { hasSubrole } = useAuth();
   const role = user?.role || null;
   const isAdvancedRole = ["mentor", "researcher", "admin"].includes(role);
-  const canEdit = isAuthenticated && isAdvancedRole; // hide for team_member
-  const canDelete = isAuthenticated && isAdvancedRole;
-  const canManageCategories = isAuthenticated && ["team_member", "mentor", "researcher", "admin"].includes(role);
+  const hasInventoryManagementSubrole = hasSubrole('inventory_manager') || hasSubrole('inventory_management');
+  const canEdit = isAuthenticated && (isAdvancedRole || hasInventoryManagementSubrole);
+  const canDelete = isAuthenticated && (isAdvancedRole || hasInventoryManagementSubrole);
+  const canManageCategories = isAuthenticated && (["team_member", "mentor", "researcher", "admin"].includes(role) || hasInventoryManagementSubrole);
 
   // Backend will compute status; no local status logic
 

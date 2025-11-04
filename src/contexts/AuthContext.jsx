@@ -38,6 +38,17 @@ export const AuthProvider = ({ children }) => {
             await authService.refreshTokens();
             const refreshedUser = authService.getCurrentUser();
             setUser(refreshedUser);
+          } else {
+            // Refresh user profile to get latest data including subroles
+            try {
+              const profileResponse = await authService.getCurrentUserProfile();
+              if (profileResponse.success && profileResponse.data?.user) {
+                setUser(profileResponse.data.user);
+              }
+            } catch (profileError) {
+              console.error('Failed to refresh user profile on init:', profileError);
+              // Continue with existing user data if refresh fails
+            }
           }
         }
       } catch (error) {
@@ -355,6 +366,12 @@ export const AuthProvider = ({ children }) => {
     return user.role === role;
   }, [user]);
 
+  // Check if user has specific subrole
+  const hasSubrole = useCallback((subrole) => {
+    if (!user || !user.subroles || !Array.isArray(user.subroles)) return false;
+    return user.subroles.includes(subrole);
+  }, [user]);
+
   const value = {
     user,
     isAuthenticated,
@@ -374,6 +391,7 @@ export const AuthProvider = ({ children }) => {
     clearError,
     hasPermission,
     hasRole,
+    hasSubrole,
   };
 
   return (

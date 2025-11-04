@@ -53,6 +53,58 @@ const departments = [
 
 export default function ProfileCompletionPage() {
   const { user, updateProfile, changePassword } = useAuth();
+  const [refreshingUser, setRefreshingUser] = useState(false);
+  
+  // Refresh user profile on mount to get latest data including subroles
+  useEffect(() => {
+    const refreshUserProfile = async () => {
+      if (!user) return;
+      
+      try {
+        setRefreshingUser(true);
+        console.log('Current user object before refresh:', user);
+        console.log('Current user.subroles:', user.subroles);
+        
+        const authService = (await import('../../lib/auth')).default;
+        console.log('Calling getCurrentUserProfile...');
+        const response = await authService.getCurrentUserProfile();
+        
+        console.log('API Response:', response);
+        console.log('Response success:', response.success);
+        console.log('Response data:', response.data);
+        
+        if (response.success && response.data?.user) {
+          console.log('Refreshed user profile:', response.data.user);
+          console.log('Refreshed user subroles:', response.data.user.subroles);
+          console.log('Refreshed user subroles type:', typeof response.data.user.subroles);
+          console.log('Refreshed user subroles isArray:', Array.isArray(response.data.user.subroles));
+          
+          // Check localStorage to see what was stored
+          const storedUser = JSON.parse(localStorage.getItem('nb_user') || 'null');
+          console.log('User in localStorage after refresh:', storedUser);
+          console.log('Subroles in localStorage:', storedUser?.subroles);
+          
+          // The user state will be updated from localStorage on next render
+          // Small delay to ensure localStorage is updated
+          setTimeout(() => {
+            window.location.reload();
+          }, 500);
+        } else {
+          console.error('Profile refresh failed - response not successful:', response);
+          setRefreshingUser(false);
+        }
+      } catch (error) {
+        console.error('Failed to refresh user profile:', error);
+        console.error('Error details:', error.message, error.stack);
+        setRefreshingUser(false);
+      }
+    };
+    
+    // Always refresh on mount to ensure we have latest data
+    if (user) {
+      refreshUserProfile();
+    }
+  }, []); // Run once on mount
   
   const [profileData, setProfileData] = useState({
     firstName: "",
@@ -86,6 +138,9 @@ export default function ProfileCompletionPage() {
 
   useEffect(() => {
     if (user) {
+      console.log('User object in ProfileCompletion:', user);
+      console.log('User role:', user.role);
+      console.log('User subroles:', user.subroles);
       setProfileData({
         firstName: user.firstName || "",
         lastName: user.lastName || "",
@@ -303,6 +358,45 @@ export default function ProfileCompletionPage() {
                   <div className="min-w-0">
                     <div className="text-lg font-semibold truncate">{displayName}</div>
                     <div className="text-white/60 text-sm truncate">{user.email}</div>
+                  </div>
+                </div>
+
+                {/* Role and Subroles Section */}
+                <div className="mb-4 pb-4 border-b border-white/10">
+                  <div className="mb-2">
+                    <label className="block text-sm text-white/80 mb-2">Role & Responsibilities</label>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="px-3 py-1.5 bg-blue-500/20 text-blue-300 rounded-lg text-sm font-medium border border-blue-500/30 capitalize">
+                        {user.role?.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Member'}
+                      </span>
+                      {(() => {
+                        // Debug: Log what we're checking
+                        console.log('Checking subroles:', {
+                          hasSubroles: !!user.subroles,
+                          isArray: Array.isArray(user.subroles),
+                          length: user.subroles?.length,
+                          subroles: user.subroles
+                        });
+                        
+                        const subroles = user.subroles;
+                        if (subroles && Array.isArray(subroles) && subroles.length > 0) {
+                          return subroles.map((subrole, idx) => (
+                            <span
+                              key={idx}
+                              className="px-3 py-1.5 bg-red-500/20 text-red-300 rounded-lg text-sm font-medium border border-red-500/30 capitalize"
+                            >
+                              {subrole.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                            </span>
+                          ));
+                        }
+                        return (
+                          <span className="text-white/40 text-sm italic">
+                            No subroles assigned
+                            {refreshingUser && ' (Refreshing...)'}
+                          </span>
+                        );
+                      })()}
+                    </div>
                   </div>
                 </div>
 

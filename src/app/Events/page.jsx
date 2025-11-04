@@ -124,13 +124,25 @@ const EventsPage = () => {
     return typeColors[type] || 'bg-white/10 text-white/80 border-white/20';
   };
 
+  // Helper to combine date and time
+  const combineDateTime = (dateString, timeString) => {
+    if (!dateString) return null;
+    const date = new Date(dateString);
+    if (timeString) {
+      const [hours, minutes] = timeString.split(':');
+      date.setHours(parseInt(hours, 10), parseInt(minutes || 0, 10), 0, 0);
+    }
+    return date;
+  };
+
   // Determine status from dates when possible so UI stays consistent
   const getDerivedStatus = (event) => {
     if (!event) return 'upcoming';
     if (event.status === 'cancelled') return 'cancelled';
     const now = new Date();
-    const start = event.startDate ? new Date(event.startDate) : null;
-    const end = event.endDate ? new Date(event.endDate) : null;
+    // Combine date and time for accurate comparison
+    const start = event.startDate ? combineDateTime(event.startDate, event.startTime) : null;
+    const end = event.endDate ? combineDateTime(event.endDate, event.endTime) : null;
     if (start && end) {
       if (now < start) return 'upcoming';
       if (now >= start && now <= end) return 'ongoing';
@@ -160,8 +172,13 @@ const EventsPage = () => {
     });
   };
 
-  const formatTime = (dateString) => {
-    const date = new Date(dateString);
+  const formatTime = (dateString, timeString = null) => {
+    let date;
+    if (timeString && dateString) {
+      date = combineDateTime(dateString, timeString);
+    } else {
+      date = new Date(dateString);
+    }
     return date.toLocaleTimeString('en-US', { 
       hour: 'numeric', 
       minute: '2-digit',
@@ -408,7 +425,7 @@ const EventsPage = () => {
                         </div>
                         <div className="flex items-center gap-2 text-white/60 text-sm">
                           <Clock className="w-4 h-4" />
-                          <span>{formatTime(event.startDate)} - {formatTime(event.endDate)}</span>
+                          <span>{formatTime(event.startDate, event.startTime)} - {formatTime(event.endDate, event.endTime)}</span>
                         </div>
                         {event.location && (
                           <div className="flex items-center gap-2 text-white/60 text-sm">

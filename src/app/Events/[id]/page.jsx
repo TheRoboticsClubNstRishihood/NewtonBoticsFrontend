@@ -32,6 +32,17 @@ const EventDetail = () => {
   
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3005/api';
 
+  // Helper to combine date and time
+  const combineDateTime = (dateString, timeString) => {
+    if (!dateString) return null;
+    const date = new Date(dateString);
+    if (timeString) {
+      const [hours, minutes] = timeString.split(':');
+      date.setHours(parseInt(hours, 10), parseInt(minutes || 0, 10), 0, 0);
+    }
+    return date;
+  };
+
   useEffect(() => {
     const fetchEvent = async () => {
       try {
@@ -62,12 +73,20 @@ const EventDetail = () => {
 
   useEffect(() => {
     if (!event) return;
-    const targetDateString = event.registrationDeadline || event.startDate;
-    if (!targetDateString) return;
+    
+    // Determine target date - use registration deadline if available, otherwise start date with time
+    let targetDate = null;
+    if (event.registrationDeadline) {
+      targetDate = new Date(event.registrationDeadline);
+    } else if (event.startDate) {
+      targetDate = combineDateTime(event.startDate, event.startTime);
+    }
+    
+    if (!targetDate) return;
 
     const calculateTimeLeft = () => {
       const now = new Date().getTime();
-      const target = new Date(targetDateString).getTime();
+      const target = targetDate.getTime();
       const diff = Math.max(0, target - now);
       const days = Math.floor(diff / (1000 * 60 * 60 * 24));
       const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
@@ -102,8 +121,13 @@ const EventDetail = () => {
     });
   };
 
-  const formatTime = (dateString) => {
-    const date = new Date(dateString);
+  const formatTime = (dateString, timeString = null) => {
+    let date;
+    if (timeString && dateString) {
+      date = combineDateTime(dateString, timeString);
+    } else {
+      date = new Date(dateString);
+    }
     return date.toLocaleTimeString('en-US', { 
       hour: 'numeric', 
       minute: '2-digit',
@@ -200,8 +224,9 @@ const EventDetail = () => {
     if (!event) return 'unknown';
     if (event.status === 'cancelled') return 'cancelled';
     const now = new Date();
-    const start = event.startDate ? new Date(event.startDate) : null;
-    const end = event.endDate ? new Date(event.endDate) : null;
+    // Combine date and time for accurate comparison
+    const start = event.startDate ? combineDateTime(event.startDate, event.startTime) : null;
+    const end = event.endDate ? combineDateTime(event.endDate, event.endTime) : null;
     if (start && now < start) return 'upcoming';
     if (start && end && now >= start && now <= end) return 'ongoing';
     if (end && now > end) return 'completed';
@@ -281,7 +306,9 @@ const EventDetail = () => {
       {/* Header */}
       <div className="bg-gradient-to-b from-gray-900 to-black border-b border-white/10">
         <div className="container mx-auto px-4 py-6 relative">
-          <div className="flex items-center gap-4 mb-6">
+          {/* Back button and Countdown in same row */}
+          <div className="flex items-center justify-between gap-4 mb-6 flex-wrap">
+            {/* Back Button - Left Side */}
             <Link href="/Events">
               <motion.button
                 whileHover={{ scale: 1.05 }}
@@ -289,46 +316,47 @@ const EventDetail = () => {
                 className="flex items-center gap-2 text-white/60 hover:text-white transition-colors p-2 hover:bg-white/10 rounded-lg"
               >
                 <ArrowLeft className="w-5 h-5" />
-                Back to Events
+                <span className="hidden sm:inline">Back to Events</span>
+                <span className="sm:hidden">Back</span>
               </motion.button>
             </Link>
-          </div>
 
-          {/* Top-right Countdown */}
-          {(event.registrationDeadline || event.startDate) && timeLeft && timeLeft.diff > 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: -4 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="absolute top-6 right-4"
-            >
-              <div className="flex items-center gap-3 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-2 backdrop-blur">
-                <span className="text-red-200 text-xs md:text-sm">{event.registrationDeadline ? 'Registration closes in' : 'Starts in'}</span>
-                <div className="flex items-center gap-2">
-                  {[
-                    { label: 'd', value: timeLeft.days },
-                    { label: 'h', value: timeLeft.hours },
-                    { label: 'm', value: timeLeft.minutes },
-                    { label: 's', value: timeLeft.seconds },
-                  ].map((unit, idx) => (
-                    <div key={unit.label} className="flex items-end gap-1">
-                      <motion.span
-                        key={`${unit.label}-${unit.value}`}
-                        initial={{ opacity: 0.4, scale: 0.95, y: -2 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-                        className="text-red-300 font-semibold text-base md:text-lg tabular-nums"
-                      >
-                        {String(unit.value).padStart(2, '0')}
-                      </motion.span>
-                      <span className="text-red-200/80 text-[10px] md:text-xs uppercase">{unit.label}</span>
-                      {idx < 3 && <span className="text-red-200/40 ml-1">:</span>}
-                    </div>
-                  ))}
+            {/* Countdown - Right Side */}
+            {(event.registrationDeadline || event.startDate) && timeLeft && timeLeft.diff > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: -4 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="flex-shrink-0"
+              >
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-1.5 sm:gap-2 md:gap-3 bg-red-500/10 border border-red-500/20 rounded-lg sm:rounded-xl px-2.5 sm:px-3 md:px-4 py-1.5 sm:py-2 backdrop-blur">
+                  <span className="text-red-200 text-[10px] sm:text-xs md:text-sm whitespace-nowrap leading-tight">{event.registrationDeadline ? 'Registration closes in' : 'Starts in'}</span>
+                  <div className="flex items-center gap-1 sm:gap-1.5 md:gap-2 flex-wrap">
+                    {[
+                      { label: 'd', value: timeLeft.days },
+                      { label: 'h', value: timeLeft.hours },
+                      { label: 'm', value: timeLeft.minutes },
+                      { label: 's', value: timeLeft.seconds },
+                    ].map((unit, idx) => (
+                      <div key={unit.label} className="flex items-end gap-0.5 sm:gap-1">
+                        <motion.span
+                          key={`${unit.label}-${unit.value}`}
+                          initial={{ opacity: 0.4, scale: 0.95, y: -2 }}
+                          animate={{ opacity: 1, scale: 1, y: 0 }}
+                          transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                          className="text-red-300 font-semibold text-xs sm:text-sm md:text-base lg:text-lg tabular-nums"
+                        >
+                          {String(unit.value).padStart(2, '0')}
+                        </motion.span>
+                        <span className="text-red-200/80 text-[8px] sm:text-[9px] md:text-[10px] lg:text-xs uppercase leading-none pb-0.5">{unit.label}</span>
+                        {idx < 3 && <span className="text-red-200/40 ml-0.5 sm:ml-1 text-[10px] sm:text-xs hidden sm:inline">:</span>}
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            </motion.div>
-          )}
+              </motion.div>
+            )}
+          </div>
           
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -337,17 +365,17 @@ const EventDetail = () => {
             className="space-y-4"
           >
             {/* Event Type and Status */}
-            <div className="flex items-center gap-3 flex-wrap">
-              <span className={`px-3 py-1 rounded-full text-sm font-medium border ${getEventTypeColor(event.type)}`}>
+            <div className="flex items-center gap-2 sm:gap-3 flex-nowrap">
+              <span className={`px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium border flex-shrink-0 whitespace-nowrap ${getEventTypeColor(event.type)}`}>
                 {event.type.charAt(0).toUpperCase() + event.type.slice(1)}
               </span>
-              <span className={`px-3 py-1 rounded-full text-sm font-medium border flex items-center gap-2 ${getEventStatusColor(getEffectiveStatus())}`}>
+              <span className={`px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium border flex items-center gap-1.5 sm:gap-2 flex-shrink-0 whitespace-nowrap ${getEventStatusColor(getEffectiveStatus())}`}>
                 {getEventStatusIcon(getEffectiveStatus())}
                 {getEffectiveStatus().charAt(0).toUpperCase() + getEffectiveStatus().slice(1)}
               </span>
               {event.isFeatured && (
-                <span className="px-3 py-1 rounded-full text-sm font-medium bg-yellow-500/20 text-yellow-300 border border-yellow-500/30 flex items-center gap-2">
-                  <Star className="w-4 h-4" />
+                <span className="px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium bg-yellow-500/20 text-yellow-300 border border-yellow-500/30 flex items-center gap-1.5 sm:gap-2 flex-shrink-0 whitespace-nowrap">
+                  <Star className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                   Featured
                 </span>
               )}
@@ -390,7 +418,7 @@ const EventDetail = () => {
                       <div className="text-white/80">
                         <div>{formatDate(event.startDate)}</div>
                         <div className="text-sm text-white/60">
-                          {formatTime(event.startDate)} - {formatTime(event.endDate)}
+                          {formatTime(event.startDate, event.startTime)} - {formatTime(event.endDate, event.endTime)}
                         </div>
                       </div>
                     </div>
@@ -450,7 +478,7 @@ const EventDetail = () => {
                       <User className="w-5 h-5 text-red-400 mt-1 flex-shrink-0" />
                       <div>
                         <div className="font-medium text-white">Organizer</div>
-                        <div className="text-white/80">Event Organizer</div>
+                        <div className="text-white/80">NewtonBotics</div>
                       </div>
                     </div>
                   )}

@@ -669,9 +669,6 @@ export default function GalleryClient() {
                       {item.duration && (
                         <span>{mediaService.formatDuration(item.duration)}</span>
                       )}
-                      {item.fileSize && (
-                        <span>{mediaService.formatFileSize(item.fileSize)}</span>
-                      )}
                       <span>{new Date(item.createdAt).toLocaleDateString()}</span>
                     </div>
                   </div>
@@ -782,9 +779,6 @@ export default function GalleryClient() {
                   </span>
                   {active.duration && (
                     <span>{mediaService.formatDuration(active.duration)}</span>
-                  )}
-                  {active.fileSize && (
-                    <span>{mediaService.formatFileSize(active.fileSize)}</span>
                   )}
                   <span>{new Date(active.createdAt).toLocaleDateString()}</span>
                 </div>

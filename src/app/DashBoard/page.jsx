@@ -550,9 +550,9 @@ const HomePage = () => {
                     <p className="text-sm sm:text-base text-white/80 leading-relaxed mb-4">
                       {area.description}
                     </p>
-                    <div className="text-xs sm:text-sm text-red-400 font-medium">
+                    {/* <div className="text-xs sm:text-sm text-red-400 font-medium">
                       {area.projectCount || 0} Active Projects
-                    </div>
+                    </div> */}
                   </motion.div>
                 </Link>
               ))
@@ -608,9 +608,9 @@ const HomePage = () => {
                   <p className="text-sm sm:text-base text-white/80 leading-relaxed mb-4">
                     {area.description}
                   </p>
-                  <div className="text-xs sm:text-sm text-red-400 font-medium">
+                  {/* <div className="text-xs sm:text-sm text-red-400 font-medium">
                     {area.projects}
-                  </div>
+                  </div> */}
                 </motion.div>
               ))
             )}

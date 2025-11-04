@@ -229,11 +229,11 @@ const ResearchAreasPage = () => {
                     </div>
 
                     {/* Stats */}
-                    <div className="grid grid-cols-3 gap-3 pt-4 border-t border-white/10">
-                      <div className="text-center">
+                    <div className="grid grid-cols-2 gap-3 pt-4 border-t border-white/10">
+                      {/* <div className="text-center">
                         <div className="text-lg font-bold text-red-400">{area.projectCount || 0}</div>
                         <div className="text-xs text-white/60">Projects</div>
-                      </div>
+                      </div> */}
                       <div className="text-center">
                         <div className="text-lg font-bold text-red-400">{area.publicationCount || 0}</div>
                         <div className="text-xs text-white/60">Publications</div>

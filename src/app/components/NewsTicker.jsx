@@ -35,13 +35,17 @@ const NewsTicker = () => {
           }`}
           onMouseEnter={(e) => {
             setHoveredNews(announcement.id);
+            setIsPaused(true); // Pause scrolling on hover
             const rect = e.currentTarget.getBoundingClientRect();
             setTooltipPosition({
               x: rect.left + rect.width / 2,
               y: rect.top - 10
             });
           }}
-          onMouseLeave={() => setHoveredNews(null)}
+          onMouseLeave={() => {
+            setHoveredNews(null);
+            setIsPaused(false); // Resume scrolling when leaving
+          }}
           onClick={(e) => {
             e.stopPropagation();
             handleNewsClick(announcement);

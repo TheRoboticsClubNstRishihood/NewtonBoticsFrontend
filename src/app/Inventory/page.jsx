@@ -11,6 +11,7 @@ import {
   List,
 } from "lucide-react";
 import Image from "next/image";
+import CloudinaryUploader from "../../components/CloudinaryUploader";
 import Link from "next/link";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import inventoryService from "../../lib/inventory";
@@ -363,8 +364,8 @@ const InventoryPage = () => {
             <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-white/80" />
           </div>
 
-          {/* View Mode Toggle */}
-          <div className="flex items-center justify-center bg-white/10 border border-white/10 rounded-lg p-1 w-full md:w-auto">
+          {/* View Mode Toggle (after Manage Categories) */}
+          <div className="flex items-center justify-center bg-white/10 border border-white/10 rounded-lg p-1 w-full md:w-auto ml-auto">
             <button
               type="button"
               onClick={() => setViewMode("grid")}
@@ -640,6 +641,21 @@ const InventoryPage = () => {
                 autoComplete="off"
                 placeholder="https://cdn.example.com/equipment-123.jpg"
               />
+              <div className="mt-2">
+                <CloudinaryUploader
+                  label="Upload Image"
+                  folder="newtonbotics/inventory"
+                  resourceType="image"
+                  multiple={false}
+                  showPreview={false}
+                  renderTrigger={({ open }) => (
+                    <button type="button" onClick={open} className="px-3 py-2 rounded-md bg-white/10 hover:bg-white/15 border border-white/10 text-sm text-white">Upload Image</button>
+                  )}
+                  onUploadComplete={(file)=>{
+                    if(file?.secureUrl){ setCreateForm(prev=>({ ...prev, imageUrl: file.secureUrl })); }
+                  }}
+                />
+              </div>
               {createForm.imageUrl ? (
                 <div className="mt-2 w-[160px] h-[120px] overflow-hidden rounded-md border border-white/10 bg-white/5">
                   {/* preview uses native img to avoid next/image domain limits during entry */}
@@ -772,6 +788,21 @@ const InventoryPage = () => {
                 value={editForm.imageUrl}
                 onChange={(e) => setEditForm({ ...editForm, imageUrl: e.target.value })}
               />
+              <div className="mt-2">
+                <CloudinaryUploader
+                  label="Upload Image"
+                  folder="newtonbotics/inventory"
+                  resourceType="image"
+                  multiple={false}
+                  showPreview={false}
+                  renderTrigger={({ open }) => (
+                    <button type="button" onClick={open} className="px-3 py-2 rounded-md bg-white/10 hover:bg-white/15 border border-white/10 text-sm text-white">Upload Image</button>
+                  )}
+                  onUploadComplete={(file)=>{
+                    if(file?.secureUrl){ setEditForm(prev=>({ ...prev, imageUrl: file.secureUrl })); }
+                  }}
+                />
+              </div>
             </div>
             <div>
               <label className="block mb-1 text-sm text-white/80">Category</label>

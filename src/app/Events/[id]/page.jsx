@@ -522,89 +522,91 @@ const EventDetail = () => {
               </motion.div>
             )}
 
-            {/* Registration Section */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4, duration: 0.8 }}
-              className="bg-white/5 backdrop-blur-lg rounded-2xl p-6 border border-white/10"
-            >
-              <h2 className="text-2xl font-bold mb-6 text-white">Registration</h2>
-              
-              <div className="space-y-6">
-                {/* Registration Status */}
-                <div className="flex items-center justify-between p-4 bg-white/5 rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <div className={`w-3 h-3 rounded-full ${
-                      getRegistrationStatus() === 'open' ? 'bg-green-400' :
-                      getRegistrationStatus() === 'full' ? 'bg-red-400' :
-                      getRegistrationStatus() === 'closed' ? 'bg-yellow-400' :
-                      'bg-gray-400'
-                    }`}></div>
-                    <span className="font-medium text-white">
-                      Registration {getRegistrationStatus() === 'open' ? 'Open' :
-                                  getRegistrationStatus() === 'full' ? 'Full' :
-                                  getRegistrationStatus() === 'closed' ? 'Closed' :
-                                  getRegistrationStatus() === 'cancelled' ? 'Cancelled' :
-                                  'Completed'}
-                    </span>
+            {/* Registration Section - Only show if registration is required */}
+            {event.requiresRegistration && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4, duration: 0.8 }}
+                className="bg-white/5 backdrop-blur-lg rounded-2xl p-6 border border-white/10"
+              >
+                <h2 className="text-2xl font-bold mb-6 text-white">Registration</h2>
+                
+                <div className="space-y-6">
+                  {/* Registration Status */}
+                  <div className="flex items-center justify-between p-4 bg-white/5 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-3 h-3 rounded-full ${
+                        getRegistrationStatus() === 'open' ? 'bg-green-400' :
+                        getRegistrationStatus() === 'full' ? 'bg-red-400' :
+                        getRegistrationStatus() === 'closed' ? 'bg-yellow-400' :
+                        'bg-gray-400'
+                      }`}></div>
+                      <span className="font-medium text-white">
+                        Registration {getRegistrationStatus() === 'open' ? 'Open' :
+                                    getRegistrationStatus() === 'full' ? 'Full' :
+                                    getRegistrationStatus() === 'closed' ? 'Closed' :
+                                    getRegistrationStatus() === 'cancelled' ? 'Cancelled' :
+                                    'Completed'}
+                      </span>
+                    </div>
+                    
+                    <div className="text-sm text-white/60">
+                      Available slots: {event.maxCapacity || '∞'}
+                    </div>
                   </div>
-                  
-                  <div className="text-sm text-white/60">
-                    Available slots: {event.maxCapacity || '∞'}
-                  </div>
+
+                  {/* Registration Button */}
+                  {getRegistrationStatus() === 'open' && (
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      disabled={isRegistering}
+                      onClick={() => {
+                        if (event?.registrationFormLink) {
+                          console.log('Opening registration form in new tab:', event.registrationFormLink);
+                          window.open(event.registrationFormLink, '_blank', 'noopener,noreferrer');
+                        } else {
+                          console.warn('No registration form link available for this event');
+                        }
+                      }}
+                      className="w-full bg-gradient-to-r from-red-500 to-red-600 text-white px-6 py-4 rounded-lg font-semibold shadow-lg shadow-red-500/30 hover:shadow-red-500/50 transition-all text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isRegistering ? 'Processing...' : 'Register for Event'}
+                    </motion.button>
+                  )}
+
+                  {/* Registration Messages */}
+                  {getRegistrationStatus() === 'full' && (
+                    <div className="text-center p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
+                      <p className="text-red-300 font-medium">Event is at full capacity</p>
+                      <p className="text-red-300/80 text-sm mt-1">Check back later for cancellations</p>
+                    </div>
+                  )}
+
+                  {getRegistrationStatus() === 'closed' && (
+                    <div className="text-center p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
+                      <p className="text-yellow-300 font-medium">Registration is closed</p>
+                      <p className="text-yellow-300/80 text-sm mt-1">The registration deadline has passed</p>
+                    </div>
+                  )}
+
+                  {getRegistrationStatus() === 'cancelled' && (
+                    <div className="text-center p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
+                      <p className="text-red-300 font-medium">Event Cancelled</p>
+                      <p className="text-red-300/80 text-sm mt-1">This event has been cancelled</p>
+                    </div>
+                  )}
+
+                  {getRegistrationStatus() === 'completed' && (
+                    <div className="text-center p-4 bg-gray-500/10 border border-gray-500/20 rounded-lg">
+                      <p className="text-gray-300 font-medium">Event Completed</p>
+                      <p className="text-gray-300/80 text-sm mt-1">This event has already taken place</p>
+                    </div>
+                  )}
                 </div>
-
-                {/* Registration Button */}
-                {getRegistrationStatus() === 'open' && (
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    disabled={isRegistering}
-                    onClick={() => {
-                      if (event?.registrationFormLink) {
-                        console.log('Opening registration form in new tab:', event.registrationFormLink);
-                        window.open(event.registrationFormLink, '_blank', 'noopener,noreferrer');
-                      } else {
-                        console.warn('No registration form link available for this event');
-                      }
-                    }}
-                    className="w-full bg-gradient-to-r from-red-500 to-red-600 text-white px-6 py-4 rounded-lg font-semibold shadow-lg shadow-red-500/30 hover:shadow-red-500/50 transition-all text-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {isRegistering ? 'Processing...' : 'Register for Event'}
-                  </motion.button>
-                )}
-
-                {/* Registration Messages */}
-                {getRegistrationStatus() === 'full' && (
-                  <div className="text-center p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
-                    <p className="text-red-300 font-medium">Event is at full capacity</p>
-                    <p className="text-red-300/80 text-sm mt-1">Check back later for cancellations</p>
-                  </div>
-                )}
-
-                {getRegistrationStatus() === 'closed' && (
-                  <div className="text-center p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
-                    <p className="text-yellow-300 font-medium">Registration is closed</p>
-                    <p className="text-yellow-300/80 text-sm mt-1">The registration deadline has passed</p>
-                  </div>
-                )}
-
-                {getRegistrationStatus() === 'cancelled' && (
-                  <div className="text-center p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
-                    <p className="text-red-300 font-medium">Event Cancelled</p>
-                    <p className="text-red-300/80 text-sm mt-1">This event has been cancelled</p>
-                  </div>
-                )}
-
-                {getRegistrationStatus() === 'completed' && (
-                  <div className="text-center p-4 bg-gray-500/10 border border-gray-500/20 rounded-lg">
-                    <p className="text-gray-300 font-medium">Event Completed</p>
-                    <p className="text-gray-300/80 text-sm mt-1">This event has already taken place</p>
-                  </div>
-                )}
-              </div>
-            </motion.div>
+              </motion.div>
+            )}
           </div>
 
           {/* Sidebar */}

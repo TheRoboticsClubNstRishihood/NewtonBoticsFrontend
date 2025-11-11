@@ -7,6 +7,8 @@ import {
   AlertCircle,
   XCircle,
   CheckCircle,
+  Grid3X3,
+  List,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -84,6 +86,7 @@ const InventoryPage = () => {
   const [catSubmitting, setCatSubmitting] = useState(false);
   const [catEditingId, setCatEditingId] = useState("");
   const [catEditValues, setCatEditValues] = useState({ name: "", description: "", parentCategoryId: "" });
+  const [viewMode, setViewMode] = useState("grid");
 
   useEffect(() => {
     let isMounted = true;
@@ -143,11 +146,25 @@ const InventoryPage = () => {
   const role = user?.role || null;
   const isAdvancedRole = ["mentor", "researcher", "admin"].includes(role);
   const hasInventoryManagementSubrole = hasSubrole('inventory_manager') || hasSubrole('inventory_management');
-  const canEdit = isAuthenticated && (isAdvancedRole || hasInventoryManagementSubrole);
-  const canDelete = isAuthenticated && (isAdvancedRole || hasInventoryManagementSubrole);
-  const canManageCategories = isAuthenticated && (["team_member", "mentor", "researcher", "admin"].includes(role) || hasInventoryManagementSubrole);
+  const isTeamMemberWithInventoryManagement = role === 'team_member' && hasInventoryManagementSubrole;
+  const canEdit = isAuthenticated && (isAdvancedRole || hasInventoryManagementSubrole || isTeamMemberWithInventoryManagement);
+  const canDelete = isAuthenticated && (isAdvancedRole || hasInventoryManagementSubrole || isTeamMemberWithInventoryManagement);
+  const canManageCategories = isAuthenticated && (["team_member", "mentor", "researcher", "admin"].includes(role) || hasInventoryManagementSubrole || isTeamMemberWithInventoryManagement);
 
   // Backend will compute status; no local status logic
+
+  const getStatusInfo = (item) => {
+    if (!item) {
+      return { label: "", color: "bg-white/10", Icon: CheckCircle };
+    }
+    if (item.currentQuantity <= 0) {
+      return { label: "Out of Stock", color: "bg-red-500/90", Icon: XCircle };
+    }
+    if (item.currentQuantity <= (item.minQuantity || 0)) {
+      return { label: "Low Stock", color: "bg-yellow-500/90", Icon: AlertCircle };
+    }
+    return { label: "Available", color: "bg-green-500/90", Icon: CheckCircle };
+  };
 
   const requestDelete = (id) => {
     if (!canDelete) return;
@@ -346,109 +363,208 @@ const InventoryPage = () => {
             <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-white/80" />
           </div>
 
+          {/* View Mode Toggle */}
+          <div className="flex items-center justify-center bg-white/10 border border-white/10 rounded-lg p-1 w-full md:w-auto">
+            <button
+              type="button"
+              onClick={() => setViewMode("grid")}
+              className={`flex items-center gap-2 px-3 py-2 rounded-md transition ${viewMode === "grid" ? "bg-red-600 text-white" : "text-white/70 hover:text-white"}`}
+            >
+              <Grid3X3 className="w-4 h-4" />
+              <span className="hidden sm:inline">Grid</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode("list")}
+              className={`flex items-center gap-2 px-3 py-2 rounded-md transition ${viewMode === "list" ? "bg-red-600 text-white" : "text-white/70 hover:text-white"}`}
+            >
+              <List className="w-4 h-4" />
+              <span className="hidden sm:inline">List</span>
+            </button>
+          </div>
+
           {/* Add Equipment Button */}
           {canEdit && (
             <button
-              className="w-full md:w-auto px-4 py-3 rounded-lg bg-red-600 hover:bg-red-500 transition border border-white/10"
+              className="w-full md:w-auto px-5 py-3 rounded-lg whitespace-nowrap bg-red-600 hover:bg-red-500 transition border border-white/10"
               onClick={handleOpenCreate}
             >Add Equipment</button>
           )}
           {/* Manage Categories Button (team_member+) */}
           {canManageCategories && (
             <button
-              className="w-full md:w-auto px-4 py-3 rounded-lg bg-white/10 hover:bg-white/15 transition border border-white/10"
+              className="w-full md:w-auto px-5 py-3 rounded-lg whitespace-nowrap bg-white/10 hover:bg-white/15 transition border border-white/10"
               onClick={() => { setIsCategoriesOpen(true); setCatError(""); }}
             >Manage Categories</button>
           )}
         </div>
       </motion.div>
 
-      {/* Inventory Grid */}
+      {/* Inventory Grid/List */}
       <motion.div
-        className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+        className="max-w-7xl mx-auto w-full"
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
         transition={{ duration: 1 }}
       >
         {isLoading && (
-          <div className="col-span-1 sm:col-span-2 lg:col-span-3 py-16"><LoadingSpinner text="Loading inventory..." /></div>
+          <div className="py-16"><LoadingSpinner text="Loading inventory..." /></div>
         )}
         {!isLoading && error && (
-          <div className="col-span-1 sm:col-span-2 lg:col-span-3 py-10 text-center text-red-400">{error}</div>
+          <div className="py-10 text-center text-red-400">{error}</div>
         )}
         {!isLoading && !error && items.length === 0 && (
-          <div className="col-span-1 sm:col-span-2 lg:col-span-3 py-10 text-center text-white/70">No equipment found.</div>
+          <div className="py-10 text-center text-white/70">No equipment found.</div>
         )}
-        {!isLoading && !error && items.map((item) => (
-          <motion.div
-            key={item._id}
-            className="bg-white/5 backdrop-blur-lg rounded-xl p-6 border border-white/10 hover:border-red-500/50 transition-all relative"
-            whileHover={{ scale: 1.05 }}
-          >
-            {/* Low Stock or Out of Stock Indicator */}
-            {item.currentQuantity <= 0 ? (
-              <div className="absolute top-4 right-4 z-10 bg-red-500/90 text-white px-3 py-1 rounded-full flex items-center text-sm">
-                <XCircle className="w-4 h-4 mr-2" />
-                Out of Stock
-              </div>
-            ) : item.currentQuantity <= (item.minQuantity || 0) ? (
-              <div className="absolute top-4 right-4 z-10 bg-yellow-500/90 text-white px-3 py-1 rounded-full flex items-center text-sm">
-                <AlertCircle className="w-4 h-4 mr-2" />
-                Low Stock
-              </div>
-            ) : (
-              <div className="absolute top-4 right-4 z-10 bg-green-500/90 text-white px-3 py-1 rounded-full flex items-center text-sm">
-                <CheckCircle className="w-4 h-4 mr-2" />
-                Available
-              </div>
-            )}
+        {!isLoading && !error && items.length > 0 && (
+          viewMode === "grid" ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {items.map((item) => {
+                const status = getStatusInfo(item);
+                const StatusIcon = status.Icon;
+                return (
+                  <motion.div
+                    key={item._id}
+                    className="bg-white/5 backdrop-blur-lg rounded-xl p-6 border border-white/10 hover:border-red-500/50 transition-all relative"
+                    whileHover={{ scale: 1.03 }}
+                  >
+                    <div className={`absolute top-4 right-4 z-10 ${status.color} text-white px-3 py-1 rounded-full flex items-center text-sm`}
+                    >
+                      <StatusIcon className="w-4 h-4 mr-2" />
+                      {status.label}
+                    </div>
 
-            {/* Item Image */}
-            <div className="relative h-56 w-full mb-4 rounded-lg overflow-hidden bg-black/30">
-              <Image
-                src={item.imageUrl || '/next.svg'}
-                alt={item.name}
-                fill
-                className="object-contain z-0"
-              />
-            </div>
+                    <div className="relative h-56 w-full mb-4 rounded-lg overflow-hidden bg-black/30">
+                      <Image
+                        src={item.imageUrl || '/next.svg'}
+                        alt={item.name}
+                        fill
+                        className="object-contain z-0"
+                      />
+                    </div>
 
-            {/* Item Details */}
-            <h3 className="text-xl font-bold text-white mb-2 font-display">
-              {item.name}
-            </h3>
-            {item.description && (<p className="text-white/80 mb-2">{item.description}</p>)}
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-red-500">{categories.find(c => c._id === item.categoryId)?.name || '—'}</span>
-              <span className="text-sm text-white/80">
-                Quantity: {item.currentQuantity}
-              </span>
+                    <h3 className="text-xl font-bold text-white mb-2 font-display">
+                      {item.name}
+                    </h3>
+                    {item.description && (<p className="text-white/80 mb-2">{item.description}</p>)}
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-red-500">{categories.find(c => c._id === item.categoryId)?.name || '—'}</span>
+                      <span className="text-white/80">Quantity: {item.currentQuantity}</span>
+                    </div>
+
+                    {(canEdit || canDelete) && (
+                      <div className="mt-4 flex flex-wrap items-center gap-2">
+                        {canEdit && (
+                          <Link
+                            href={`/Inventory/${item._id}`}
+                            className="px-3 py-2 rounded-md bg-white/10 hover:bg-white/15 border border-white/10 text-sm"
+                          >Manage</Link>
+                        )}
+                        {canEdit && (
+                          <button
+                            className="px-3 py-2 rounded-md bg-white/10 hover:bg-white/15 border border-white/10 text-sm"
+                            onClick={() => handleOpenEdit(item)}
+                          >Edit</button>
+                        )}
+                        {canDelete && (
+                          <button
+                            className="px-3 py-2 rounded-md bg-red-600/80 hover:bg-red-600 text-white text-sm"
+                            onClick={() => requestDelete(item._id)}
+                          >Delete</button>
+                        )}
+                      </div>
+                    )}
+                  </motion.div>
+                );
+              })}
             </div>
-            {/* Actions */}
-            {(canEdit || canDelete) && (
-              <div className="mt-4 flex items-center gap-2">
-                {canEdit && (
-                  <Link
-                    href={`/Inventory/${item._id}`}
-                    className="px-3 py-2 rounded-md bg-white/10 hover:bg-white/15 border border-white/10 text-sm"
-                  >Manage</Link>
-                )}
-                {canEdit && (
-                  <button
-                    className="px-3 py-2 rounded-md bg-white/10 hover:bg-white/15 border border-white/10 text-sm"
-                    onClick={() => handleOpenEdit(item)}
-                  >Edit</button>
-                )}
-                {canDelete && (
-                  <button
-                    className="px-3 py-2 rounded-md bg-red-600/80 hover:bg-red-600 text-white text-sm"
-                    onClick={() => requestDelete(item._id)}
-                  >Delete</button>
-                )}
-              </div>
-            )}
-          </motion.div>
-        ))}
+          ) : (
+            <div className="space-y-4">
+              {items.map((item) => {
+                const status = getStatusInfo(item);
+                const StatusIcon = status.Icon;
+                return (
+                  <motion.div
+                    key={item._id}
+                    className="bg-white/5 backdrop-blur-lg rounded-xl p-5 border border-white/10 hover:border-white/15 transition-all"
+                    initial={{ opacity: 0, y: 10 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                  >
+                    <div className="flex flex-col md:flex-row gap-5">
+                      <div className="w-full md:w-48 h-40 rounded-lg overflow-hidden bg-black/30 relative">
+                        <Image
+                          src={item.imageUrl || '/next.svg'}
+                          alt={item.name}
+                          fill
+                          className="object-contain"
+                        />
+                      </div>
+                      <div className="flex-1 flex flex-col gap-3">
+                        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                          <div>
+                            <h3 className="text-xl font-semibold text-white font-display">{item.name}</h3>
+                            {item.description && <p className="text-white/70 text-sm mt-1 max-w-2xl">{item.description}</p>}
+                          </div>
+                          <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm text-white ${status.color}`}>
+                            <StatusIcon className="w-4 h-4" />
+                            {status.label}
+                          </span>
+                        </div>
+
+                        <div className="flex flex-wrap items-center gap-4 text-sm text-white/70">
+                          <span className="flex items-center gap-1">
+                            <strong className="text-white/90">Category:</strong>
+                            {categories.find(c => c._id === item.categoryId)?.name || '—'}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <strong className="text-white/90">Quantity:</strong>
+                            {item.currentQuantity}
+                          </span>
+                          {item.location && (
+                            <span className="flex items-center gap-1">
+                              <strong className="text-white/90">Location:</strong>
+                              {item.location}
+                            </span>
+                          )}
+                          {item.modelNumber && (
+                            <span className="flex items-center gap-1">
+                              <strong className="text-white/90">Model:</strong>
+                              {item.modelNumber}
+                            </span>
+                          )}
+                        </div>
+
+                        {(canEdit || canDelete) && (
+                          <div className="flex flex-wrap items-center gap-2">
+                            {canEdit && (
+                              <Link
+                                href={`/Inventory/${item._id}`}
+                                className="px-3 py-2 rounded-md bg-white/10 hover:bg-white/15 border border-white/10 text-sm"
+                              >Manage</Link>
+                            )}
+                            {canEdit && (
+                              <button
+                                className="px-3 py-2 rounded-md bg-white/10 hover:bg-white/15 border border-white/10 text-sm"
+                                onClick={() => handleOpenEdit(item)}
+                              >Edit</button>
+                            )}
+                            {canDelete && (
+                              <button
+                                className="px-3 py-2 rounded-md bg-red-600/80 hover:bg-red-600 text-white text-sm"
+                                onClick={() => requestDelete(item._id)}
+                              >Delete</button>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+          )
+        )}
       </motion.div>
 
       {/* Pagination Controls */}

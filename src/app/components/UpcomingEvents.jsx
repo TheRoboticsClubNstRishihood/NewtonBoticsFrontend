@@ -10,6 +10,17 @@ const UpcomingEvents = () => {
   const [error, setError] = useState(null);
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3005/api';
 
+  // Helper to combine date and time
+  const combineDateTime = (dateString, timeString) => {
+    if (!dateString) return null;
+    const date = new Date(dateString);
+    if (timeString) {
+      const [hours, minutes] = timeString.split(':');
+      date.setHours(parseInt(hours, 10), parseInt(minutes || 0, 10), 0, 0);
+    }
+    return date;
+  };
+
   useEffect(() => {
     const fetchUpcomingEvents = async () => {
       try {
@@ -22,7 +33,27 @@ const UpcomingEvents = () => {
         
         const data = await res.json();
         if (data.success) {
-          setEvents((data.data.items || []).slice(0, 3)); // Limit to 3 for homepage
+          const allEvents = data.data.items || [];
+          // Filter out completed and cancelled events
+          const now = new Date();
+          const upcomingEvents = allEvents.filter(event => {
+            // Check explicit status first
+            if (event.status === 'completed' || event.status === 'cancelled') {
+              return false;
+            }
+            // Also check derived status based on dates
+            const start = event.startDate ? combineDateTime(event.startDate, event.startTime) : null;
+            const end = event.endDate ? combineDateTime(event.endDate, event.endTime) : null;
+            if (start && end) {
+              // Event is completed if current time is after end date
+              if (now > end) return false;
+            } else if (end) {
+              // If only end date exists, check if it's passed
+              if (now > end) return false;
+            }
+            return true; // Keep if upcoming or ongoing
+          }).slice(0, 3); // Limit to 3 for homepage
+          setEvents(upcomingEvents);
         } else {
           throw new Error(data.message || 'Failed to fetch upcoming events');
         }
@@ -44,17 +75,6 @@ const UpcomingEvents = () => {
       day: 'numeric',
       year: 'numeric'
     });
-  };
-
-  // Helper to combine date and time
-  const combineDateTime = (dateString, timeString) => {
-    if (!dateString) return null;
-    const date = new Date(dateString);
-    if (timeString) {
-      const [hours, minutes] = timeString.split(':');
-      date.setHours(parseInt(hours, 10), parseInt(minutes || 0, 10), 0, 0);
-    }
-    return date;
   };
 
   const formatTime = (dateString, timeString = null) => {

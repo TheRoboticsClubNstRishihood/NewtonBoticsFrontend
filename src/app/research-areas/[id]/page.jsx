@@ -344,11 +344,11 @@ console.log(researchArea,'researchArea');
                     };
 
                     return (
-                      <a
+                    <a
                         key={link._id || index}
-                        href={link.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                      href={link.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
                         className="group block p-5 bg-gradient-to-br from-white/5 to-white/[0.02] rounded-xl border border-white/10 hover:border-red-400/30 hover:from-white/10 hover:to-white/5 transition-all duration-300 hover:shadow-lg hover:shadow-red-400/10"
                       >
                         <div className="flex items-start gap-4">

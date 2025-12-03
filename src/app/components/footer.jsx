@@ -125,7 +125,13 @@ const Footer = () => {
             © {currentYear} NewtonBotics. All rights reserved.
           </p>
           <p className="text-gray-400 text-sm">
-            Made with ❤️ by  <span onClick={() => window.open("https://monadnocks.in", "_blank")} className="text-red-400 cursor-pointer hover:text-red-300 hover:font-bold">Monadnocks</span>
+            Developed by <span className="text-red-400 font-semibold">Monu</span> under{" "}
+            <span 
+              onClick={() => window.open("https://monadnocks.in", "_blank")} 
+              className="text-red-400 cursor-pointer hover:text-red-300 hover:font-bold transition-colors"
+            >
+              Monadnocks
+            </span>
           </p>
         </div>
       </div>

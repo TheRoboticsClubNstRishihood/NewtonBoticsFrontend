@@ -10,6 +10,7 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
+  const [isProjectLeader, setIsProjectLeader] = useState(false);
   const profileRef = useRef(null);
   const pathname = usePathname();
   const router = useRouter();
@@ -59,9 +60,73 @@ const Navbar = () => {
     };
   }, [isOpen]);
 
+  // Check if user is a project leader
+  useEffect(() => {
+    const checkIfProjectLeader = async () => {
+      if (!isAuthenticated || !user) {
+        setIsProjectLeader(false);
+        return;
+      }
+
+      // Only check for team-members
+      if (!hasRole('team_member')) {
+        setIsProjectLeader(false);
+        return;
+      }
+
+      try {
+        const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3005/api';
+        const userId = user.id || user._id;
+        
+        if (!userId) {
+          setIsProjectLeader(false);
+          return;
+        }
+
+        // Fetch projects to check if user is a leader
+        const response = await fetch(`${API_BASE_URL}/projects?limit=100`, { 
+          cache: 'no-store' 
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.data?.projects) {
+            const projects = data.data.projects || [];
+            // Check if user is a leader of any project
+            const isLeader = projects.some(project => {
+              if (!project.teamLeaderId) return false;
+              // Handle both populated object and ID string
+              const leaderId = typeof project.teamLeaderId === 'object' 
+                ? (project.teamLeaderId.id || project.teamLeaderId._id)
+                : project.teamLeaderId;
+              return leaderId === userId || leaderId?.toString() === userId?.toString();
+            });
+            setIsProjectLeader(isLeader);
+          } else {
+            setIsProjectLeader(false);
+          }
+        } else {
+          setIsProjectLeader(false);
+        }
+      } catch (error) {
+        console.error('Error checking project leader status:', error);
+        setIsProjectLeader(false);
+      }
+    };
+
+    checkIfProjectLeader();
+  }, [isAuthenticated, user, hasRole]);
+
   const isLoggedIn = isAuthenticated && user;
   // Treat 'admin' role as full admin; keep legacy mentor/researcher and permission fallback
-  const isAdmin = isLoggedIn && (hasRole('admin') || hasRole('mentor') || hasRole('researcher') || hasPermission('admin:access'));
+  // Also include team-members who are project leaders
+  const isAdmin = isLoggedIn && (
+    hasRole('admin') || 
+    hasRole('mentor') || 
+    hasRole('researcher') || 
+    hasPermission('admin:access') ||
+    (hasRole('team_member') && isProjectLeader)
+  );
 
   const handleLogout = async () => {
     try {

@@ -304,10 +304,10 @@ export default function AuthPage() {
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="relative w-full max-w-md rounded-3xl border border-white/10 bg-gradient-to-br from-white/[0.06] to-white/[0.03] p-6 md:p-8 lg:order-2"
+            className="relative w-full max-w-md rounded-3xl border border-white/10 bg-gradient-to-br from-white/[0.06] to-white/[0.03] p-6 md:p-8 lg:order-2 flex flex-col max-h-[90vh]"
           >
             {/* Tabs */}
-            <div className="flex items-center gap-2 bg-white/5 rounded-xl p-1 w-fit mx-auto mb-6 border border-white/10">
+            <div className="flex items-center gap-2 bg-white/5 rounded-xl p-1 w-fit mx-auto mb-6 border border-white/10 flex-shrink-0">
               <button
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition ${tab === "signin" ? "bg-white/15" : "text-white/70 hover:text-white"}`}
                 onClick={() => setTab("signin")}
@@ -322,6 +322,7 @@ export default function AuthPage() {
               </button>
             </div>
 
+            <div className="flex-1 overflow-y-auto pr-2 pb-2 custom-scrollbar">
             <AnimatePresence mode="wait">
               {tab === "signin" ? (
                 <motion.form
@@ -487,8 +488,9 @@ export default function AuthPage() {
                 </motion.form>
               )}
             </AnimatePresence>
+            </div>
 
-            <div className="mt-6 text-[11px] text-white/40 text-center">
+            <div className="mt-6 text-[11px] text-white/40 text-center flex-shrink-0 pt-4 border-t border-white/10">
               Secure authentication powered by NewtonBotics API
             </div>
           </motion.div>

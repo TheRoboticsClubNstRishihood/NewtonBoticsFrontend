@@ -85,10 +85,13 @@ const TeamPage = () => {
 
       const requestInit = { cache: 'no-store' };
 
+      // Use a high limit so that all members are shown on a single page
+      const teamLimit = 100;
+
       // Fetch all team data in parallel; don't fail whole page if one endpoint fails
       const [leadershipRes, teamRes, mentorsRes, researchersRes] = await Promise.all([
         fetch(`${API_BASE_URL}/public/leadership-team`, requestInit),
-        fetch(`${API_BASE_URL}/public/team-members`, requestInit),
+        fetch(`${API_BASE_URL}/public/team-members?limit=${teamLimit}`, requestInit),
         fetch(`${API_BASE_URL}/public/mentors`, requestInit),
         fetch(`${API_BASE_URL}/public/researchers`, requestInit)
       ]);
@@ -144,7 +147,9 @@ const TeamPage = () => {
       
       console.log('Summary:', {
         leadershipCount: leadershipData.success ? leadershipData.data.items.length : 0,
-        teamMembersCount: teamData.success ? teamData.data.items.length : 0,
+        teamMembersCount: teamData.success
+          ? (teamData.data.pagination?.total ?? teamData.data.items.length)
+          : 0,
         mentorsCount: mentorsData.success ? mentorsData.data.items.length : 0,
         researchersCount: researchersData.success ? researchersData.data.items.length : 0,
         departments: uniqueDepartments,

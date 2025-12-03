@@ -1,15 +1,17 @@
 "use client";
 import { motion, AnimatePresence } from "framer-motion";
 import { Box, Brain, Layout, ArrowRight, Cpu, Wifi, Camera, Shield, ChevronDown, X } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { Spotlight } from "@/components/components/ui/spotlight";
 import Link from "next/link";
-import RawGallery from "../components/RawGallery";
 import { useAuth } from "../../contexts/AuthContext";
-import UpcomingEvents from "../components/UpcomingEvents";
-import ImpactSection from "../components/ImpactSection";
 import { subscribeToNewsletter } from "../../lib/newsletter";
 import { SplineScene } from "@/components/components/ui/splite";
+
+// Lazy load below-the-fold components for better initial page load
+const RawGallery = lazy(() => import("../components/RawGallery"));
+const UpcomingEvents = lazy(() => import("../components/UpcomingEvents"));
+const ImpactSection = lazy(() => import("../components/ImpactSection"));
 
 const HomePage = () => {
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3005/api';
@@ -33,7 +35,10 @@ const HomePage = () => {
   useEffect(() => {
     // Only run initial animations once
     if (!hasAnimated) {
-      setHasAnimated(true);
+      // Use requestAnimationFrame for better performance
+      requestAnimationFrame(() => {
+        setHasAnimated(true);
+      });
     }
     
     try {
@@ -44,19 +49,27 @@ const HomePage = () => {
       }
     } catch (_) {}
 
+    // Only set up slide interval if needed (currently unused but keeping for future)
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % 3);
     }, 5000);
     return () => clearInterval(interval);
   }, [hasAnimated]);
 
-  // Hide scroll indicator once user starts scrolling
+  // Hide scroll indicator once user starts scrolling - Optimized with throttling
   useEffect(() => {
+    let ticking = false;
     const handleScroll = () => {
-      if (window.scrollY > 40) {
-        setShowScrollIndicator(false);
-      } else {
-        setShowScrollIndicator(true);
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          if (window.scrollY > 40) {
+            setShowScrollIndicator(false);
+          } else {
+            setShowScrollIndicator(true);
+          }
+          ticking = false;
+        });
+        ticking = true;
       }
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
@@ -187,7 +200,7 @@ const HomePage = () => {
   ];
 
   return (
-      <div className=" min-h-screen bg-black text-white font-sans overflow-hidden">
+      <main className="min-h-screen bg-black text-white font-sans overflow-hidden" itemScope itemType="https://schema.org/WebPage">
         {/* Removed welcome back toast per request */}
 
         {/* Role notice toast */}
@@ -215,15 +228,17 @@ const HomePage = () => {
         )}
 
         {/* Hero Section with Enhanced Animations */}
-        <div className="relative min-h-screen lg:h-screen">
-        {/* Mobile Video Background */}
+        <section className="relative min-h-screen lg:h-screen" itemScope itemType="https://schema.org/Organization">
+        {/* Mobile Video Background - Optimized for performance */}
         <div className="absolute inset-0 lg:hidden overflow-hidden">
           <video
             autoPlay
             loop
             muted
             playsInline
+            preload="metadata"
             className="w-full h-full object-cover opacity-30"
+            style={{ willChange: 'auto' }}
           >
             <source src="/robotanimation.mp4" type="video/mp4" />
           </video>
@@ -231,13 +246,17 @@ const HomePage = () => {
         </div>
         
         <div className="absolute inset-0 bg-gradient-to-br from-black via-gray-900 to-black hidden lg:block"></div>
-        <Spotlight
-          className="-top-40 left-0 md:left-60 md:-top-20"
-          fill="white"
-        />
+        {/* Spotlight - Only render on desktop for better mobile performance */}
+        <div className="hidden lg:block">
+          <Spotlight
+            className="-top-40 left-0 md:left-60 md:-top-20"
+            fill="white"
+          />
+        </div>
         
-        {/* Animated Background Elements - Reduced opacity on mobile for video visibility */}
+        {/* Animated Background Elements - Reduced on mobile for performance */}
         <div className="absolute inset-0 overflow-hidden">
+          {/* Reduce animations on mobile - use CSS animations instead of JS where possible */}
           <motion.div
             className="absolute top-20 left-4 sm:left-20 w-48 h-48 sm:w-72 sm:h-72 bg-white/10 rounded-full blur-3xl lg:opacity-100 opacity-50"
             animate={{
@@ -249,9 +268,10 @@ const HomePage = () => {
               repeat: Infinity,
               ease: "easeInOut",
             }}
+            style={{ willChange: 'transform, opacity' }}
           />
           <motion.div
-            className="absolute bottom-20 right-4 sm:right-20 w-64 h-64 sm:w-96 sm:h-96 bg-white/10 rounded-full blur-3xl lg:opacity-100 opacity-50"
+            className="absolute bottom-20 right-4 sm:right-20 w-64 h-64 sm:w-96 sm:h-96 bg-white/10 rounded-full blur-3xl lg:opacity-100 opacity-50 hidden sm:block"
             animate={{
               scale: [1.2, 1, 1.2],
               opacity: [0.4, 0.7, 0.4],
@@ -261,10 +281,11 @@ const HomePage = () => {
               repeat: Infinity,
               ease: "easeInOut",
             }}
+            style={{ willChange: 'transform, opacity' }}
           />
-          {/* Subtle Red Texture Elements */}
+          {/* Subtle Red Texture Elements - Hidden on mobile for performance */}
           <motion.div
-            className="absolute top-40 right-4 sm:right-40 w-32 h-32 sm:w-48 sm:h-48 bg-red-500/5 rounded-full blur-2xl lg:opacity-100 opacity-40"
+            className="absolute top-40 right-4 sm:right-40 w-32 h-32 sm:w-48 sm:h-48 bg-red-500/5 rounded-full blur-2xl lg:opacity-100 opacity-40 hidden sm:block"
             animate={{
               scale: [1, 1.3, 1],
               opacity: [0.2, 0.4, 0.2],
@@ -275,9 +296,10 @@ const HomePage = () => {
               ease: "easeInOut",
               delay: 1,
             }}
+            style={{ willChange: 'transform, opacity' }}
           />
           <motion.div
-            className="absolute bottom-40 left-4 sm:left-40 w-24 h-24 sm:w-32 sm:h-32 bg-red-500/8 rounded-full blur-xl lg:opacity-100 opacity-40"
+            className="absolute bottom-40 left-4 sm:left-40 w-24 h-24 sm:w-32 sm:h-32 bg-red-500/8 rounded-full blur-xl lg:opacity-100 opacity-40 hidden md:block"
             animate={{
               scale: [1.2, 1, 1.2],
               opacity: [0.3, 0.5, 0.3],
@@ -288,37 +310,66 @@ const HomePage = () => {
               ease: "easeInOut",
               delay: 2,
             }}
+            style={{ willChange: 'transform, opacity' }}
           />
         </div>
 
         <div className="relative z-10 flex flex-col lg:flex-row h-full min-h-screen md:mt-[-100px]">
           {/* Left content */}
           <div className="flex-1 p-4 sm:p-8 md:p-12 lg:p-20 relative z-10 flex flex-col justify-center order-2 lg:order-1">
+            {/* Mobile: Use CSS animations for better performance */}
+            <div className="max-w-2xl mx-auto lg:mx-0 text-center lg:text-left lg:hidden">
+              <div className="flex items-center justify-center lg:justify-start gap-2 mb-4 hero-fade-in">
+                <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
+                <span className="text-white/80 font-medium text-sm sm:text-base">Innovation Hub</span>
+              </div>
+              
+              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-extrabold bg-clip-text text-transparent bg-gradient-to-b from-white via-gray-300 to-gray-500 drop-shadow-2xl leading-tight hero-title-fade-in" itemProp="name">
+                NewtonBotics
+              </h1>
+              
+              <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-white/80 mt-4 sm:mt-6 mb-6 sm:mb-8 leading-relaxed max-w-lg mx-auto lg:mx-0 hero-text-fade-in" itemProp="description">
+                Where Innovation Meets Precision in Robotics Excellence. 
+                <span className="text-red-400 font-semibold"> Building the future, one robot at a time.</span>
+              </p>
+
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start hero-button-fade-in">
+                <Link href="/Projects" className="inline-block">
+                  <div className="bg-gradient-to-r from-red-500 to-red-600 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-full text-base sm:text-lg font-semibold shadow-lg shadow-red-500/30 hover:shadow-red-500/50 transition-all flex items-center justify-center gap-2 group">
+                    Discover Our Innovations
+                    <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" />
+                  </div>
+                </Link>
+              </div>
+            </div>
+            
+            {/* Desktop: Keep JS animations for smoother experience */}
             <motion.div
-              className="max-w-2xl mx-auto lg:mx-0 text-center lg:text-left"
+              className="max-w-2xl mx-auto lg:mx-0 text-center lg:text-left hidden lg:block"
               initial={hasAnimated ? false : { opacity: 0, x: -100 }}
               animate={hasAnimated ? { opacity: 1, x: 0 } : { opacity: 1, x: 0 }}
-              transition={{ duration: 1, ease: "easeOut" }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
             >
               <motion.div
                 initial={hasAnimated ? false : { opacity: 0, y: 20 }}
                 animate={hasAnimated ? { opacity: 1, y: 0 } : { opacity: 1, y: 0 }}
-                transition={{ delay: 0.2, duration: 0.8 }}
+                transition={{ delay: 0.1, duration: 0.5 }}
                 className="flex items-center justify-center lg:justify-start gap-2 mb-4"
               >
                 <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
                 <span className="text-white/80 font-medium text-sm sm:text-base">Innovation Hub</span>
               </motion.div>
               
-              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-extrabold bg-clip-text text-transparent bg-gradient-to-b from-white via-gray-300 to-gray-500 drop-shadow-2xl leading-tight">
+              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-extrabold bg-clip-text text-transparent bg-gradient-to-b from-white via-gray-300 to-gray-500 drop-shadow-2xl leading-tight" itemProp="name">
                 NewtonBotics
               </h1>
               
               <motion.p
                 initial={hasAnimated ? false : { opacity: 0, y: 20 }}
                 animate={hasAnimated ? { opacity: 1, y: 0 } : { opacity: 1, y: 0 }}
-                transition={{ delay: 0.4, duration: 0.8 }}
+                transition={{ delay: 0.2, duration: 0.5 }}
                 className="text-base sm:text-lg md:text-xl lg:text-2xl text-white/80 mt-4 sm:mt-6 mb-6 sm:mb-8 leading-relaxed max-w-lg mx-auto lg:mx-0"
+                itemProp="description"
               >
                 Where Innovation Meets Precision in Robotics Excellence. 
                 <span className="text-red-400 font-semibold"> Building the future, one robot at a time.</span>
@@ -327,7 +378,7 @@ const HomePage = () => {
               <motion.div
                 initial={hasAnimated ? false : { opacity: 0, y: 20 }}
                 animate={hasAnimated ? { opacity: 1, y: 0 } : { opacity: 1, y: 0 }}
-                transition={{ delay: 0.6, duration: 0.8 }}
+                transition={{ delay: 0.3, duration: 0.5 }}
                 className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start"
               >
                 <Link href="/Projects" className="inline-block">
@@ -340,23 +391,12 @@ const HomePage = () => {
                     <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" />
                   </motion.div>
                 </Link>
-
-              </motion.div>
-
-              {/* Quick Stats */}
-              <motion.div
-                initial={hasAnimated ? false : { opacity: 0, y: 20 }}
-                animate={hasAnimated ? { opacity: 1, y: 0 } : { opacity: 1, y: 0 }}
-                transition={{ delay: 0.8, duration: 0.8 }}
-                className="flex flex-wrap justify-center lg:justify-start gap-4 sm:gap-6 lg:gap-8 mt-8 sm:mt-12"
-              >
-                {/* Achievements are now handled by ImpactSection */}
               </motion.div>
             </motion.div>
           </div>
 
-          {/* Right content - Animated Robot (Desktop only) */}
-          <div className="hidden lg:block flex-1 relative order-1 lg:order-2 h-full ">
+          {/* Right content - Animated Robot (Desktop only) - Lazy loaded */}
+          <div className="hidden lg:block flex-1 relative order-1 lg:order-2 h-full">
             <SplineScene
               scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
               className="w-full h-full"
@@ -396,12 +436,12 @@ const HomePage = () => {
             </motion.div>
           )}
         </AnimatePresence>
-      </div>
+      </section>
 
       {/* Features Section */}
-      <section id="features" className="py-12 sm:py-16 md:py-20 lg:py-24 relative overflow-hidden z-10">
-        {/* Subtle Red Texture Background */}
-        <div className="absolute inset-0">
+      <section id="features" className="py-12 sm:py-16 md:py-20 lg:py-24 relative overflow-hidden z-10" aria-label="Cutting-Edge Technology Features">
+        {/* Subtle Red Texture Background - Reduced on mobile */}
+        <div className="absolute inset-0 hidden md:block">
           <motion.div
             className="absolute top-20 left-1/4 w-32 h-32 sm:w-48 sm:h-48 md:w-64 md:h-64 bg-red-500/3 rounded-full blur-3xl"
             animate={{
@@ -413,6 +453,7 @@ const HomePage = () => {
               repeat: Infinity,
               ease: "easeInOut",
             }}
+            style={{ willChange: 'transform, opacity' }}
           />
           <motion.div
             className="absolute bottom-20 right-1/4 w-24 h-24 sm:w-36 sm:h-36 md:w-48 md:h-48 bg-red-500/4 rounded-full blur-2xl"
@@ -426,6 +467,7 @@ const HomePage = () => {
               ease: "easeInOut",
               delay: 2,
             }}
+            style={{ willChange: 'transform, opacity' }}
           />
         </div>
         
@@ -473,9 +515,9 @@ const HomePage = () => {
       </section>
 
       {/* Research Areas Section */}
-      <section className="py-12 sm:py-16 md:py-20 lg:py-24 relative overflow-hidden z-10">
-        {/* Subtle Red Texture Background */}
-        <div className="absolute inset-0">
+      <section className="py-12 sm:py-16 md:py-20 lg:py-24 relative overflow-hidden z-10" aria-label="Research Areas">
+        {/* Subtle Red Texture Background - Hidden on mobile */}
+        <div className="absolute inset-0 hidden md:block">
           <motion.div
             className="absolute top-1/2 left-4 sm:left-20 w-32 h-32 sm:w-40 sm:h-40 md:w-56 md:h-56 bg-red-500/4 rounded-full blur-3xl"
             animate={{
@@ -488,6 +530,7 @@ const HomePage = () => {
               ease: "easeInOut",
               delay: 1,
             }}
+            style={{ willChange: 'transform, opacity' }}
           />
         </div>
         
@@ -635,20 +678,26 @@ const HomePage = () => {
       </section>
 
       {/* Enhanced Statistics Section */}
-      <ImpactSection />
+      <Suspense fallback={<div className="min-h-[200px]"></div>}>
+        <ImpactSection />
+      </Suspense>
 
       {/* Upcoming Events Component */}
-      <UpcomingEvents />
+      <Suspense fallback={<div className="min-h-[200px]"></div>}>
+        <UpcomingEvents />
+      </Suspense>
 
       {/* Raw Media Collage Section */}
       <section className="py-12 sm:py-16 md:py-20 lg:py-24 bg-[#0b0f16]/70 relative z-10">
-        <RawGallery />
+        <Suspense fallback={<div className="min-h-[200px]"></div>}>
+          <RawGallery />
+        </Suspense>
       </section>
 
       {/* Enhanced Newsletter Section */}
-      <section className="py-12 sm:py-16 md:py-20 lg:py-24 bg-black/70 relative overflow-hidden z-10">
-        {/* Subtle Red Texture Background */}
-        <div className="absolute inset-0">
+      <section className="py-12 sm:py-16 md:py-20 lg:py-24 bg-black/70 relative overflow-hidden z-10" aria-label="Newsletter Subscription">
+        {/* Subtle Red Texture Background - Hidden on mobile */}
+        <div className="absolute inset-0 hidden md:block">
           <motion.div
             className="absolute top-1/2 right-1/4 w-48 h-48 sm:w-64 sm:h-64 md:w-80 md:h-80 bg-red-500/2 rounded-full blur-3xl"
             animate={{
@@ -661,6 +710,7 @@ const HomePage = () => {
               ease: "easeInOut",
               delay: 5,
             }}
+            style={{ willChange: 'transform, opacity' }}
           />
         </div>
         
@@ -804,7 +854,7 @@ const HomePage = () => {
         </div>
       </section>
 
-      </div>
+      </main>
   );
 };
 

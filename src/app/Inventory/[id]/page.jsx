@@ -366,23 +366,23 @@ export default function EquipmentDetailPage(){
           ) : checkouts.length === 0 ? (
             <div className="text-center py-8 text-white/60">No checkout history</div>
           ) : (
-            <div className="overflow-x-auto rounded-lg border border-white/10">
-              <table className="min-w-full text-sm">
-                <thead className="bg-white/5 text-white/70">
-                  <tr>
-                    <th className="px-3 py-2 text-left">User</th>
+          <div className="overflow-x-auto rounded-lg border border-white/10">
+            <table className="min-w-full text-sm">
+              <thead className="bg-white/5 text-white/70">
+                <tr>
+                  <th className="px-3 py-2 text-left">User</th>
                     <th className="px-3 py-2 text-left">Quantity</th>
-                    <th className="px-3 py-2 text-left">Status</th>
+                  <th className="px-3 py-2 text-left">Status</th>
                     <th className="px-3 py-2 text-left">Project</th>
-                    <th className="px-3 py-2 text-left">Checkout Date</th>
-                    <th className="px-3 py-2 text-left">Expected Return</th>
-                    <th className="px-3 py-2 text-left">Actual Return</th>
+                  <th className="px-3 py-2 text-left">Checkout Date</th>
+                  <th className="px-3 py-2 text-left">Expected Return</th>
+                  <th className="px-3 py-2 text-left">Actual Return</th>
                     <th className="px-3 py-2 text-left">Notes</th>
-                  </tr>
-                </thead>
-                <tbody>
+                </tr>
+              </thead>
+              <tbody>
                   {checkouts.map((c)=>{
-                    return (
+                  return (
                       <tr key={c.id} className="border-t border-white/10">
                         <td className="px-3 py-2">{c.userNameSnapshot || c.userId || '—'}</td>
                         <td className="px-3 py-2">{c.quantity}</td>
@@ -397,18 +397,18 @@ export default function EquipmentDetailPage(){
                           </span>
                         </td>
                         <td className="px-3 py-2">{c.projectName || '—'}</td>
-                        <td className="px-3 py-2">{c.checkoutDate ? new Date(c.checkoutDate).toLocaleDateString() : '—'}</td>
-                        <td className="px-3 py-2">{c.expectedReturnDate ? new Date(c.expectedReturnDate).toLocaleDateString() : '—'}</td>
-                        <td className="px-3 py-2">{c.actualReturnDate ? new Date(c.actualReturnDate).toLocaleDateString() : '—'}</td>
+                      <td className="px-3 py-2">{c.checkoutDate ? new Date(c.checkoutDate).toLocaleDateString() : '—'}</td>
+                      <td className="px-3 py-2">{c.expectedReturnDate ? new Date(c.expectedReturnDate).toLocaleDateString() : '—'}</td>
+                      <td className="px-3 py-2">{c.actualReturnDate ? new Date(c.actualReturnDate).toLocaleDateString() : '—'}</td>
                         <td className="px-3 py-2 text-xs text-white/60 max-w-xs truncate" title={c.checkoutNotes || c.returnNotes || ''}>
                           {c.checkoutNotes || c.returnNotes || '—'}
                         </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
           )}
         </div>
       </div>

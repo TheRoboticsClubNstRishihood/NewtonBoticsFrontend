@@ -259,7 +259,7 @@ const ContactPage = () => {
             </div>
             <div className="flex items-center">
               <Mail className="mr-3 text-red-500" />
-              <span>robotics.club@rishihood.edu.in</span>
+              <span>contact@newtonbotics.tech</span>
             </div>
             <div className="mt-4">
               <h4 className="text-lg font-semibold text-white mb-2 font-display">

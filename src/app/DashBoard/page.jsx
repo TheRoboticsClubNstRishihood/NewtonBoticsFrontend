@@ -321,12 +321,16 @@ const HomePage = () => {
             <div className="max-w-2xl mx-auto lg:mx-0 text-center lg:text-left lg:hidden">
               <div className="flex items-center justify-center lg:justify-start gap-2 mb-4 hero-fade-in">
                 <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
-                <span className="text-white/80 font-medium text-sm sm:text-base">Innovation Hub</span>
+                <span className="text-white/80 font-medium text-sm sm:text-base">Innovation Hub at Rishihood University</span>
               </div>
               
               <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-extrabold bg-clip-text text-transparent bg-gradient-to-b from-white via-gray-300 to-gray-500 drop-shadow-2xl leading-tight hero-title-fade-in" itemProp="name">
                 NewtonBotics
               </h1>
+              
+              <p className="text-sm sm:text-base md:text-lg text-white/70 mt-2 sm:mt-3 mb-4 sm:mb-6 hero-text-fade-in">
+                <span className="text-white/90 font-medium">at Rishihood University</span>
+              </p>
               
               <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-white/80 mt-4 sm:mt-6 mb-6 sm:mb-8 leading-relaxed max-w-lg mx-auto lg:mx-0 hero-text-fade-in" itemProp="description">
                 Where Innovation Meets Precision in Robotics Excellence. 
@@ -357,12 +361,21 @@ const HomePage = () => {
                 className="flex items-center justify-center lg:justify-start gap-2 mb-4"
               >
                 <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
-                <span className="text-white/80 font-medium text-sm sm:text-base">Innovation Hub</span>
+                <span className="text-white/80 font-medium text-sm sm:text-base">Innovation Hub at Rishihood University</span>
               </motion.div>
               
               <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-extrabold bg-clip-text text-transparent bg-gradient-to-b from-white via-gray-300 to-gray-500 drop-shadow-2xl leading-tight" itemProp="name">
                 NewtonBotics
               </h1>
+              
+              <motion.p
+                initial={hasAnimated ? false : { opacity: 0, y: 20 }}
+                animate={hasAnimated ? { opacity: 1, y: 0 } : { opacity: 1, y: 0 }}
+                transition={{ delay: 0.15, duration: 0.5 }}
+                className="text-sm sm:text-base md:text-lg text-white/70 mt-2 sm:mt-3 mb-4 sm:mb-6"
+              >
+                <span className="text-white/90 font-medium">at Rishihood University</span>
+              </motion.p>
               
               <motion.p
                 initial={hasAnimated ? false : { opacity: 0, y: 20 }}

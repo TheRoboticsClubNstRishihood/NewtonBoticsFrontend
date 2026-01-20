@@ -38,7 +38,7 @@ export const metadata = {
     },
   },
   alternates: {
-    canonical: "https://newtonbotics.com",
+    canonical: "https://newtonbotics.tech",
   },
   openGraph: {
     title: "NewtonBotics Robotics Lab - Advancing Robotics & AI Research",
@@ -46,10 +46,10 @@ export const metadata = {
     type: "website",
     locale: "en_US",
     siteName: "NewtonBotics Robotics Lab",
-    url: "https://newtonbotics.com",
+    url: "https://newtonbotics.tech",
     images: [
       {
-        url: "https://newtonbotics.com/og-image.jpg",
+        url: "https://newtonbotics.tech/og-image.jpg",
         width: 1200,
         height: 630,
         alt: "NewtonBotics Robotics Lab - Innovation Hub",
@@ -60,7 +60,7 @@ export const metadata = {
     card: "summary_large_image",
     title: "NewtonBotics Robotics Lab - Advancing Robotics & AI Research",
     description: "Join NewtonBotics Robotics Lab - where innovation meets precision in robotics excellence.",
-    images: ["https://newtonbotics.com/og-image.jpg"],
+    images: ["https://newtonbotics.tech/og-image.jpg"],
   },
   themeColor: "#000000",
   category: "Education",
@@ -78,8 +78,8 @@ export default function RootLayout({ children }) {
     "@type": "Organization",
     "name": "NewtonBotics Robotics Lab",
     "alternateName": "NewtonBotics",
-    "url": "https://newtonbotics.com",
-    "logo": "https://newtonbotics.com/logo.png",
+    "url": "https://newtonbotics.tech",
+    "logo": "https://newtonbotics.tech/logo.png",
     "description": "NewtonBotics Robotics Lab at Rishihood University - Advancing robotics and AI research through innovation, collaboration, and hands-on learning.",
     "address": {
       "@type": "PostalAddress",
@@ -107,7 +107,7 @@ export default function RootLayout({ children }) {
     "@context": "https://schema.org",
     "@type": "WebSite",
     "name": "NewtonBotics Robotics Lab",
-    "url": "https://newtonbotics.com",
+    "url": "https://newtonbotics.tech",
     "description": "Official website of NewtonBotics Robotics Lab - A hub for robotics innovation, research, and education.",
     "publisher": {
       "@type": "Organization",
@@ -115,7 +115,7 @@ export default function RootLayout({ children }) {
     },
     "potentialAction": {
       "@type": "SearchAction",
-      "target": "https://newtonbotics.com/search?q={search_term_string}",
+      "target": "https://newtonbotics.tech/search?q={search_term_string}",
       "query-input": "required name=search_term_string"
     }
   };
@@ -125,12 +125,12 @@ export default function RootLayout({ children }) {
     "@type": "WebPage",
     "name": "NewtonBotics Robotics Lab - Home",
     "description": "Join NewtonBotics Robotics Lab - where innovation meets precision in robotics excellence. Building the future, one robot at a time.",
-    "url": "https://newtonbotics.com",
+    "url": "https://newtonbotics.tech",
     "inLanguage": "en-US",
     "isPartOf": {
       "@type": "WebSite",
       "name": "NewtonBotics Robotics Lab",
-      "url": "https://newtonbotics.com"
+      "url": "https://newtonbotics.tech"
     },
     "about": {
       "@type": "Organization",

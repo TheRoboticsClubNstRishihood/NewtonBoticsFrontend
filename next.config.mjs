@@ -1,5 +1,15 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  eslint: {
+    // Temporarily ignore ESLint during builds to avoid serialization errors
+    // ESLint will still run during development and via 'npm run lint'
+    ignoreDuringBuilds: true,
+  },
+  typescript: {
+    // Warning: This allows production builds to successfully complete even if
+    // your project has type errors.
+    ignoreBuildErrors: false,
+  },
   async redirects() {
     return [
       {

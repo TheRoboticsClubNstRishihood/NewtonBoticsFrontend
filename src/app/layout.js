@@ -62,9 +62,13 @@ export const metadata = {
     description: "Join NewtonBotics Robotics Lab - where innovation meets precision in robotics excellence.",
     images: ["https://newtonbotics.com/og-image.jpg"],
   },
-  viewport: "width=device-width, initial-scale=1",
   themeColor: "#000000",
   category: "Education",
+};
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
 };
 
 export default function RootLayout({ children }) {

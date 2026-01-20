@@ -9,6 +9,12 @@ const compat = new FlatCompat({
   baseDirectory: __dirname,
 });
 
-const eslintConfig = [...compat.extends("next/core-web-vitals")];
+// Use a serializable config that Next.js can handle during builds
+const eslintConfig = [
+  {
+    ignores: [".next/**", "node_modules/**", "out/**", ".vercel/**"],
+  },
+  ...compat.extends("next/core-web-vitals"),
+];
 
 export default eslintConfig;

@@ -4,10 +4,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import { 
   FileText, Plus, X, Users, DollarSign, Calendar, 
   Target, TrendingUp, Briefcase, AlertCircle, CheckCircle, Send,
-  Clock, Eye, RefreshCw, Edit2, Trash2 
+  Clock, Eye, RefreshCw, Edit2, Trash2, Upload, Download, File
 } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
 import { useRouter } from "next/navigation";
+import CloudinaryUploader from "../../components/CloudinaryUploader";
 
 const ProjectRequestPage = () => {
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
@@ -36,7 +37,8 @@ const ProjectRequestPage = () => {
     budgetEstimate: 0,
     requiredResources: [""],
     teamMembers: [],
-    resources: []
+    resources: [],
+    document: null // Cloudinary document URL and metadata
   });
 
   useEffect(() => {
@@ -53,6 +55,46 @@ const ProjectRequestPage = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated, authLoading]);
+
+  // Fix scroll issue when returning from PDF viewer
+  useEffect(() => {
+    const handleFocus = () => {
+      // Ensure body can scroll when window regains focus
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.documentElement.style.overflow = '';
+      
+      // Remove any potential scroll locks
+      const scrollLockElements = document.querySelectorAll('[style*="overflow: hidden"]');
+      scrollLockElements.forEach(el => {
+        if (el !== document.body && el !== document.documentElement) {
+          // Only remove if it's not intentionally set
+          const computedStyle = window.getComputedStyle(el);
+          if (computedStyle.position === 'fixed') {
+            el.style.overflow = '';
+          }
+        }
+      });
+    };
+
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        // Page became visible again
+        handleFocus();
+      }
+    };
+
+    window.addEventListener('focus', handleFocus);
+    window.addEventListener('blur', () => {
+      // Optional: can add cleanup here if needed
+    });
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []);
 
   const fetchMyRequests = async () => {
     try {
@@ -81,6 +123,55 @@ const ProjectRequestPage = () => {
 
   const handleEdit = (request) => {
     // Populate form with request data
+    let documentData = null;
+    
+    // Handle different document formats from backend - check multiple possible formats
+    // Check 1: Full document object with URL fields
+    if (request.document && (request.document.secureUrl || request.document.url || request.document.path)) {
+      // Backend document object (from API docs format or Cloudinary format)
+      const docFormat = request.document.format || request.document.mimetype?.split('/')[1] || 
+                       (request.document.filename?.split('.').pop()) || 
+                       (request.document.originalName?.split('.').pop()) || 'pdf';
+      const docUrl = request.document.secureUrl || request.document.url || 
+                     (request.document.path && `${API_BASE_URL.replace('/api', '')}/${request.document.path}`);
+      
+      documentData = {
+        secureUrl: fixCloudinaryUrl(docUrl, docFormat),
+        url: fixCloudinaryUrl(request.document.url || request.document.secureUrl || docUrl, docFormat),
+        originalName: request.document.originalName || request.document.filename || 'Document',
+        bytes: request.document.bytes || request.document.size,
+        format: docFormat,
+        publicId: request.document.publicId || request.document.public_id
+      };
+    } 
+    // Check 2: Document URL stored separately
+    else if (request.documentUrl) {
+      // Cloudinary URL stored separately (fallback format)
+      const docFormat = request.documentFormat || 
+                       (request.documentUrl.split('.').pop()?.split('?')[0]) || 'pdf';
+      documentData = {
+        secureUrl: fixCloudinaryUrl(request.documentUrl, docFormat),
+        url: fixCloudinaryUrl(request.documentUrl, docFormat),
+        originalName: request.documentName || 'Document',
+        bytes: request.documentSize,
+        format: docFormat
+      };
+    }
+    // Check 3: Try loading from localStorage (backup since backend doesn't return it)
+    else if (request._id) {
+      const storageKey = `project_request_doc_${request._id}`;
+      const storedDoc = localStorage.getItem(storageKey);
+      if (storedDoc) {
+        try {
+          documentData = JSON.parse(storedDoc);
+          console.log('Loaded document from localStorage:', documentData);
+        } catch (e) {
+          console.error('Failed to parse stored document:', e);
+        }
+      }
+    }
+    
+    
     setFormData({
       title: request.title || "",
       description: request.description || "",
@@ -91,7 +182,8 @@ const ProjectRequestPage = () => {
       budgetEstimate: request.budgetEstimate || 0,
       requiredResources: request.requiredResources && request.requiredResources.length > 0 ? request.requiredResources : [""],
       teamMembers: request.teamMembers || [],
-      resources: request.resources || []
+      resources: request.resources || [],
+      document: documentData
     });
     setEditingRequest(request);
     setShowForm(true);
@@ -109,7 +201,8 @@ const ProjectRequestPage = () => {
       budgetEstimate: 0,
       requiredResources: [""],
       teamMembers: [],
-      resources: []
+      resources: [],
+      document: null
     });
     setShowForm(false);
   };
@@ -333,6 +426,29 @@ const ProjectRequestPage = () => {
         resources: formData.resources.filter(res => res.description.trim() !== "")
       };
 
+      // Include document URL if uploaded via Cloudinary
+      if (formData.document && (formData.document.secureUrl || formData.document.url)) {
+        cleanedData.documentUrl = formData.document.secureUrl || formData.document.url;
+        cleanedData.documentName = formData.document.originalName || 'Document';
+        cleanedData.documentSize = formData.document.bytes;
+        cleanedData.documentFormat = formData.document.format;
+        // Also send full document object for backend to store properly
+        cleanedData.document = {
+          secureUrl: formData.document.secureUrl || formData.document.url,
+          url: formData.document.url || formData.document.secureUrl,
+          originalName: formData.document.originalName || 'Document',
+          bytes: formData.document.bytes,
+          format: formData.document.format,
+          publicId: formData.document.publicId
+        };
+        
+        // Store document in localStorage as backup (since backend might not return it)
+        if (editingRequest?._id) {
+          const storageKey = `project_request_doc_${editingRequest._id}`;
+          localStorage.setItem(storageKey, JSON.stringify(formData.document));
+        }
+      }
+
       // Add reason for update if editing
       if (editingRequest) {
         cleanedData.reason = 'Updated project request details';
@@ -359,25 +475,77 @@ const ProjectRequestPage = () => {
         throw new Error(data.error?.message || `Failed to ${editingRequest ? 'update' : 'create'} project request`);
       }
 
+      // Debug: Log the response to see what document data is returned
+      console.log('Save response:', data);
+      console.log('Data sent to backend:', cleanedData);
+      if (data.data?.item) {
+        console.log('Saved item document:', data.data.item.document);
+        console.log('Saved item documentUrl:', data.data.item.documentUrl);
+        console.log('Saved item keys:', Object.keys(data.data.item));
+      }
+
       setSuccess(true);
       setSuccessMessage(editingRequest ? 'Project request updated successfully!' : 'Project request submitted successfully!');
       setError(null);
       
-      // Reset form
-      setFormData({
-        title: "",
-        description: "",
-        objectives: [""],
-        expectedOutcomes: [""],
-        teamSize: 1,
-        estimatedDurationMonths: 1,
-        budgetEstimate: 0,
-        requiredResources: [""],
-        teamMembers: [],
-        resources: []
-      });
-
-      setEditingRequest(null);
+      // If editing, preserve the document from formData since backend might not return it
+      if (editingRequest) {
+        // Keep the current document in formData (backend might not return it in response)
+        const currentDocument = formData.document;
+        
+        // If backend returned document data, use it; otherwise keep what we had
+        let savedDocument = currentDocument;
+        
+        if (data.data?.item) {
+          const savedItem = data.data.item;
+          
+          if (savedItem.document && (savedItem.document.secureUrl || savedItem.document.url || savedItem.document.path)) {
+            const docFormat = savedItem.document.format || savedItem.document.mimetype?.split('/')[1] || 'pdf';
+            const docUrl = savedItem.document.secureUrl || savedItem.document.url || 
+                           (savedItem.document.path && `${API_BASE_URL.replace('/api', '')}/${savedItem.document.path}`);
+            savedDocument = {
+              secureUrl: fixCloudinaryUrl(docUrl, docFormat),
+              url: fixCloudinaryUrl(savedItem.document.url || savedItem.document.secureUrl || docUrl, docFormat),
+              originalName: savedItem.document.originalName || savedItem.document.filename || 'Document',
+              bytes: savedItem.document.bytes || savedItem.document.size,
+              format: docFormat
+            };
+          } else if (savedItem.documentUrl) {
+            const docFormat = savedItem.documentFormat || 'pdf';
+            savedDocument = {
+              secureUrl: fixCloudinaryUrl(savedItem.documentUrl, docFormat),
+              url: fixCloudinaryUrl(savedItem.documentUrl, docFormat),
+              originalName: savedItem.documentName || 'Document',
+              bytes: savedItem.documentSize,
+              format: docFormat
+            };
+          }
+        }
+        
+        // Preserve document in formData (don't clear it)
+        if (savedDocument) {
+          setFormData(prev => ({
+            ...prev,
+            document: savedDocument
+          }));
+        }
+      } else {
+        // Reset form only for new requests
+        setFormData({
+          title: "",
+          description: "",
+          objectives: [""],
+          expectedOutcomes: [""],
+          teamSize: 1,
+          estimatedDurationMonths: 1,
+          budgetEstimate: 0,
+          requiredResources: [""],
+          teamMembers: [],
+          resources: [],
+          document: null
+        });
+        setEditingRequest(null);
+      }
 
       // Refresh the requests list
       fetchMyRequests();
@@ -445,6 +613,46 @@ const ProjectRequestPage = () => {
       month: 'short',
       day: 'numeric'
     });
+  };
+
+  // Helper function to fix Cloudinary URLs for PDFs and other raw files
+  // Cloudinary sometimes returns /image/upload/ URLs for PDFs, but they need /raw/upload/ to work
+  const fixCloudinaryUrl = (url, format) => {
+    if (!url) return url;
+    
+    // Check if it's a Cloudinary URL
+    if (url.includes('res.cloudinary.com')) {
+      // List of document formats that should use raw delivery
+      const rawFormats = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt', 'md'];
+      const fileFormat = format?.toLowerCase() || url.split('.').pop()?.split('?')[0]?.toLowerCase();
+      
+      // If it's a document format OR if URL contains /image/upload/ with a document extension
+      if (rawFormats.includes(fileFormat) || (url.includes('/image/upload/') && rawFormats.some(fmt => url.includes(`.${fmt}`)))) {
+        // Always replace /image/upload/ with /raw/upload/ for documents
+        if (url.includes('/image/upload/')) {
+          url = url.replace('/image/upload/', '/raw/upload/');
+        }
+        
+        // Also handle case where path structure needs fixing
+        try {
+          const urlObj = new URL(url);
+          const pathParts = urlObj.pathname.split('/').filter(Boolean);
+          
+          // Find the upload index
+          const uploadIndex = pathParts.findIndex(part => part === 'upload');
+          if (uploadIndex > 0 && pathParts[uploadIndex - 1] === 'image') {
+            // Replace image with raw
+            pathParts[uploadIndex - 1] = 'raw';
+            urlObj.pathname = '/' + pathParts.join('/');
+            url = urlObj.toString();
+          }
+        } catch (e) {
+          // If URL parsing fails, the simple string replacement above should handle it
+        }
+      }
+    }
+    
+    return url;
   };
 
   return (
@@ -598,22 +806,24 @@ const ProjectRequestPage = () => {
                       </div>
                       
                       {/* Action Buttons - Top Right */}
-                      <div className="flex items-center gap-2 ml-4">
-                        <button
-                          onClick={() => handleEdit(request)}
-                          title="Edit Project"
-                          className="p-2 bg-blue-500/20 text-blue-300 border border-blue-500/30 rounded-lg hover:bg-blue-500/30 transition"
-                        >
-                          <Edit2 className="w-5 h-5" />
-                        </button>
-                        <button
-                          onClick={() => setDeleteConfirm(request._id)}
-                          title="Delete Project"
-                          className="p-2 bg-red-500/20 text-red-300 border border-red-500/30 rounded-lg hover:bg-red-500/30 transition"
-                        >
-                          <Trash2 className="w-5 h-5" />
-                        </button>
-                      </div>
+                      {request.status !== 'approved' && (
+                        <div className="flex items-center gap-2 ml-4">
+                          <button
+                            onClick={() => handleEdit(request)}
+                            title="Edit Project"
+                            className="p-2 bg-blue-500/20 text-blue-300 border border-blue-500/30 rounded-lg hover:bg-blue-500/30 transition"
+                          >
+                            <Edit2 className="w-5 h-5" />
+                          </button>
+                          <button
+                            onClick={() => setDeleteConfirm(request._id)}
+                            title="Delete Project"
+                            className="p-2 bg-red-500/20 text-red-300 border border-red-500/30 rounded-lg hover:bg-red-500/30 transition"
+                          >
+                            <Trash2 className="w-5 h-5" />
+                          </button>
+                        </div>
+                      )}
                     </div>
 
                     {/* Description */}
@@ -675,6 +885,48 @@ const ProjectRequestPage = () => {
                         <p className="text-sm text-blue-300">
                           <span className="font-medium">Review Notes:</span> {request.reviewNotes}
                         </p>
+                      </div>
+                    )}
+
+                    {/* Document Section */}
+                    {(request.document || (request.documentUrl && request.documentName)) && (
+                      <div className="mb-4 p-4 bg-white/5 border border-white/10 rounded-lg">
+                        <h4 className="text-sm font-semibold text-white/80 mb-3 flex items-center gap-2">
+                          <File className="w-4 h-4" />
+                          Project Document
+                        </h4>
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1">
+                            <p className="text-white/70 text-sm mb-1">
+                              {request.document?.originalName || request.document?.filename || request.documentName || 'Document'}
+                            </p>
+                          </div>
+                          <a
+                            href={fixCloudinaryUrl(
+                              request.document?.secureUrl || request.document?.url || request.documentUrl || 
+                              (request.document?.path && `${API_BASE_URL.replace('/api', '')}/${request.document.path}`),
+                              request.document?.format || request.document?.mimetype?.split('/')[1]
+                            )}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={(e) => {
+                              // Ensure scroll is enabled before opening PDF
+                              document.body.style.overflow = '';
+                              document.documentElement.style.overflow = '';
+                            }}
+                            onBlur={() => {
+                              // Restore scroll when link loses focus
+                              setTimeout(() => {
+                                document.body.style.overflow = '';
+                                document.documentElement.style.overflow = '';
+                              }, 100);
+                            }}
+                            className="flex items-center gap-2 px-4 py-2 bg-blue-500/20 text-blue-300 border border-blue-500/30 rounded-lg hover:bg-blue-500/30 transition"
+                          >
+                            <Download className="w-4 h-4" />
+                            Download
+                          </a>
+                        </div>
                       </div>
                     )}
 
@@ -817,6 +1069,121 @@ const ProjectRequestPage = () => {
                   className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-red-500/50"
                 />
               </div>
+            </div>
+          </div>
+
+          {/* Document Upload Section */}
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+              <File className="w-6 h-6 text-red-500" />
+              Project Document (Optional)
+            </h2>
+            <div className="p-6 bg-white/5 border border-white/10 rounded-lg">
+              <p className="text-white/60 text-sm mb-4">
+                Upload a document file (PDF, Word, Excel, PowerPoint, Text, Markdown) to provide additional details about your project.
+              </p>
+              
+              {formData.document && (formData.document.secureUrl || formData.document.url) ? (
+                <div className="mb-4 p-4 bg-white/5 border border-white/10 rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <File className="w-8 h-8 text-blue-400" />
+                      <div>
+                        <p className="text-white/80 font-medium">
+                          {formData.document.originalName || 'Document'}
+                        </p>
+                        {editingRequest && (
+                          <p className="text-white/40 text-xs mt-1">
+                            Current document - click "Change Document" to replace
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <a
+                        href={fixCloudinaryUrl(formData.document.secureUrl || formData.document.url, formData.document.format)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e) => {
+                          // Ensure scroll is enabled before opening PDF
+                          document.body.style.overflow = '';
+                          document.documentElement.style.overflow = '';
+                        }}
+                        onBlur={() => {
+                          // Restore scroll when link loses focus
+                          setTimeout(() => {
+                            document.body.style.overflow = '';
+                            document.documentElement.style.overflow = '';
+                          }, 100);
+                        }}
+                        className="px-3 py-2 bg-blue-500/20 text-blue-300 border border-blue-500/30 rounded-lg hover:bg-blue-500/30 transition text-sm flex items-center gap-2"
+                      >
+                        <Eye className="w-4 h-4" />
+                        View
+                      </a>
+                      <button
+                        type="button"
+                        onClick={() => setFormData(prev => ({ ...prev, document: null }))}
+                        className="px-3 py-2 bg-yellow-500/20 text-yellow-300 border border-yellow-500/30 rounded-lg hover:bg-yellow-500/30 transition text-sm flex items-center gap-2"
+                        title={editingRequest ? "Change document" : "Remove document"}
+                      >
+                        <Upload className="w-4 h-4" />
+                        {editingRequest ? 'Change' : 'Remove'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <CloudinaryUploader
+                  folder="newtonbotics/project-documents"
+                  resourceType="raw"
+                  showPreview={false}
+                  maxFileSizeBytes={10 * 1024 * 1024} // 10MB
+                  onUploadComplete={(file) => {
+                    // Cloudinary might return /image/upload/ URLs even for raw files
+                    // We need to convert them to /raw/upload/ for PDFs to work
+                    const documentFormats = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt', 'md'];
+                    const fileFormat = file.format?.toLowerCase();
+                    
+                    // Always fix URLs for document formats
+                    let fixedSecureUrl = file.secureUrl;
+                    let fixedUrl = file.url;
+                    
+                    if (documentFormats.includes(fileFormat)) {
+                      // Convert /image/upload/ to /raw/upload/ if present
+                      fixedSecureUrl = fixCloudinaryUrl(file.secureUrl, file.format);
+                      fixedUrl = fixCloudinaryUrl(file.url, file.format);
+                    }
+                    
+                    setFormData(prev => ({
+                      ...prev,
+                      document: {
+                        secureUrl: fixedSecureUrl || file.secureUrl,
+                        url: fixedUrl || file.url,
+                        originalName: file.originalName || 'Document',
+                        bytes: file.bytes,
+                        format: file.format,
+                        publicId: file.publicId,
+                        resourceType: 'raw' // Force raw for documents
+                      }
+                    }));
+                  }}
+                  renderTrigger={({ open }) => (
+                    <button
+                      type="button"
+                      onClick={open}
+                      className="flex items-center gap-2 px-6 py-3 bg-white/10 text-white/80 border border-white/20 rounded-lg hover:bg-white/20 transition"
+                    >
+                      <Upload className="w-5 h-5" />
+                      Upload Document
+                    </button>
+                  )}
+                />
+              )}
+              
+              <p className="text-white/40 text-xs mt-3">
+                Supported formats: PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, TXT, MD (Max 10MB)
+              </p>
             </div>
           </div>
 

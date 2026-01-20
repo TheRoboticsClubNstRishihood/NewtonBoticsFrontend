@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { CldUploadWidget, CldImage } from "next-cloudinary";
 
 const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
@@ -21,6 +21,45 @@ export default function CloudinaryUploader({
 }) {
 	const [lastResult, setLastResult] = useState(null);
 	const [error, setError] = useState("");
+	
+	// Suppress DataCloneError from Cloudinary widget (harmless error)
+	useEffect(() => {
+		const handleError = (e) => {
+			// Suppress DataCloneError related to PointerEvent from Cloudinary widget
+			if (e.message && typeof e.message === 'string' && 
+			    (e.message.includes('DataCloneError') || e.message.includes('PointerEvent')) &&
+			    e.filename && e.filename.includes('cloudinary.com')) {
+				e.preventDefault();
+				e.stopPropagation();
+				return true; // Indicate error was handled
+			}
+		};
+		
+		// Also catch unhandled promise rejections
+		const handleUnhandledRejection = (e) => {
+			if (e.reason && typeof e.reason === 'object' && 
+			    e.reason.message && e.reason.message.includes('DataCloneError')) {
+				e.preventDefault();
+				return true;
+			}
+		};
+		
+		window.addEventListener('error', handleError);
+		window.addEventListener('unhandledrejection', handleUnhandledRejection);
+		
+		return () => {
+			window.removeEventListener('error', handleError);
+			window.removeEventListener('unhandledrejection', handleUnhandledRejection);
+		};
+	}, []);
+
+	// Helper function to extract filename from public_id
+	const extractFilenameFromPublicId = (publicId, format) => {
+		if (!publicId) return 'Document';
+		const parts = publicId.split('/');
+		const filename = parts[parts.length - 1];
+		return format ? `${filename}.${format}` : filename;
+	};
 
 	const handleSuccess = useCallback(
 		(result) => {
@@ -36,6 +75,7 @@ export default function CloudinaryUploader({
 				format: info.format,
 				resourceType: info.resource_type,
 				bytes: info.bytes,
+				originalName: info.original_filename || extractFilenameFromPublicId(info.public_id, info.format),
 			};
 			setLastResult(payload);
 			onUploadComplete && onUploadComplete(payload);
@@ -44,6 +84,11 @@ export default function CloudinaryUploader({
 	);
 
 	const handleError = useCallback((err) => {
+		// Ignore DataCloneError from Cloudinary widget (harmless)
+		if (err?.message?.includes('DataCloneError') || err?.message?.includes('PointerEvent')) {
+			console.warn('Cloudinary widget DataCloneError (can be safely ignored):', err);
+			return;
+		}
 		const message = err?.statusText || err?.message || "Upload failed";
 		setError(message);
 	}, []);
@@ -67,19 +112,28 @@ export default function CloudinaryUploader({
 				onSuccess={handleSuccess}
 				onError={handleError}
 			>
-				{({ open }) => (
-					renderTrigger ? (
-						renderTrigger({ open })
+				{({ open }) => {
+					// Wrap open function to prevent event object cloning issues
+					const handleOpen = (e) => {
+						if (e) {
+							e.preventDefault();
+							e.stopPropagation();
+						}
+						open();
+					};
+					
+					return renderTrigger ? (
+						renderTrigger({ open: handleOpen })
 					) : (
 						<button
 							type="button"
-							onClick={() => open()}
+							onClick={handleOpen}
 							className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
 						>
 							{label}
 						</button>
-					)
-				)}
+					);
+				}}
 			</CldUploadWidget>
 
 			{error ? <span className="text-xs text-red-400">{error}</span> : null}

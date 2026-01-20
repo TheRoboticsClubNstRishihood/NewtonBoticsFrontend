@@ -102,7 +102,8 @@ yarn dev
    ```
 
 5. **Open your browser**
-   Navigate to [http://localhost:3000](http://localhost:3000)
+   - Development: Navigate to [http://localhost:3000](http://localhost:3000)
+   - Production: Visit [https://newtonbotics.tech](https://newtonbotics.tech)
 
 ## 🔐 Authentication Setup
 

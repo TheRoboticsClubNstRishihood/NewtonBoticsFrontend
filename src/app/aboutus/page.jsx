@@ -46,9 +46,12 @@ const AboutUs = () => {
         transition={{ duration: 1 }}
         viewport={{ once: true }}
       >
-        <h1 className="text-4xl md:text-5xl font-bold mb-4 font-display bg-clip-text text-transparent bg-gradient-to-r from-red-500 to-red-600">
+        <h1 className="text-4xl md:text-5xl font-bold mb-2 font-display bg-clip-text text-transparent bg-gradient-to-r from-red-500 to-red-600">
           About NewtonBotics
         </h1>
+        <p className="text-base text-white/70 mb-4 font-medium">
+          Rishihood University
+        </p>
         <p className="text-lg text-white/80 max-w-2xl mx-auto">
           Innovating the future through cutting-edge robotics and technology.
         </p>

@@ -173,9 +173,10 @@ const Navbar = () => {
         <div className="flex items-center">
           <Link
             href="/DashBoard"
-            className="text-2xl font-bold text-white hover:text-red-500 transition"
+            className="flex flex-col hover:text-red-500 transition"
           >
-            NewtonBotics
+            <span className="text-2xl font-bold text-white">NewtonBotics</span>
+            <span className="text-xs text-white/70 font-medium">Rishihood University</span>
           </Link>
         </div>
 
